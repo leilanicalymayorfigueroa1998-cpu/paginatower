@@ -19,7 +19,6 @@ if (isset($_GET['txtID'])) {
     $fecha_fin = $ren['fecha_fin'];
     $metodo = $ren['metodo'];
     $estatus = $ren['estatus'];
-    
 }
 
 if ($_POST) {
@@ -40,27 +39,39 @@ if ($_POST) {
     $consulta = $conexionBD->prepare("UPDATE rentas SET
                 id_local = :id_local,
                 id_cliente = :id_cliente,
- renta = :renta,
- deposito = :deposito,
-  adicional = :adicional,
+                renta = :renta,
+                deposito = :deposito,
+                adicional = :adicional,
                 fecha_inicio = :fecha_inicio,
                 fecha_fin = :fecha_fin,
                 metodo = :metodo,
                 estatus = :estatus
                 WHERE id_renta = :id_renta");
 
+    $consulta->bindParam(':id_local', $id_local);
     $consulta->bindParam(':id_cliente', $id_cliente);
-    $consulta->bindParam(':id_propiedad', $id_propiedad);
+    $consulta->bindParam(':renta', $renta);
+    $consulta->bindParam(':deposito', $deposito);
+    $consulta->bindParam(':adicional', $adicional);
     $consulta->bindParam(':fecha_inicio', $fecha_inicio);
     $consulta->bindParam(':fecha_fin', $fecha_fin);
-    $consulta->bindParam(':renta_mensual', $renta_mensual);
-    $consulta->bindParam(':deposito', $deposito);
-    $consulta->bindParam(':comentarios', $comentarios);
-    $consulta->bindParam(':id', $txtID);
+    $consulta->bindParam(':metodo', $metodo);
+    $consulta->bindParam(':estatus', $estatus);
+    $consulta->bindParam(':id_renta', $txtID);
 
     $consulta->execute();
     header("Location:index.php");
 }
+
+// Locales
+$consultaLocales = $conexionBD->prepare("SELECT id_local, codigo FROM locales");
+$consultaLocales->execute();
+$listaLocales = $consultaLocales->fetchAll(PDO::FETCH_ASSOC);
+
+// Clientes
+$consultaClientes = $conexionBD->prepare("SELECT id_cliente, nombre FROM clientes");
+$consultaClientes->execute();
+$listaClientes = $consultaClientes->fetchAll(PDO::FETCH_ASSOC);
 
 include('../../templates/cabecera.php');
 
@@ -86,27 +97,27 @@ include('../../templates/cabecera.php');
             </div>
 
             <div class="mb-3">
-                <label for="" class="form-label">Local</label>
-                <input
-                    type="text"
-                    class="form-control"
-                    name="id_local"
-                    id="id_local"
-                    value="<?php echo $id_local ?>"
-                    aria-describedby="helpId"
-                    placeholder="Local" />
+                <label class="form-label">Local</label>
+                <select name="id_local" class="form-control" required>
+                    <?php foreach ($listaLocales as $local) { ?>
+                        <option value="<?php echo $local['id_local']; ?>"
+                            <?php echo ($local['id_local'] == $id_local) ? 'selected' : ''; ?>>
+                            <?php echo $local['codigo']; ?>
+                        </option>
+                    <?php } ?>
+                </select>
             </div>
 
             <div class="mb-3">
-                <label for="" class="form-label">Cliente</label>
-                <input
-                    type="text"
-                    class="form-control"
-                    name="id_cliente"
-                    id="id_cliente"
-                    value="<?php echo $id_cliente ?>"
-                    aria-describedby="helpId"
-                    placeholder="Cliente" />
+                <label class="form-label">Cliente</label>
+                <select name="id_cliente" class="form-control" required>
+                    <?php foreach ($listaClientes as $cliente) { ?>
+                        <option value="<?php echo $cliente['id_cliente']; ?>"
+                            <?php echo ($cliente['id_cliente'] == $id_cliente) ? 'selected' : ''; ?>>
+                            <?php echo $cliente['nombre']; ?>
+                        </option>
+                    <?php } ?>
+                </select>
             </div>
 
             <div class="mb-3">
@@ -116,7 +127,7 @@ include('../../templates/cabecera.php');
                     class="form-control"
                     name="renta_mensual"
                     id="renta_mensual"
-                    value="<?php echo $renta_mensual ?>"
+                    value="<?php echo $renta ?>"
                     aria-describedby="helpId"
                     placeholder="Renta" />
             </div>
@@ -171,28 +182,35 @@ include('../../templates/cabecera.php');
 
 
             <div class="mb-3">
-                <label for="" class="form-label">Metodo</label>
-                <input
-                    type="text"
-                    class="form-control"
-                    name="metodo"
-                    id="metodo"
-                    value="<?php echo $metodo ?>"
-                    aria-describedby="helpId"
-                    placeholder="Metodo" />
+                <label class="form-label">Método de pago</label>
+                <select name="metodo" class="form-control" required>
+                    <option value="Efectivo" <?php echo ($metodo == 'Efectivo') ? 'selected' : ''; ?>>
+                        Efectivo
+                    </option>
+                    <option value="Transferencia" <?php echo ($metodo == 'Transferencia') ? 'selected' : ''; ?>>
+                        Transferencia
+                    </option>
+                    <option value="Depósito" <?php echo ($metodo == 'Depósito') ? 'selected' : ''; ?>>
+                        Depósito
+                    </option>
+                </select>
             </div>
 
             <div class="mb-3">
-                <label for="" class="form-label">Estatus</label>
-                <input
-                    type="text"
-                    class="form-control"
-                    name="estatus"
-                    id="estatus"
-                    value="<?php echo $metodo ?>"
-                    aria-describedby="helpId"
-                    placeholder="Estatus" />
+                <label class="form-label">Estatus</label>
+                <select name="estatus" class="form-control" required>
+                    <option value="Activa" <?php echo ($estatus == 'Activa') ? 'selected' : ''; ?>>
+                        Activa
+                    </option>
+                    <option value="Finalizada" <?php echo ($estatus == 'Finalizada') ? 'selected' : ''; ?>>
+                        Finalizada
+                    </option>
+                    <option value="Pendiente" <?php echo ($estatus == 'Pendiente') ? 'selected' : ''; ?>>
+                        Pendiente
+                    </option>
+                </select>
             </div>
+
 
             <button type="submit" name="accion" value="agregar" class="btn btn-success">Modificar</button>
             <a

@@ -8,13 +8,17 @@ if ($_POST) {
     $restricciones = isset($_POST['restricciones']) ? $_POST['restricciones'] : '';
 
     $consulta = $conexionBD->prepare("INSERT INTO restricciones (id_restriccion, id_local, restricciones) 
-                  VALUES (NULL, :id_local, :restricciones )");
+                  VALUES (NULL, :id_local, :restricciones");
 
     $consulta->bindParam(':id_local', $id_local);
     $consulta->bindParam(':restricciones', $restricciones);
     $consulta->execute();
     header("Location:index.php");
 }
+
+$consultaLocales = $conexionBD->prepare("SELECT id_local, codigo FROM locales");
+$consultaLocales->execute();
+$listaLocales = $consultaLocales->fetchAll(PDO::FETCH_ASSOC);
 
 include('../../templates/cabecera.php'); ?>
 
@@ -37,14 +41,20 @@ include('../../templates/cabecera.php'); ?>
             </div>
 
             <div class="mb-3">
-                <label for="" class="form-label">Local</label>
-                <input
-                    type="text"
-                    class="form-control"
-                    name="local"
-                    id="local"
-                    aria-describedby="helpId"
-                    placeholder="Local" />
+                <label class="form-label">Local</label>
+                <select name="id_local" class="form-control" required>
+                    <option value="">-- Selecciona un local --</option>
+
+                    <?php foreach ($listaLocales as $local) { ?>
+                        <option value="<?php echo $local['id_local']; ?>">
+                            <?php echo $local['codigo']; ?>
+                        </option>
+                    <?php } ?>
+                </select>
+
+                <small class="form-text text-muted">
+                    Si el local no existe, primero agrégalo en el módulo de Locales.
+                </small>
             </div>
 
             <div class="mb-3">

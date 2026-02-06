@@ -11,9 +11,21 @@ if (isset($_GET['txtID'])) {
     header("Location:index.php");
 }
 
-$consulta = $conexionBD->prepare("SELECT * FROM locales");
+$consulta = $conexionBD->prepare(" SELECT
+        l.id_local,
+        p.codigo AS propiedad,
+        l.codigo,
+        l.medidas,
+        l.descripcion,
+        l.estacionamiento,
+        l.estatus
+    FROM locales l
+    INNER JOIN propiedades p
+        ON p.id_propiedad = l.id_propiedad
+    ORDER BY l.id_local DESC");
+
 $consulta->execute();
-$listaPropiedades = $consulta->fetchAll(PDO::FETCH_ASSOC);
+$listaLocales = $consulta->fetchAll(PDO::FETCH_ASSOC);
 
 include('../../templates/cabecera.php');
 
@@ -52,36 +64,26 @@ include('../../templates/cabecera.php');
 
                 <tbody>
 
-                    <?php foreach ($listaPropiedades as $key => $value) { ?>
+                    <?php foreach ($listaLocales as $key => $value) { ?>
 
-                        <tr class="">
-                            <td scope="row"><?php echo $value['id_local'] ?> </td>
-                            <td scope="row"><?php echo $value['id_propiedad'] ?> </td>
-                            <td><?php echo $value['codigo'] ?></td>
-                            <td><?php echo $value['medidas'] ?></td>
-                            <td><?php echo $value['descripcion'] ?></td>
-                            <td><?php echo $value['estacionamiento'] ?></td>
-                            <td><?php echo $value['estatus'] ?></td>
-
+                        <tr>
+                            <td><?php echo $value['id_local']; ?></td>
+                            <td><?php echo $value['propiedad']; ?></td>
+                            <td><?php echo $value['codigo']; ?></td>
+                            <td><?php echo $value['medidas']; ?></td>
+                            <td><?php echo $value['descripcion']; ?></td>
+                            <td><?php echo $value['estacionamiento']; ?></td>
+                            <td><?php echo $value['estatus']; ?></td>
                             <td>
-
-                                <a
-                                    name=""
-                                    id=""
-                                    class="btn btn-primary"
-                                    href="editar.php?txtID=<?php echo $value['id_local']; ?>"
-                                    role="button">Editar</a>
-
-                                <a
-                                    name=""
-                                    id=""
-                                    class="btn btn-danger"
-                                    href="index.php?txtID=<?php echo $value['id_local']; ?>"
-                                    role="button">Borrar</a>
-
+                                <a class="btn btn-primary"
+                                    href="editar.php?txtID=<?php echo $value['id_local']; ?>">
+                                    Editar
+                                </a>
+                                <a class="btn btn-danger"
+                                    href="index.php?txtID=<?php echo $value['id_local']; ?>">
+                                    Borrar
+                                </a>
                             </td>
-
-
                         </tr>
 
                     <?php   } ?>

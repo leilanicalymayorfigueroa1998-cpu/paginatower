@@ -16,8 +16,8 @@ if ($_POST) {
 
     $accion = isset($_POST['accion']) ? $_POST['accion'] : '';
 
-    $consulta = $conexionBD->prepare("INSERT INTO rentas (`id_renta`, `id_local`, `id_cliente`, `renta`,
-  `deposito`,`adicional`,`fecha_inicio`, `fecha_fin`, `metodos`,`estatus`) 
+    $consulta = $conexionBD->prepare("INSERT INTO rentas (id_renta, id_local, id_cliente, renta,
+  deposito, adicional, fecha_inicio, fecha_fin, metodo, estatus) 
             VALUES (NULL, :id_renta, :id_local, :id_cliente, :renta,
   :deposito, :adicional, :fecha_inicio, :fecha_fin, :metodo, :estatus");
 
@@ -34,6 +34,16 @@ if ($_POST) {
 
     header("Location:index.php");
 }
+
+// Locales
+$consultaLocales = $conexionBD->prepare("SELECT id_local, codigo FROM locales");
+$consultaLocales->execute();
+$listaLocales = $consultaLocales->fetchAll(PDO::FETCH_ASSOC);
+
+// Clientes
+$consultaClientes = $conexionBD->prepare("SELECT id_cliente, nombre FROM clientes");
+$consultaClientes->execute();
+$listaClientes = $consultaClientes->fetchAll(PDO::FETCH_ASSOC);
 
 include('../../templates/cabecera.php');
 
@@ -60,25 +70,27 @@ include('../../templates/cabecera.php');
 
 
             <div class="mb-3">
-                <label for="" class="form-label">Local</label>
-                <input
-                    type="text"
-                    class="form-control"
-                    name="id_local"
-                    id="id_local"
-                    aria-describedby="helpId"
-                    placeholder="Local" />
+                <label class="form-label">Local</label>
+                <select name="id_local" class="form-control" required>
+                    <option value="">-- Selecciona un local --</option>
+                    <?php foreach ($listaLocales as $local) { ?>
+                        <option value="<?php echo $local['id_local']; ?>">
+                            <?php echo $local['codigo']; ?>
+                        </option>
+                    <?php } ?>
+                </select>
             </div>
 
             <div class="mb-3">
-                <label for="" class="form-label">Cliente</label>
-                <input
-                    type="text"
-                    class="form-control"
-                    name="id_cliente"
-                    id="id_cliente"
-                    aria-describedby="helpId"
-                    placeholder="Cliente" />
+                <label class="form-label">Cliente</label>
+                <select name="id_cliente" class="form-control" required>
+                    <option value="">-- Selecciona un cliente --</option>
+                    <?php foreach ($listaClientes as $cliente) { ?>
+                        <option value="<?php echo $cliente['id_cliente']; ?>">
+                            <?php echo $cliente['nombre']; ?>
+                        </option>
+                    <?php } ?>
+                </select>
             </div>
 
             <div class="mb-3">
@@ -137,27 +149,24 @@ include('../../templates/cabecera.php');
             </div>
 
             <div class="mb-3">
-                <label for="" class="form-label">Metodo</label>
-                <input
-                    type="date"
-                    class="form-control"
-                    name="metodo"
-                    id="metodo"
-                    aria-describedby="helpId"
-                    placeholder="Metodo" />
+                <label class="form-label">Método de pago</label>
+                <select name="metodo" class="form-control" required>
+                    <option value="">-- Selecciona método --</option>
+                    <option value="Efectivo">Efectivo</option>
+                    <option value="Transferencia">Transferencia</option>
+                    <option value="Depósito">Depósito</option>
+                </select>
             </div>
 
             <div class="mb-3">
-                <label for="" class="form-label">Estatus</label>
-                <input
-                    type="date"
-                    class="form-control"
-                    name="estatus"
-                    id="estatus"
-                    aria-describedby="helpId"
-                    placeholder="Estatus" />
+                <label class="form-label">Estatus</label>
+                <select name="estatus" class="form-control" required>
+                    <option value="">-- Selecciona estatus --</option>
+                    <option value="Activa">Activa</option>
+                    <option value="Finalizada">Finalizada</option>
+                    <option value="Pendiente">Pendiente</option>
+                </select>
             </div>
-
             <button type="submit" name="accion" value="agregar" class="btn btn-success">Agregar</button>
             <a
                 name=""

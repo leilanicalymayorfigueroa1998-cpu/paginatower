@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 include('../../bd.php');
 
@@ -9,20 +9,20 @@ if (isset($_GET['txtID'])) {
     $consulta->bindParam(':id_pago', $txtID);
     $consulta->execute();
 
-   $pago = $consulta->fetch(PDO::FETCH_LAZY);
-            $id_renta = $pago['id_renta'];
-            $fecha_pago = $pago['fecha_pago'];
-            $monto = $pago['monto'];
-            $estatus = $pago['estatus'];
+    $pago = $consulta->fetch(PDO::FETCH_LAZY);
+    $id_renta = $pago['id_renta'];
+    $fecha_pago = $pago['fecha_pago'];
+    $monto = $pago['monto'];
+    $estatus = $pago['estatus'];
 }
 
 if ($_POST) {
-$txtID  = isset($_POST['txtID']) ? $_POST['txtID'] : '';
-$id_renta = isset($_POST['id_renta']) ? $_POST['id_renta'] : '';
-$fecha_pago = isset($_POST['fecha_pago']) ? $_POST['fecha_pago'] : '';
-$monto = isset($_POST['monto']) ? $_POST['monto'] : '';
-$estatus= isset($_POST['estatus']) ? $_POST['estatus'] : '';
-$accion = isset($_POST['accion']) ? $_POST['accion'] : '';
+    $txtID  = isset($_POST['txtID']) ? $_POST['txtID'] : '';
+    $id_renta = isset($_POST['id_renta']) ? $_POST['id_renta'] : '';
+    $fecha_pago = isset($_POST['fecha_pago']) ? $_POST['fecha_pago'] : '';
+    $monto = isset($_POST['monto']) ? $_POST['monto'] : '';
+    $estatus = isset($_POST['estatus']) ? $_POST['estatus'] : '';
+    $accion = isset($_POST['accion']) ? $_POST['accion'] : '';
 
     print_r($_POST);
 
@@ -33,17 +33,24 @@ $accion = isset($_POST['accion']) ? $_POST['accion'] : '';
                 estatus = :estatus
                 WHERE id_pago = :id_pago");
 
-            $consulta->bindParam(':id_renta', $id_renta);
-            $consulta->bindParam(':fecha_pago', $fecha_pago);
-            $consulta->bindParam(':monto', $monto);
-            $consulta->bindParam(':estatus', $estatus);
-            $consulta->bindParam(':id_pago', $txtID);
+    $consulta->bindParam(':id_renta', $id_renta);
+    $consulta->bindParam(':fecha_pago', $fecha_pago);
+    $consulta->bindParam(':monto', $monto);
+    $consulta->bindParam(':estatus', $estatus);
+    $consulta->bindParam(':id_pago', $txtID);
 
     $consulta->execute();
     header("Location:index.php");
 }
 
-include('../../templates/cabecera.php'); 
+$consultaRentas = $conexionBD->prepare("SELECT r.id_renta, l.codigo, c.nombre
+    FROM rentas r
+    INNER JOIN locales l ON r.id_local = l.id_local
+    INNER JOIN clientes c ON r.id_cliente = c.id_cliente");
+$consultaRentas->execute();
+$listaRentas = $consultaRentas->fetchAll(PDO::FETCH_ASSOC);
+
+include('../../templates/cabecera.php');
 
 ?>
 
@@ -67,70 +74,74 @@ include('../../templates/cabecera.php');
             </div>
 
             <div class="mb-3">
-                <label for="" class="form-label">Renta</label>
-                <input
-                    type="text"
-                    class="form-control"
-                    name="id_renta"
-                    id="id_renta"
-                    value="<?php echo $id_renta ?>"
-                    aria-describedby="helpId"
-                    placeholder="Renta" />
-            </div>
-
-            <div class="mb-3">
-                <label for="" class="form-label">Fecha Pago</label>
-                <input
-                    type="date"
-                    class="form-control"
-                    name="fecha-pago"
-                    id="fecha_pago"
-                    value="<?php echo $fecha_pago ?>"
-                    aria-describedby="helpId"
-                    placeholder="Fecha Pago" />
-            </div>
-
-            <div class="mb-3">
-                <label for="" class="form-label">Monto</label>
-                <input
-                    type="text"
-                    class="form-control"
-                    name="monto"
-                    id="monto"
-                    value="<?php echo $monto ?>"
-                    aria-describedby="helpId"
-                    placeholder="Monto" />
-            </div>
-
-            <div class="mb-3">
-                <label for="" class="form-label">Estatus</label>
-                <input
-                    type="date"
-                    class="form-control"
-                    name="estatus"
-                    id="estatus"
-                    value="<?php echo $estatus ?>"
-                    aria-describedby="helpId"
-                    placeholder="Estatus" />
-            </div>
-
-            <button type="submit" name="accion" value="agregar" class="btn btn-success">Modificar</button>
-            <a
-                name=""
-                id=""
-                class="btn btn-primary"
-                href="index.php"
-                role="button">Cancelar</a>
-
-
-        </form>
-
+            <label class="form-label">Renta</label>
+            <select name="id_renta" class="form-control" required>
+                <?php foreach ($listaRentas as $renta) { ?>
+                    <option value="<?php echo $renta['id_renta']; ?>"
+                        <?php echo ($renta['id_renta'] == $id_renta) ? 'selected' : ''; ?>>
+                        <?php echo $renta['codigo'] . ' - ' . $renta['nombre']; ?>
+                    </option>
+                <?php } ?>
+            </select>
     </div>
 
-    <div class="card-footer text-muted">
-
-
+    <div class="mb-3">
+        <label for="" class="form-label">Fecha Pago</label>
+        <input
+            type="date"
+            class="form-control"
+            name="fecha-pago"
+            id="fecha_pago"
+            value="<?php echo $fecha_pago ?>"
+            aria-describedby="helpId"
+            placeholder="Fecha Pago" />
     </div>
+
+    <div class="mb-3">
+        <label for="" class="form-label">Monto</label>
+        <input
+            type="text"
+            class="form-control"
+            name="monto"
+            id="monto"
+            value="<?php echo $monto ?>"
+            aria-describedby="helpId"
+            placeholder="Monto" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Estatus</label>
+        <select name="estatus" class="form-control" required>
+            <option value="Pagado" <?php echo ($estatus == 'Pagado') ? 'selected' : ''; ?>>
+                Pagado
+            </option>
+            <option value="Pendiente" <?php echo ($estatus == 'Pendiente') ? 'selected' : ''; ?>>
+                Pendiente
+            </option>
+            <option value="Vencido" <?php echo ($estatus == 'Vencido') ? 'selected' : ''; ?>>
+                Vencido
+            </option>
+        </select>
+    </div>
+
+
+    <button type="submit" name="accion" value="agregar" class="btn btn-success">Modificar</button>
+    <a
+        name=""
+        id=""
+        class="btn btn-primary"
+        href="index.php"
+        role="button">Cancelar</a>
+
+
+    </form>
+
+</div>
+
+<div class="card-footer text-muted">
+
+
+</div>
 
 </div>
 

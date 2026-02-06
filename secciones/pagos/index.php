@@ -11,7 +11,15 @@ if (isset($_GET['txtID'])) {
     header("Location:index.php");
 }
 
-$consulta = $conexionBD->prepare("SELECT * FROM pagos");
+$consulta = $conexionBD->prepare("SELECT p.id_pago,
+           l.codigo AS renta,
+           p.fecha_pago,
+           p.monto,
+           p.estatus
+    FROM pagos p
+    INNER JOIN rentas r ON p.id_renta = r.id_renta
+    INNER JOIN locales l ON r.id_local = l.id_local");
+
 $consulta->execute();
 $listaPagos = $consulta->fetchAll(PDO::FETCH_ASSOC);
 
@@ -51,7 +59,7 @@ include('../../templates/cabecera.php');
                     <?php foreach ($listaPagos as $key => $value) { ?>
                         <tr class="">
                             <td scope="row"><?php echo $value['id_pago'] ?> </td>
-                            <td><?php echo $value['id_renta'] ?></td>
+                            <td><?php echo $value['renta'] ?></td>
                             <td><?php echo $value['fecha_pago'] ?></td>
                             <td><?php echo $value['monto'] ?></td>
                             <td><?php echo $value['estatus'] ?></td>

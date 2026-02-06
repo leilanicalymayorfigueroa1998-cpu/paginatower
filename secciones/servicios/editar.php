@@ -16,7 +16,6 @@ if (isset($_GET['txtID'])) {
     $agua = $serv['agua'];
 }
 
-
 if ($_POST) {
 
     $txtID  = isset($_POST['txtID']) ? $_POST['txtID'] : '';
@@ -25,21 +24,23 @@ if ($_POST) {
     $agua = isset($_POST['agua']) ? $_POST['agua'] : '';
     $accion = isset($_POST['accion']) ? $_POST['accion'] : '';
 
-    print_r($_POST);
-
     $consulta = $conexionBD->prepare("UPDATE servicios
         SET id_local = :id_local,
-        cfe = :cfe,
-        agua = :agua
-                WHERE id_servicio=:id_servicio");
+            cfe = :cfe,
+            agua = :agua
+      WHERE id_servicio=:id_servicio");
 
     $consulta->bindParam(':id_local', $id_local);
     $consulta->bindParam(':cfe', $cfe);
     $consulta->bindParam(':agua', $agua);
+    $consulta->bindParam(':id_servicio', $txtID);;
     $consulta->execute();
     header("Location:index.php");
 }
 
+$consultaLocales = $conexionBD->prepare("SELECT id_local, codigo  FROM locales");
+$consultaLocales->execute();
+$listaLocales = $consultaLocales->fetchAll(PDO::FETCH_ASSOC);
 
 include('../../templates/cabecera.php'); ?>
 
@@ -63,15 +64,15 @@ include('../../templates/cabecera.php'); ?>
             </div>
 
             <div class="mb-3">
-                <label for="" class="form-label">Local</label>
-                <input
-                    type="text"
-                    class="form-control"
-                    value="<?php echo $id_local ?>"
-                    name="id_local"
-                    id="id_local"
-                    aria-describedby="helpId"
-                    placeholder="Local" />
+                <label class="form-label">Local</label>
+                <select name="id_local" class="form-control" required>
+                    <?php foreach ($listaLocales as $local) { ?>
+                        <option value="<?php echo $local['id_local']; ?>"
+                            <?php echo ($local['id_local'] == $id_local) ? 'selected' : ''; ?>>
+                            <?php echo $local['codigo']; ?>
+                        </option>
+                    <?php } ?>
+                </select>
             </div>
 
             <div class="mb-3">

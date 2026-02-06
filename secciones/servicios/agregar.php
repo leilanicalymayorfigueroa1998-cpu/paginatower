@@ -19,6 +19,10 @@ if ($_POST) {
     header("Location:index.php");
 }
 
+$consultaLocales = $conexionBD->prepare("SELECT id_local, codigo  FROM locales");
+$consultaLocales->execute();
+$listaLocales = $consultaLocales->fetchAll(PDO::FETCH_ASSOC);
+
 include('../../templates/cabecera.php'); ?>
 
 
@@ -40,14 +44,16 @@ include('../../templates/cabecera.php'); ?>
             </div>
 
             <div class="mb-3">
-                <label for="" class="form-label">Local</label>
-                <input
-                    type="text"
-                    class="form-control"
-                    name="id_local"
-                    id="id_local"
-                    aria-describedby="helpId"
-                    placeholder="Local" />
+                <label class="form-label">Local</label>
+                <select name="id_local" class="form-control" required>
+                    <option value="">-- Selecciona un local --</option>
+
+                    <?php foreach ($listaLocales as $local) { ?>
+                        <option value="<?php echo $local['id_local']; ?>">
+                            <?php echo $local['codigo']; ?>
+                        </option>
+                    <?php } ?>
+                </select>
             </div>
 
             <div class="mb-3">

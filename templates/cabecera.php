@@ -98,29 +98,31 @@ $url_base = "http://localhost/paginatower/";
 
 </head>
 
+
+
 <body>
 
     <div class="sidebar">
 
-        <h4>🏢 Sistema Inmobiliario Tower</h4>
+        <h4>🏢 Sistema Tower</h4>
 
         <a href="#">📊 Dashboard</a>
-        <a href="<?php echo $url_base; ?>/secciones/dueños/">👤 Dueños</a>
-        <a href="<?php echo $url_base; ?>/secciones/clientes/">👥 Clientes</a>
         <a href="javascript:void(0)" onclick="togglePropiedades()">
-            🏘 Propiedades
+            🏠 Propiedades
         </a>
 
         <div class="submenu" id="submenuPropiedades">
-            <a href="<?php echo $url_base; ?>/secciones/propiedades/">🏘 Ver propiedades</a>
+            <a href="<?php echo $url_base; ?>/secciones/propiedades/">🏠 Propiedades</a>
             <a href="<?php echo $url_base; ?>/secciones/locales/">🏢 Locales</a>
             <a href="<?php echo $url_base; ?>/secciones/servicios/">💧🔌 Servicios</a>
             <a href="<?php echo $url_base; ?>/secciones/restricciones/">⚠️ Restricciones</a>
         </div>
 
-
         <a href="<?php echo $url_base; ?>/secciones/rentas/">📄 Rentas</a>
         <a href="<?php echo $url_base; ?>/secciones/pagos/">💳 Pagos</a>
+        <a href="<?php echo $url_base; ?>/secciones/movimientos/">🧾 Movimientos</a>
+        <a href="<?php echo $url_base; ?>/secciones/dueños/">👤 Dueños</a>
+        <a href="<?php echo $url_base; ?>/secciones/clientes/">👥 Clientes</a>
         <a href="<?php echo $url_base; ?>/secciones/usuarios/">⚙ Usuarios</a>
 
         <a href="#" style="position:absolute; bottom:20px; color:#f87171;">

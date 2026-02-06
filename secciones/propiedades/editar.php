@@ -24,10 +24,8 @@ if ($_POST) {
     $latitud = isset($_POST['latitud']) ? $_POST['latitud'] : '';
     $longitud = isset($_POST['longitud']) ? $_POST['longitud'] : '';
     $tipo = isset($_POST['tipo']) ? $_POST['tipo'] : '';
-    
-    $accion = isset($_POST['accion']) ? $_POST['accion'] : '';
 
-    print_r($_POST);
+    $accion = isset($_POST['accion']) ? $_POST['accion'] : '';
 
     $consulta = $conexionBD->prepare("UPDATE propiedades SET 
                     codigo = :codigo, 
@@ -49,6 +47,9 @@ if ($_POST) {
 
 include('../../templates/cabecera.php');
 
+$consultaDuenos = $conexionBD->prepare("SELECT id_dueno, nombre FROM duenos");
+$consultaDuenos->execute();
+$listaDuenos = $consultaDuenos->fetchAll(PDO::FETCH_ASSOC);
 
 ?>
 
@@ -121,17 +122,14 @@ include('../../templates/cabecera.php');
             </div>
 
             <div class="mb-3">
-                <label for="" class="form-label">Tipo</label>
-                <input
-                    type="text"
-                    class="form-control"
-                    name="tipo"
-                    id="tipo"
-                    value="<?php echo $tipo ?>"
-                    aria-describedby="helpId"
-                    placeholder="Tipo" />
+                <label class="form-label">Tipo</label>
+                <select name="tipo" class="form-select" required>
+                    <option value="Local" <?php echo ($tipo == 'Local') ? 'selected' : ''; ?>>Local</option>
+                    <option value="Casa" <?php echo ($tipo == 'Casa') ? 'selected' : ''; ?>>Casa</option>
+                    <option value="Departamento" <?php echo ($tipo == 'Departamento') ? 'selected' : ''; ?>>Departamento</option>
+                    <option value="Oficina" <?php echo ($tipo == 'Oficina') ? 'selected' : ''; ?>>Oficina</option>
+                </select>
             </div>
-
 
             <button type="submit" name="accion" value="agregar" class="btn btn-success">Modificar</button>
             <a

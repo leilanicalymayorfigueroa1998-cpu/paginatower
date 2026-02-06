@@ -12,10 +12,14 @@ if (isset($_GET['txtID'])) {
     header("Location:index.php");
 }
 
-$consulta = $conexionBD->prepare("SELECT * FROM restricciones");
-$consulta->execute();
-$listaDueños = $consulta->fetchAll(PDO::FETCH_ASSOC);
+$consulta = $conexionBD->prepare("SELECT r.id_restriccion,
+           l.codigo AS local,
+           r.restricciones
+    FROM restricciones r
+    INNER JOIN locales l ON r.id_local = l.id_local");
 
+$consulta->execute();
+$lista_restricciones = $consulta->fetchAll(PDO::FETCH_ASSOC);
 include('../../templates/cabecera.php');
 
 ?>
@@ -47,11 +51,11 @@ include('../../templates/cabecera.php');
                 </thead>
                 <tbody>
 
-                    <?php foreach ($listaDueños as $key => $value) { ?>
+                    <?php foreach ($lista_restricciones as $key => $value) { ?>
 
                         <tr class="">
                             <td scope="row"><?php echo $value['id_restriccion'] ?> </td>
-                            <td><?php echo $value['id_local'] ?></td>
+                            <td><?php echo $value['local'] ?></td>
                             <td><?php echo $value['restricciones'] ?></td>
 
                             <td>

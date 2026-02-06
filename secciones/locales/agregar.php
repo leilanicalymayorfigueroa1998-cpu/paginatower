@@ -13,9 +13,9 @@ if ($_POST) {
     $estatus = isset($_POST['estatus']) ? $_POST['estatus'] : '';
     $accion = isset($_POST['accion']) ? $_POST['accion'] : '';
 
-    $consulta = $conexionBD->prepare("INSERT INTO locales (`id_local`,`id_propiedad`,`codigo`,
-                                                  `medidas`,`descripcion`, `estacionamiento`, `estatus`)
- VALUES (NULL, :id_propiedad, :codigo, :medidas, :descripcion, :estacionamiento, :estatus");
+    $consulta = $conexionBD->prepare("INSERT INTO locales (id_local, id_propiedad, 
+    codigo, medidas, descripcion, estacionamiento, estatus)
+    VALUES (NULL, :id_propiedad, :codigo, :medidas, :descripcion, :estacionamiento, :estatus");
 
     $consulta->bindParam(':id_propiedad', $id_propiedad);
     $consulta->bindParam(':codigo', $codigo);
@@ -24,9 +24,12 @@ if ($_POST) {
     $consulta->bindParam(':estacionamiento', $estacionamiento);
     $consulta->bindParam(':estatus', $estatus);
     $consulta->execute();
-
     header("Location:index.php");
 }
+
+$consultaProp = $conexionBD->prepare("SELECT id_propiedad, codigo, direccion FROM propiedades");
+$consultaProp->execute();
+$listaPropiedades = $consultaProp->fetchAll(PDO::FETCH_ASSOC);
 
 include('../../templates/cabecera.php');
 ?>
@@ -50,14 +53,16 @@ include('../../templates/cabecera.php');
             </div>
 
             <div class="mb-3">
-                <label for="" class="form-label">Propiedad</label>
-                <input
-                    type="text"
-                    class="form-control"
-                    name="propiedad"
-                    id="propiedad"
-                    aria-describedby="helpId"
-                    placeholder="propiedad" />
+                <label for="id_propiedad">Propiedad</label>
+                <select name="id_propiedad" class="form-control" required>
+                    <option value="">-- Selecciona una propiedad --</option>
+
+                    <?php foreach ($listaPropiedades as $prop) { ?>
+                        <option value="<?php echo $prop['id_propiedad']; ?>">
+                            <?php echo strtoupper($prop['codigo']); ?>
+                        </option>
+                    <?php } ?>
+                </select>
             </div>
 
 
@@ -107,14 +112,12 @@ include('../../templates/cabecera.php');
 
 
             <div class="mb-3">
-                <label for="" class="form-label">Estatus</label>
-                <input
-                    type="text"
-                    class="form-control"
-                    name="estatus"
-                    id="estatus"
-                    aria-describedby="helpId"
-                    placeholder="Estatus" />
+                <label for="estatus" class="form-label">Estatus</label>
+                <select name="estatus" id="estatus" class="form-control" required>
+                    <option value="">-- Selecciona estatus --</option>
+                    <option value="Disponible">Disponible</option>
+                    <option value="Ocupado">Ocupado</option>
+                </select>
             </div>
 
             <button type="submit" name="accion" value="agregar" class="btn btn-success">Agregar</button>

@@ -12,7 +12,7 @@ if (isset($_GET['txtID'])) {
     $restri = $consulta->fetch(PDO::FETCH_LAZY);
     $id_restriccion = $restri['id_restriccion'];
     $id_local = $restri['id_local'];
-    $restriccion = $restri['restriccion'];
+    $restricciones = $restri['restriccion'];
 }
 
 if ($_POST) {
@@ -37,6 +37,9 @@ if ($_POST) {
     header("Location:index.php");
 }
 
+$consultaLocales = $conexionBD->prepare("SELECT id_local, codigo FROM locales");
+$consultaLocales->execute();
+$listaLocales = $consultaLocales->fetchAll(PDO::FETCH_ASSOC);
 
 include('../../templates/cabecera.php'); ?>
 
@@ -60,15 +63,15 @@ include('../../templates/cabecera.php'); ?>
             </div>
 
             <div class="mb-3">
-                <label for="" class="form-label">Local</label>
-                <input
-                    type="text"
-                    class="form-control"
-                    value="<?php echo $txtID; ?>"
-                    name="id_local"
-                    id="id_local"
-                    aria-describedby="helpId"
-                    placeholder="ID" />
+                <label class="form-label">Local</label>
+                <select name="id_local" class="form-control" required>
+                    <?php foreach ($listaLocales as $local) { ?>
+                        <option value="<?php echo $local['id_local']; ?>"
+                            <?php echo ($local['id_local'] == $id_local) ? 'selected' : ''; ?>>
+                            <?php echo $local['codigo']; ?>
+                        </option>
+                    <?php } ?>
+                </select>
             </div>
 
             <div class="mb-3">

@@ -12,9 +12,14 @@ if (isset($_GET['txtID'])) {
     header("Location:index.php");
 }
 
-$consulta = $conexionBD->prepare("SELECT * FROM servicios");
+$consulta = $conexionBD->prepare("SELECT s.id_servicio,
+           l.codigo AS local,
+           s.cfe,
+           s.agua
+    FROM servicios s
+    INNER JOIN locales l ON s.id_local = l.id_local");
 $consulta->execute();
-$listaDueños = $consulta->fetchAll(PDO::FETCH_ASSOC);
+$lista_servicios = $consulta->fetchAll(PDO::FETCH_ASSOC);
 
 include('../../templates/cabecera.php');
 
@@ -48,11 +53,11 @@ include('../../templates/cabecera.php');
                 </thead>
                 <tbody>
 
-                    <?php foreach ($listaDueños as $key => $value) { ?>
+                    <?php foreach ($lista_servicios as $key => $value) { ?>
 
                         <tr class="">
                             <td scope="row"><?php echo $value['id_servicio'] ?> </td>
-                            <td><?php echo $value['id_local'] ?></td>
+                            <td><?php echo $value['local'] ?></td>
                             <td><?php echo $value['cfe'] ?></td>
                             <td><?php echo $value['agua'] ?></td>
                             <td>
