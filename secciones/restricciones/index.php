@@ -14,7 +14,7 @@ if (isset($_GET['txtID'])) {
 
 $consulta = $conexionBD->prepare("SELECT r.id_restriccion,
            l.codigo AS local,
-           r.restricciones
+           r.restriccion
     FROM restricciones r
     INNER JOIN locales l ON r.id_local = l.id_local");
 
@@ -56,7 +56,7 @@ include('../../templates/cabecera.php');
                         <tr class="">
                             <td scope="row"><?php echo $value['id_restriccion'] ?> </td>
                             <td><?php echo $value['local'] ?></td>
-                            <td><?php echo $value['restricciones'] ?></td>
+                            <td><?php echo $value['restriccion'] ?></td>
 
                             <td>
                                 <a
@@ -87,28 +87,5 @@ include('../../templates/cabecera.php');
     </div>
     <div class="card-footer text-muted"></div>
 </div>
-
-<style>
-    .table th,
-    .table td {
-        white-space: nowrap;
-        padding: 6px 10px;
-        font-size: 13px;
-        text-align: center;
-        vertical-align: middle !important;
-    }
-
-    /* Que los botones no se encimen */
-    .btn {
-        padding: 4px 10px;
-        font-size: 13px;
-    }
-
-    /* Para que la tabla no se vea aplastada */
-    .table-responsive {
-        max-height: 500px;
-        overflow: auto;
-    }
-</style>
 
 <?php include('../../templates/pie.php'); ?>

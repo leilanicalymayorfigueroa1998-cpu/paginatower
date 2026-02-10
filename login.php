@@ -1,10 +1,9 @@
 
-
 <!doctype html>
 <html lang="en">
 
 <head>
-    <title>Sistema Inmobiliario Tower</title>
+    <title>Login</title>
     <!-- Required meta tags -->
     <meta charset="utf-8" />
     <meta
@@ -34,7 +33,7 @@
                     <div
                         class="alert alert-danger"
                         role="alert">
-                        <strong> <?php echo $mensaje; ?></strong>
+                        <strong> Error: <?php echo $mensaje; ?></strong>
                     </div>
 
                 <?php } ?>

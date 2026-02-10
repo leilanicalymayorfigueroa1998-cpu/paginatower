@@ -9,8 +9,8 @@ if ($_POST) {
     $agua = isset($_POST['agua']) ? $_POST['agua'] : '';
     $accion = isset($_POST['accion']) ? $_POST['accion'] : '';
 
-    $consulta = $conexionBD->prepare("INSERT INTO servicios (id_servicios, , id_local, cfe, agua) 
-                  VALUES (NULL, :id_local, :cfe, :agua");
+    $consulta = $conexionBD->prepare("INSERT INTO servicios (id_servicio, id_local, cfe, agua) 
+                  VALUES (NULL, :id_local, :cfe, :agua)");
 
     $consulta->bindParam(':id_local', $id_local);
     $consulta->bindParam(':cfe', $cfe);

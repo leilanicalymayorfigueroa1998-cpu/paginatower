@@ -125,8 +125,8 @@ include('../../templates/cabecera.php');
                 <input
                     type="text"
                     class="form-control"
-                    name="renta_mensual"
-                    id="renta_mensual"
+                    name="renta"
+                    id="renta"
                     value="<?php echo $renta ?>"
                     aria-describedby="helpId"
                     placeholder="Renta" />

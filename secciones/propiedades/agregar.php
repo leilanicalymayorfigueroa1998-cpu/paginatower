@@ -11,7 +11,7 @@ if ($_POST) {
     $tipo = isset($_POST['tipo']) ? $_POST['tipo'] : '';
 
     $consulta = $conexionBD->prepare("INSERT INTO propiedades (id_propiedad, codigo, direccion, latitud, longitud, tipo)
-                    VALUES (NULL, :codigo, :direccion, :latitud, :longitud, :tipo");
+                    VALUES (NULL, :codigo, :direccion, :latitud, :longitud, :tipo)");
 
     $consulta->bindParam(':codigo', $codigo);
     $consulta->bindParam(':direccion', $direccion);
@@ -20,7 +20,7 @@ if ($_POST) {
     $consulta->bindParam(':tipo', $tipo);
     $consulta->execute();
 
-    header("Location:index.php");
+    header("Location:index.php?mensaje=editado");
 }
 
 $consultaDuenos = $conexionBD->prepare("SELECT id_dueno, nombre FROM duenos");
@@ -28,8 +28,8 @@ $consultaDuenos->execute();
 $listaDuenos = $consultaDuenos->fetchAll(PDO::FETCH_ASSOC);
 
 include('../../templates/cabecera.php');
-?>
 
+?>
 
 <div class="card">
     <div class="card-header">Propiedades</div>

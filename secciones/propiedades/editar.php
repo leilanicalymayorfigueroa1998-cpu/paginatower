@@ -20,6 +20,7 @@ if (isset($_GET['txtID'])) {
 if ($_POST) {
     $txtID  = isset($_POST['txtID']) ? $_POST['txtID'] : '';
     $codigo = isset($_POST['codigo']) ? $_POST['codigo'] : '';
+    
     $direccion = isset($_POST['direccion']) ? $_POST['direccion'] : '';
     $latitud = isset($_POST['latitud']) ? $_POST['latitud'] : '';
     $longitud = isset($_POST['longitud']) ? $_POST['longitud'] : '';
@@ -42,7 +43,7 @@ if ($_POST) {
     $consulta->bindParam(':tipo', $tipo);
     $consulta->bindParam(':id_propiedad', $txtID);;
     $consulta->execute();
-    header("Location:index.php");
+    header("Location:index.php?mensaje=editado");
 }
 
 include('../../templates/cabecera.php');
@@ -83,6 +84,19 @@ $listaDuenos = $consultaDuenos->fetchAll(PDO::FETCH_ASSOC);
                     value="<?php echo $codigo ?>"
                     aria-describedby="helpId"
                     placeholder="Codigo" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Dueño</label>
+                <select name="id_dueno" class="form-select" required>
+                    <option value="">-- Selecciona dueño --</option>
+                    <?php foreach ($listaDuenos as $dueno) { ?>
+                        <option value="<?php echo $dueno['id_dueno']; ?>"
+                            <?php echo ($dueno['id_dueno'] == $id_dueno) ? 'selected' : ''; ?>>
+                            <?php echo $dueno['nombre']; ?>
+                        </option>
+                    <?php } ?>
+                </select>
             </div>
 
             <div class="mb-3">

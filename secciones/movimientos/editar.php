@@ -23,7 +23,6 @@ if (isset($_GET['txtID'])) {
 
 if ($_POST) {
     $txtID  = isset($_POST['txtID']) ? $_POST['txtID'] : '';
-    $id_movimiento = isset($_POST['id_movimiento']) ? $_POST['id_movimiento'] : '';
     $fecha = isset($_POST['fecha']) ? $_POST['fecha'] : '';
     $id_propiedad = isset($_POST['id_propiedad']) ? $_POST['id_propiedad'] : '';
     $id_tipo_operacion = isset($_POST['id_tipo_operacion']) ? $_POST['id_tipo_operacion'] : '';

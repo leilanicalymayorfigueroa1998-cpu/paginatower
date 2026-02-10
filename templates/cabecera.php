@@ -32,73 +32,10 @@ $url_base = "http://localhost/paginatower/";
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
-    <style>
-        body {
-            margin: 0;
-            background: #f2f4f7;
-            font-family: "Segoe UI", sans-serif;
-        }
-
-        .sidebar {
-            width: 240px;
-            height: 100vh;
-            position: fixed;
-            background: #111827;
-            color: white;
-            padding-top: 20px;
-        }
-
-        .sidebar h4 {
-            text-align: center;
-            font-weight: bold;
-            margin-bottom: 30px;
-        }
-
-        .sidebar a {
-            display: flex;
-            align-items: center;
-            padding: 12px 20px;
-            color: #cbd5e1;
-            text-decoration: none;
-            transition: .3s;
-            font-size: 15px;
-        }
-
-        .sidebar a:hover {
-            background: #1f2937;
-            color: white;
-        }
-
-        .sidebar a.active {
-            background: #2563eb;
-            color: white;
-        }
-
-        .content {
-            margin-left: 240px;
-            padding: 30px;
-        }
-
-        .submenu {
-            padding-left: 20px;
-            display: none;
-        }
-
-        .submenu a {
-            font-size: 14px;
-            padding: 10px 20px;
-            color: #9ca3af;
-        }
-
-        .submenu a:hover {
-            background: #1f2937;
-            color: white;
-        }
-    </style>
+    <link rel="stylesheet" href="<?php echo $url_base; ?>assets/css/cabecera.css">
+    <link rel="stylesheet" href="<?php echo $url_base; ?>assets/css/tablas.css">
 
 </head>
-
-
 
 <body>
 
@@ -107,6 +44,7 @@ $url_base = "http://localhost/paginatower/";
         <h4>🏢 Sistema Tower</h4>
 
         <a href="#">📊 Dashboard</a>
+        <a href="<?php echo $url_base; ?>/secciones/movimientos/">🧾 Administracion</a>
         <a href="javascript:void(0)" onclick="togglePropiedades()">
             🏠 Propiedades
         </a>
@@ -120,7 +58,7 @@ $url_base = "http://localhost/paginatower/";
 
         <a href="<?php echo $url_base; ?>/secciones/rentas/">📄 Rentas</a>
         <a href="<?php echo $url_base; ?>/secciones/pagos/">💳 Pagos</a>
-        <a href="<?php echo $url_base; ?>/secciones/movimientos/">🧾 Movimientos</a>
+
         <a href="<?php echo $url_base; ?>/secciones/dueños/">👤 Dueños</a>
         <a href="<?php echo $url_base; ?>/secciones/clientes/">👥 Clientes</a>
         <a href="<?php echo $url_base; ?>/secciones/usuarios/">⚙ Usuarios</a>

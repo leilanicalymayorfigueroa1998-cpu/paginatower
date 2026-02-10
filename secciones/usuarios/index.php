@@ -39,7 +39,6 @@ include('../../templates/cabecera.php');
                     <tr>
                         <th>ID</th>
                         <th>Nombre del Usuario</th>
-                        <th>Contraseña</th>
                         <th>Correo</th>
                         <th>Roles</th>
                         <th>Acciones</th>
@@ -53,7 +52,6 @@ include('../../templates/cabecera.php');
                         <tr class="">
                             <td scope="row"><?php echo $value['id'] ?> </td>
                             <td scope="row"><?php echo $value['usuario'] ?></td>
-                            <td scope="row"><?php echo $value['contrasena'] ?></td>
                             <td scope="row"><?php echo $value['correo'] ?></td>
                             <td scope="row"><?php echo $value['rol'] ?></td>
                             <td>
@@ -64,12 +62,11 @@ include('../../templates/cabecera.php');
                                     href="editar.php?txtID=<?php echo $value['id']; ?>"
                                     role="button">Editar</a>
 
-                                <a
-                                    name=""
-                                    id=""
-                                    class="btn btn-danger"
+                                <a class="btn btn-danger"
                                     href="index.php?txtID=<?php echo $value['id']; ?>"
-                                    role="button">Borrar</a>
+                                    onclick="return confirm('¿Seguro que quieres eliminar este usuario?');">
+                                    Borrar
+                                </a>
 
                             </td>
 

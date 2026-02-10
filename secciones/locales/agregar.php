@@ -15,7 +15,7 @@ if ($_POST) {
 
     $consulta = $conexionBD->prepare("INSERT INTO locales (id_local, id_propiedad, 
     codigo, medidas, descripcion, estacionamiento, estatus)
-    VALUES (NULL, :id_propiedad, :codigo, :medidas, :descripcion, :estacionamiento, :estatus");
+    VALUES (NULL, :id_propiedad, :codigo, :medidas, :descripcion, :estacionamiento, :estatus)");
 
     $consulta->bindParam(':id_propiedad', $id_propiedad);
     $consulta->bindParam(':codigo', $codigo);

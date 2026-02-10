@@ -29,6 +29,7 @@ $consulta = $conexionBD->prepare("SELECT
     INNER JOIN clientes c 
         ON c.id_cliente = r.id_cliente
     ORDER BY r.id_renta DESC");
+    
 $consulta->execute();
 $listaRentas = $consulta->fetchAll(PDO::FETCH_ASSOC);
 

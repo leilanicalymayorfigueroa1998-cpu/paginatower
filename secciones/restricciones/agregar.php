@@ -5,13 +5,13 @@ include('../../bd.php');
 if ($_POST) {
     $txtID  = isset($_POST['txtID']) ? $_POST['txtID'] : '';
     $id_local = isset($_POST['id_local']) ? $_POST['id_local'] : '';
-    $restricciones = isset($_POST['restricciones']) ? $_POST['restricciones'] : '';
+    $restriccion = isset($_POST['restriccion']) ? $_POST['restriccion'] : '';
 
-    $consulta = $conexionBD->prepare("INSERT INTO restricciones (id_restriccion, id_local, restricciones) 
-                  VALUES (NULL, :id_local, :restricciones");
+    $consulta = $conexionBD->prepare("INSERT INTO restricciones (id_restriccion, id_local, restriccion) 
+                  VALUES (NULL, :id_local, :restriccion)");
 
     $consulta->bindParam(':id_local', $id_local);
-    $consulta->bindParam(':restricciones', $restricciones);
+    $consulta->bindParam(':restriccion', $restriccion);
     $consulta->execute();
     header("Location:index.php");
 }
@@ -58,14 +58,14 @@ include('../../templates/cabecera.php'); ?>
             </div>
 
             <div class="mb-3">
-                <label for="" class="form-label">Restricciones</label>
+                <label for="" class="form-label">Restriccion</label>
                 <input
                     type="text"
                     class="form-control"
-                    name="restricciones"
-                    id="restricciones"
+                    name="restriccion"
+                    id="restriccion"
                     aria-describedby="helpId"
-                    placeholder="Restricciones" />
+                    placeholder="Restriccion" />
             </div>
 
             <button type="submit" name="accion" value="agregar" class="btn btn-success">Agregar</button>

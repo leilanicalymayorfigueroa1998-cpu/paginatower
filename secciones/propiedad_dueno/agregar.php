@@ -40,7 +40,7 @@ if ($_POST) {
 
             // ✅ INSERT
             $consulta = $conexionBD->prepare("INSERT INTO propiedad_dueno (id, id_propiedad, id_dueno)
-                VALUES (NULL, :id_propiedad, :id_dueno) ");
+                VALUES (NULL, :id_propiedad, :id_dueno)");
             $consulta->bindParam(':id_propiedad', $id_propiedad);
             $consulta->bindParam(':id_dueno', $id_dueno);
             $consulta->execute();

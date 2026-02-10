@@ -15,7 +15,7 @@ if ($_POST) {
     $consulta = $conexionBD->prepare("INSERT INTO clientes (id_cliente, nombre, 
         telefono, correo, aval, correoaval, direccion, ciudad) 
         VALUES (NULL, :nombre, :telefono, :correo, :aval, 
-        :correoaval, :direccion, :ciudad");
+        :correoaval, :direccion, :ciudad)");
 
     $consulta->bindParam(':nombre', $nombre);
     $consulta->bindParam(':telefono', $telefono);

@@ -15,10 +15,8 @@ if ($_POST) {
     $accion = isset($_POST['accion']) ? $_POST['accion'] : '';
 
     $consulta = $conexionBD->prepare("INSERT INTO movimientos_financieros
-     (id_movimiento, fecha, id_propiedad, id_tipo_operacion, descripcion, 
-     nota, abono, cargo, origen)
-     VALUES (NULL, :fecha, :id_propiedad, :id_tipo_operacion, :descripcion, 
-    :nota, :abono, :cargo, :origen");
+     (id_movimiento, fecha, id_propiedad, id_tipo_operacion, nota, abono, cargo, origen)
+     VALUES (NULL, :fecha, :id_propiedad, :id_tipo_operacion, :nota, :abono, :cargo, :origen)");
 
     $consulta->bindParam(':fecha', $fecha);
     $consulta->bindParam(':id_propiedad', $id_propiedad);
@@ -118,7 +116,7 @@ include('../../templates/cabecera.php');
                     name="Nota"
                     id="Nota"
                     aria-describedby="helpId"
-                    placeholder="Descripcion" />
+                    placeholder="Nota" />
             </div>
 
             <div class="mb-3">

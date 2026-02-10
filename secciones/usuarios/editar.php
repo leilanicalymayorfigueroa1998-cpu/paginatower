@@ -9,9 +9,8 @@ if (isset($_GET['txtID'])) {
     $consulta->bindParam(':id', $txtID);
     $consulta->execute();
 
-    $user = $consulta->fetch(PDO::FETCH_LAZY);
+    $user = $consulta->fetch(PDO::FETCH_ASSOC);
     $usuario = $user['usuario'];
-    $contrasena = $user['contrasena'];
     $correo = $user['correo'];
     $rol = $user['rol'];
 }
@@ -24,28 +23,42 @@ if ($_POST) {
     $correo = isset($_POST['correo']) ? $_POST['correo'] : '';
     $rol = isset($_POST['rol']) ? $_POST['rol'] : '';
 
-    $accion = isset($_POST['accion']) ? $_POST['accion'] : '';
+    if (!empty($contrasena)) {
 
-    print_r($_POST);
+        // 🔐 Si escribió nueva contraseña, la encriptamos
+        $contrasena_hash = password_hash($contrasena, PASSWORD_DEFAULT);
 
-    $consulta = $conexionBD->prepare("UPDATE usuarios 
-        SET usuario =:usuario, 
+        $consulta = $conexionBD->prepare("UPDATE usuarios 
+            SET usuario =:usuario, 
                 contrasena = :contrasena,
                 correo = :correo,
                 rol = :rol
-                WHERE id=:id");
+            WHERE id=:id");
+
+        $consulta->bindParam(':contrasena', $contrasena_hash);
+    } else {
+
+        // ✨ Si NO escribió contraseña, no la tocamos
+        $consulta = $conexionBD->prepare("UPDATE usuarios 
+            SET usuario =:usuario, 
+                correo = :correo,
+                rol = :rol
+            WHERE id=:id");
+    }
 
     $consulta->bindParam(':usuario', $usuario);
-    $consulta->bindParam(':contrasena', $contrasena);
     $consulta->bindParam(':correo', $correo);
     $consulta->bindParam(':rol', $rol);
     $consulta->bindParam(':id', $txtID);
+
     $consulta->execute();
     header("Location:index.php");
 }
 
 
-include('../../templates/cabecera.php'); ?>
+include('../../templates/cabecera.php');
+
+?>
 
 <br />
 <div class="card">
@@ -57,13 +70,9 @@ include('../../templates/cabecera.php'); ?>
             <div class="mb-3">
                 <label for="" class="form-label">ID</label>
                 <input
-                    type="text"
-                    class="form-control"
-                    value="<?php echo $txtID; ?>"
+                    type="hidden"
                     name="txtID"
-                    id="txtID"
-                    aria-describedby="helpId"
-                    placeholder="ID" />
+                    value="<?php echo $txtID; ?>">
             </div>
 
             <div class="mb-3">
@@ -81,19 +90,16 @@ include('../../templates/cabecera.php'); ?>
             <div class="mb-3">
                 <label for="" class="form-label">Contraseña</label>
                 <input
-                    type="text"
+                    type="password"
                     class="form-control"
-                    value="<?php echo $contrasena ?>"
                     name="contrasena"
-                    id="contrasena"
-                    aria-describedby="helpId"
-                    placeholder="Contraseña" />
+                    placeholder="Nueva contraseña (opcional)" />
             </div>
 
             <div class="mb-3">
                 <label for="" class="form-label">Correo</label>
                 <input
-                    type="text"
+                    type="email"
                     class="form-control"
                     value="<?php echo $correo ?>"
                     name="correo"
@@ -103,15 +109,11 @@ include('../../templates/cabecera.php'); ?>
             </div>
 
             <div class="mb-3">
-                <label for="" class="form-label">Rol</label>
-                <input
-                    type="text"
-                    class="form-control"
-                    value="<?php echo $rol ?>"
-                    name="rol"
-                    id="rol"
-                    aria-describedby="helpId"
-                    placeholder="Rol" />
+                <select class="form-control" name="rol" id="rol">
+                    <option value="admin" <?php if ($rol == 'admin') echo 'selected'; ?>>Admin</option>
+                    <option value="dueno" <?php if ($rol == 'dueno') echo 'selected'; ?>>Dueño</option>
+                    <option value="cliente" <?php if ($rol == 'cliente') echo 'selected'; ?>>Cliente</option>
+                </select>
             </div>
 
             <button type="submit" name="accion" value="agregar" class="btn btn-success">Modificar</button>

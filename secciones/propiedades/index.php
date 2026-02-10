@@ -8,7 +8,8 @@ if (isset($_GET['txtID'])) {
     $consulta = $conexionBD->prepare("DELETE FROM propiedades WHERE id_propiedad = :id_propiedad");
     $consulta->bindParam(':id_propiedad', $txtID);
     $consulta->execute();
-    header("Location:index.php");
+    header("Location:index.php?mensaje=eliminado");
+    exit();
 }
 
 $consulta = $conexionBD->prepare("SELECT * FROM propiedades");
@@ -18,6 +19,28 @@ $listaPropiedades = $consulta->fetchAll(PDO::FETCH_ASSOC);
 include('../../templates/cabecera.php');
 
 ?>
+
+<?php if (isset($_GET['mensaje'])) { ?>
+
+    <?php if ($_GET['mensaje'] == "agregado") { ?>
+        <div class="alert alert-success">
+            Propiedad agregada correctamente ✅
+        </div>
+    <?php } ?>
+
+    <?php if ($_GET['mensaje'] == "editado") { ?>
+        <div class="alert alert-primary">
+            Propiedad  correctamente ✏️
+        </div>
+    <?php } ?>
+
+    <?php if ($_GET['mensaje'] == "eliminado") { ?>
+        <div class="alert alert-danger">
+            Propiedad eliminada correctamente 🗑️
+        </div>
+    <?php } ?>
+
+<?php } ?>
 
 <div class="card">
     <div class="card-header">
@@ -69,12 +92,11 @@ include('../../templates/cabecera.php');
                                     href="editar.php?txtID=<?php echo $value['id_propiedad']; ?>"
                                     role="button">Editar</a>
 
-                                <a
-                                    name=""
-                                    id=""
-                                    class="btn btn-danger"
+                                <a class="btn btn-danger"
                                     href="index.php?txtID=<?php echo $value['id_propiedad']; ?>"
-                                    role="button">Borrar</a>
+                                    onclick="return confirm('¿Estás segura de eliminar esta propiedad?');">
+                                    Borrar
+                                </a>
 
                             </td>
 
@@ -90,28 +112,5 @@ include('../../templates/cabecera.php');
     </div>
     <div class="card-footer text-muted"></div>
 </div>
-
-<style>
-    .table th,
-    .table td {
-        white-space: nowrap;
-        padding: 6px 10px;
-        font-size: 13px;
-        text-align: center;
-        vertical-align: middle !important;
-    }
-
-    /* Que los botones no se encimen */
-    .btn {
-        padding: 4px 10px;
-        font-size: 13px;
-    }
-
-    /* Para que la tabla no se vea aplastada */
-    .table-responsive {
-        max-height: 500px;
-        overflow: auto;
-    }
-</style>
 
 <?php include('../../templates/pie.php'); ?>

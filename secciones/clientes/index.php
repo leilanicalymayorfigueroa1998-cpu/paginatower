@@ -1,6 +1,7 @@
 <?php
 include('../../bd.php');
 
+
 if (isset($_GET['txtID'])) {
     $txtID = isset($_GET['txtID']) ? $_GET['txtID'] : '';
 
@@ -32,7 +33,7 @@ include('../../templates/cabecera.php');
 
     <div class="card-body">
         <div
-            class="table-responsive-sm">
+            class="table-responsive">
             <table
                 class="table">
                 <thead>
@@ -91,30 +92,7 @@ include('../../templates/cabecera.php');
 
     </div>
 
-
     <div class="card-footer text-muted"></div>
 </div>
 
-<style>
-    .table th,
-    .table td {
-        white-space: nowrap;
-        padding: 6px 10px;
-        font-size: 13px;
-        text-align: center;
-        vertical-align: middle !important;
-    }
-
-    /* Que los botones no se encimen */
-    .btn {
-        padding: 4px 10px;
-        font-size: 13px;
-    }
-
-    /* Para que la tabla no se vea aplastada */
-    .table-responsive {
-        max-height: 500px;
-        overflow: auto;
-    }
-</style>
 <?php include('../../templates/pie.php'); ?>

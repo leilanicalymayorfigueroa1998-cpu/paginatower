@@ -3,43 +3,39 @@
 include('../../bd.php');
 
 if ($_POST) {
-$txtID  = isset($_POST['txtID']) ? $_POST['txtID'] : '';
-$usuario = isset($_POST['usuario']) ? $_POST['usuario'] : '';
-$contrasena = isset($_POST['contrasena']) ? $_POST['contrasena'] : '';
-$correo = isset($_POST['correo']) ? $_POST['correo'] : '';
-$rol = isset($_POST['rol']) ? $_POST['rol'] : '';
 
-$consulta = $conexionBD->prepare("INSERT INTO usuarios (id, usuario, contrasena, correo, rol) 
-                  VALUES (NULL, :usuario, :contrasena, :correo, :rol)");
-            $consulta->bindParam(':usuario', $usuario);
-            $consulta->bindParam(':contrasena', $contrasena);
-            $consulta->bindParam(':correo', $correo);
-            $consulta->bindParam(':rol', $rol);
-            $consulta->execute();
-             header("Location:index.php");  
+    $usuario = isset($_POST['usuario']) ? $_POST['usuario'] : '';
+    $contrasena = isset($_POST['contrasena']) ? $_POST['contrasena'] : '';
+    $correo = isset($_POST['correo']) ? $_POST['correo'] : '';
+    $rol = isset($_POST['rol']) ? $_POST['rol'] : '';
 
+    if (!empty($usuario) && !empty($contrasena) && !empty($correo) && !empty($rol)) {
 
+        $contrasena_hash = password_hash($contrasena, PASSWORD_DEFAULT);
+
+        $consulta = $conexionBD->prepare("INSERT INTO usuarios 
+            (usuario, contrasena, correo, rol) 
+            VALUES (:usuario, :contrasena, :correo, :rol)");
+
+        $consulta->bindParam(':usuario', $usuario);
+        $consulta->bindParam(':contrasena', $contrasena_hash);
+        $consulta->bindParam(':correo', $correo);
+        $consulta->bindParam(':rol', $rol);
+        $consulta->execute();
+
+        header("Location:index.php");
+        exit();
+    }
 }
 
 include('../../templates/cabecera.php'); ?>
 
-<br/>
+<br />
 <div class="card">
     <div class="card-header">Datos del Usuario</div>
     <div class="card-body">
 
         <form action="" method="post">
-
-            <div class="mb-3">
-                <label for="" class="form-label">ID</label>
-                <input
-                    type="text"
-                    class="form-control"
-                    name="txtID"
-                    id="txtID"
-                    aria-describedby="helpId"
-                    placeholder="ID" />
-            </div>
 
             <div class="mb-3">
                 <label for="" class="form-label">Usuario</label>
@@ -53,38 +49,33 @@ include('../../templates/cabecera.php'); ?>
             </div>
 
             <div class="mb-3">
-                <label for="" class="form-label">Contraseña</label>
+                <label class="form-label">Contraseña</label>
                 <input
-                    type="text"
+                    type="password"
                     class="form-control"
                     name="contrasena"
                     id="contrasena"
-                    aria-describedby="helpId"
                     placeholder="Contraseña" />
             </div>
 
             <div class="mb-3">
                 <label for="" class="form-label">Correo</label>
                 <input
-                    type="text"
+                    type="email"
                     class="form-control"
                     name="correo"
                     id="correo"
-                   
                     aria-describedby="helpId"
                     placeholder="Correo" />
             </div>
 
-             <div class="mb-3">
+            <div class="mb-3">
                 <label for="" class="form-label">Rol</label>
-                <input
-                    type="text"
-                    class="form-control"
-                    name="rol"
-                    id="rol"
-                   
-                    aria-describedby="helpId"
-                    placeholder="Rol" />
+                <select class="form-control" name="rol">
+                    <option value="admin">Admin</option>
+                    <option value="dueno">Dueño</option>
+                    <option value="cliente">Cliente</option>
+                </select>
             </div>
 
             <button type="submit" name="accion" value="agregar" class="btn btn-success">Agregar</button>

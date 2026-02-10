@@ -12,26 +12,26 @@ if (isset($_GET['txtID'])) {
     $restri = $consulta->fetch(PDO::FETCH_LAZY);
     $id_restriccion = $restri['id_restriccion'];
     $id_local = $restri['id_local'];
-    $restricciones = $restri['restriccion'];
+    $restriccion = $restri['restriccion'];
 }
 
 if ($_POST) {
     $txtID  = isset($_POST['txtID']) ? $_POST['txtID'] : '';
     $id_local = isset($_POST['id_local']) ? $_POST['id_local'] : '';
-    $restricciones = isset($_POST['restricciones']) ? $_POST['restricciones'] : '';
+    $restriccion = isset($_POST['restriccion']) ? $_POST['restriccion'] : '';
 
     $accion = isset($_POST['accion']) ? $_POST['accion'] : '';
 
     print_r($_POST);
 
     $consulta = $conexionBD->prepare("UPDATE restricciones
-        SET id_restriccion = :id_restriccion,
-        restricciones = :restricciones
-        WHERE id_local =: id_local,");
+    SET id_local = :id_local,
+        restriccion = :restriccion
+    WHERE id_restriccion = :id_restriccion");
 
     $consulta->bindParam(':id_local', $id_local);
-    $consulta->bindParam(':restricciones', $restricciones);
-    $consulta->bindParam(':id_restricciones', $txtID);
+    $consulta->bindParam(':restriccion', $restriccion);
+    $consulta->bindParam(':id_restriccion', $txtID);
 
     $consulta->execute();
     header("Location:index.php");
@@ -79,11 +79,11 @@ include('../../templates/cabecera.php'); ?>
                 <input
                     type="text"
                     class="form-control"
-                    value="<?php echo $restricciones; ?>"
-                    name="restricciones"
-                    id="restricciones"
+                    value="<?php echo $restriccion; ?>"
+                    name="restriccion"
+                    id="restriccion"
                     aria-describedby="helpId"
-                    placeholder="Restricciones" />
+                    placeholder="Restriccion" />
             </div>
 
             <button type="submit" name="accion" value="agregar" class="btn btn-success">Modificar</button>

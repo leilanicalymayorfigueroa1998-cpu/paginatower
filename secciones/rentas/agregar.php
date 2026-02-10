@@ -18,8 +18,8 @@ if ($_POST) {
 
     $consulta = $conexionBD->prepare("INSERT INTO rentas (id_renta, id_local, id_cliente, renta,
   deposito, adicional, fecha_inicio, fecha_fin, metodo, estatus) 
-            VALUES (NULL, :id_renta, :id_local, :id_cliente, :renta,
-  :deposito, :adicional, :fecha_inicio, :fecha_fin, :metodo, :estatus");
+            VALUES (NULL, :id_local, :id_cliente, :renta,
+  :deposito, :adicional, :fecha_inicio, :fecha_fin, :metodo, :estatus)");
 
     $consulta->bindParam(':id_local', $id_local);
     $consulta->bindParam(':id_cliente', $id_cliente);
@@ -98,8 +98,8 @@ include('../../templates/cabecera.php');
                 <input
                     type="text"
                     class="form-control"
-                    name="renta_mensual"
-                    id="renta_mensual"
+                    name="renta"
+                    id="renta"
                     aria-describedby="helpId"
                     placeholder="Renta" />
             </div>
