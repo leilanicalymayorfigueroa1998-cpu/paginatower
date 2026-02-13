@@ -1,3 +1,44 @@
+<?php
+session_start();
+include("bd.php");
+
+$mensaje = "";
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+    $usuario = trim($_POST['usuario'] ?? '');
+    $contrasena = trim($_POST['contrasena'] ?? '');
+
+    if (!empty($usuario) && !empty($contrasena)) {
+
+        $consulta = $conexionBD->prepare("SELECT u.*, r.nombre AS nombre_rol
+            FROM usuarios u
+            JOIN roles r ON u.id_rol = r.id_rol
+            WHERE u.usuario = :usuario");
+
+        $consulta->bindParam(":usuario", $usuario);
+        $consulta->execute();
+
+        $usuarioBD = $consulta->fetch(PDO::FETCH_ASSOC);
+
+        if ($usuarioBD && password_verify($contrasena, $usuarioBD['contrasena'])) {
+
+            $_SESSION['id'] = $usuarioBD['id'];
+            $_SESSION['usuario'] = $usuarioBD['usuario'];
+            $_SESSION['id_rol'] = $usuarioBD['id_rol'];
+            $_SESSION['rol'] = $usuarioBD['nombre_rol']; // solo visual
+
+            header("Location: index.php");
+            exit();
+        } else {
+            $mensaje = "Usuario o contraseña incorrectos";
+        }
+    } else {
+        $mensaje = "Todos los campos son obligatorios";
+    }
+}
+?>
+
 
 <!doctype html>
 <html lang="en">

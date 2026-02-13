@@ -12,47 +12,72 @@ if (isset($_GET['txtID'])) {
     $user = $consulta->fetch(PDO::FETCH_ASSOC);
     $usuario = $user['usuario'];
     $correo = $user['correo'];
-    $rol = $user['rol'];
+    $id_rol = $user['id_rol'];
+    $id_cliente = $user['id_cliente'];
+    $id_dueno = $user['id_dueno'];
 }
 
 if ($_POST) {
 
-    $txtID  = isset($_POST['txtID']) ? $_POST['txtID'] : '';
-    $usuario = isset($_POST['usuario']) ? $_POST['usuario'] : '';
-    $contrasena = isset($_POST['contrasena']) ? $_POST['contrasena'] : '';
-    $correo = isset($_POST['correo']) ? $_POST['correo'] : '';
-    $rol = isset($_POST['rol']) ? $_POST['rol'] : '';
+    $txtID  = $_POST['txtID'] ?? '';
+    $usuario = $_POST['usuario'] ?? '';
+    $contrasena = $_POST['contrasena'] ?? '';
+    $correo = $_POST['correo'] ?? '';
+    $id_rol = $_POST['id_rol'] ?? '';
 
+    $id_cliente = null;
+    $id_dueno = null;
+
+    if ($id_rol == 3) { // Arrendatario
+        if (empty($_POST['id_cliente'])) {
+            die("Debe seleccionar un arrendatario.");
+        }
+        $id_cliente = $_POST['id_cliente'];
+    }
+
+    if ($id_rol == 2) { // Dueño
+        if (empty($_POST['id_dueno'])) {
+            die("Debe seleccionar un dueño.");
+        }
+        $id_dueno = $_POST['id_dueno'];
+    }
+
+    // 🔐 Si escribió nueva contraseña
     if (!empty($contrasena)) {
 
-        // 🔐 Si escribió nueva contraseña, la encriptamos
         $contrasena_hash = password_hash($contrasena, PASSWORD_DEFAULT);
 
         $consulta = $conexionBD->prepare("UPDATE usuarios 
             SET usuario =:usuario, 
                 contrasena = :contrasena,
                 correo = :correo,
-                rol = :rol
+                id_rol = :id_rol,
+                id_cliente = :id_cliente,
+                id_dueno = :id_dueno
             WHERE id=:id");
 
         $consulta->bindParam(':contrasena', $contrasena_hash);
     } else {
 
-        // ✨ Si NO escribió contraseña, no la tocamos
         $consulta = $conexionBD->prepare("UPDATE usuarios 
             SET usuario =:usuario, 
                 correo = :correo,
-                rol = :rol
+                id_rol = :id_rol,
+                id_cliente = :id_cliente,
+                id_dueno = :id_dueno
             WHERE id=:id");
     }
 
     $consulta->bindParam(':usuario', $usuario);
     $consulta->bindParam(':correo', $correo);
-    $consulta->bindParam(':rol', $rol);
+    $consulta->bindParam(':id_rol', $id_rol);
+    $consulta->bindParam(':id_cliente', $id_cliente);
+    $consulta->bindParam(':id_dueno', $id_dueno);
     $consulta->bindParam(':id', $txtID);
 
     $consulta->execute();
     header("Location:index.php");
+    exit();
 }
 
 
@@ -80,7 +105,7 @@ include('../../templates/cabecera.php');
                 <input
                     type="text"
                     class="form-control"
-                    value="<?php echo $usuario ?>"
+                   value="<?php echo htmlspecialchars($usuario); ?>"
                     name="usuario"
                     id="usuario"
                     aria-describedby="helpId"
@@ -101,7 +126,7 @@ include('../../templates/cabecera.php');
                 <input
                     type="email"
                     class="form-control"
-                    value="<?php echo $correo ?>"
+                    vvalue="<?php echo htmlspecialchars($correo); ?>"
                     name="correo"
                     id="correo"
                     aria-describedby="helpId"
@@ -109,10 +134,52 @@ include('../../templates/cabecera.php');
             </div>
 
             <div class="mb-3">
-                <select class="form-control" name="rol" id="rol">
-                    <option value="admin" <?php if ($rol == 'admin') echo 'selected'; ?>>Admin</option>
-                    <option value="dueno" <?php if ($rol == 'dueno') echo 'selected'; ?>>Dueño</option>
-                    <option value="cliente" <?php if ($rol == 'cliente') echo 'selected'; ?>>Cliente</option>
+                <label class="form-label">Rol</label>
+                <select name="id_rol" class="form-select">
+
+                    <?php
+                    $roles = $conexionBD->query("SELECT * FROM roles")->fetchAll(PDO::FETCH_ASSOC);
+                    foreach ($roles as $rol_item) {
+                        $selected = ($rol_item['id_rol'] == $id_rol) ? "selected" : "";
+                        echo "<option value='{$rol_item['id_rol']}' $selected>
+                    {$rol_item['nombre']}
+                  </option>";
+                    }
+                    ?>
+
+                </select>
+            </div>
+
+
+            <div class="mb-3" id="grupo_cliente">
+                <label class="form-label">Seleccionar Arrendatario</label>
+                <select name="id_cliente" class="form-select">
+                    <option value="">Seleccione arrendatario</option>
+                    <?php
+                    $consultaClientes = $conexionBD->prepare("SELECT id_cliente, nombre FROM clientes");
+                    $consultaClientes->execute();
+                    $clientes = $consultaClientes->fetchAll(PDO::FETCH_ASSOC);
+                    foreach ($clientes as $cliente) {
+                        $selected = ($cliente['id_cliente'] == $id_cliente) ? "selected" : "";
+                        echo "<option value='{$cliente['id_cliente']}' $selected>{$cliente['nombre']}</option>";
+                    }
+                    ?>
+                </select>
+            </div>
+
+            <div class="mb-3" id="grupo_dueno">
+                <label class="form-label">Seleccionar Dueño</label>
+               <select name="id_dueno" class="form-select">
+                    <option value="">Seleccione dueño</option>
+                    <?php
+                    $consultaDuenos = $conexionBD->prepare("SELECT id_dueno, nombre FROM duenos");
+                    $consultaDuenos->execute();
+                    $duenos = $consultaDuenos->fetchAll(PDO::FETCH_ASSOC);
+                    foreach ($duenos as $dueno) {
+                        $selected = ($dueno['id_dueno'] == $id_dueno) ? "selected" : "";
+                        echo "<option value='{$dueno['id_dueno']}' $selected>{$dueno['nombre']}</option>";
+                    }
+                    ?>
                 </select>
             </div>
 
@@ -135,5 +202,7 @@ include('../../templates/cabecera.php');
     </div>
 
 </div>
+
+<script src="../../assets/js/usuarios.js"></script>
 
 <?php include('../../templates/pie.php'); ?>

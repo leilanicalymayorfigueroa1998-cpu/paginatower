@@ -1,8 +1,12 @@
 <?php
 
-include('../../bd.php');
+include('../../bd.php');  // CONEXIÓN A LA BASE DE DATOS
+
+// CUANDO SE ENVÍA EL FORMULARIO
 
 if ($_POST) {
+
+    // Recibimos los datos enviados por el formulario
     $txtID  = isset($_POST['txtID']) ? $_POST['txtID'] : '';
     $id_local = isset($_POST['id_local']) ? $_POST['id_local'] : '';
     $id_cliente = isset($_POST['id_cliente']) ? $_POST['id_cliente'] : '';
@@ -14,13 +18,13 @@ if ($_POST) {
     $metodo = isset($_POST['metodo']) ? $_POST['metodo'] : '';
     $estatus = isset($_POST['estatus']) ? $_POST['estatus'] : '';
 
-    $accion = isset($_POST['accion']) ? $_POST['accion'] : '';
-
+    // Preparamos la consulta para insertar en la tabla rentas
     $consulta = $conexionBD->prepare("INSERT INTO rentas (id_renta, id_local, id_cliente, renta,
   deposito, adicional, fecha_inicio, fecha_fin, metodo, estatus) 
             VALUES (NULL, :id_local, :id_cliente, :renta,
   :deposito, :adicional, :fecha_inicio, :fecha_fin, :metodo, :estatus)");
 
+    // Vinculamos cada valor recibido del formulario
     $consulta->bindParam(':id_local', $id_local);
     $consulta->bindParam(':id_cliente', $id_cliente);
     $consulta->bindParam(':renta', $renta);
@@ -30,17 +34,18 @@ if ($_POST) {
     $consulta->bindParam(':fecha_fin', $fecha_fin);
     $consulta->bindParam(':metodo', $metodo);
     $consulta->bindParam(':estatus', $estatus);
-    $consulta->execute();
+    $consulta->execute();  // Ejecutamos la inserción
 
-    header("Location:index.php");
+    header("Location:index.php"); // Redirigimos al listado después de guardar
+    exit();
 }
 
-// Locales
+//CARGAR LOCALES
 $consultaLocales = $conexionBD->prepare("SELECT id_local, codigo FROM locales");
 $consultaLocales->execute();
 $listaLocales = $consultaLocales->fetchAll(PDO::FETCH_ASSOC);
 
-// Clientes
+//CARGAR CLIENTES
 $consultaClientes = $conexionBD->prepare("SELECT id_cliente, nombre FROM clientes");
 $consultaClientes->execute();
 $listaClientes = $consultaClientes->fetchAll(PDO::FETCH_ASSOC);
@@ -82,9 +87,9 @@ include('../../templates/cabecera.php');
             </div>
 
             <div class="mb-3">
-                <label class="form-label">Cliente</label>
+                <label class="form-label">Arrendatario</label>
                 <select name="id_cliente" class="form-control" required>
-                    <option value="">-- Selecciona un cliente --</option>
+                    <option value="">-- Selecciona un Arrendatario--</option>
                     <?php foreach ($listaClientes as $cliente) { ?>
                         <option value="<?php echo $cliente['id_cliente']; ?>">
                             <?php echo $cliente['nombre']; ?>

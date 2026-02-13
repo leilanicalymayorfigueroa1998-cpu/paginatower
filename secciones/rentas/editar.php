@@ -1,15 +1,20 @@
 <?php
 
-include('../../bd.php');
+include('../../bd.php'); // CONEXIÓN A BASE DE DATOS
 
-if (isset($_GET['txtID'])) {
-    $txtID = isset($_GET['txtID']) ? $_GET['txtID'] : '';
+// CARGAR DATOS PARA EDITAR
 
-    $consulta = $conexionBD->prepare("SELECT * FROM rentas WHERE id_renta=:id_renta");
-    $consulta->bindParam(':id_renta', $txtID);
-    $consulta->execute();
+if (isset($_GET['txtID'])) {  // Si viene un ID por la URL (ej: editar.php?txtID=3)
 
-    $ren = $consulta->fetch(PDO::FETCH_LAZY);
+    $txtID = isset($_GET['txtID']) ? $_GET['txtID'] : ''; // Guardamos el ID recibido
+
+    // Buscamos la renta correspondiente en la base de datos
+    $consulta = $conexionBD->prepare("SELECT * FROM rentas WHERE id_renta = :id_renta");
+    $consulta->bindParam(':id_renta', $txtID);       // Vinculamos el parámetro
+    $consulta->execute();                            // Ejecutamos la consulta
+    $ren = $consulta->fetch(PDO::FETCH_LAZY);        // Guardamos el resultado
+
+    // Asignamos cada campo a una variable
     $id_local = $ren['id_local'];
     $id_cliente = $ren['id_cliente'];
     $renta = $ren['renta'];
@@ -21,7 +26,11 @@ if (isset($_GET['txtID'])) {
     $estatus = $ren['estatus'];
 }
 
+// ACTUALIZAR DATOS (CUANDO SE ENVÍA EL FORMULARIO)
+
 if ($_POST) {
+
+    // Recibimos datos del formulario
     $txtID  = isset($_POST['txtID']) ? $_POST['txtID'] : '';
     $id_local = isset($_POST['id_local']) ? $_POST['id_local'] : '';
     $id_cliente = isset($_POST['id_cliente']) ? $_POST['id_cliente'] : '';
@@ -32,22 +41,21 @@ if ($_POST) {
     $fecha_fin = isset($_POST['fecha_fin']) ? $_POST['fecha_fin'] : '';
     $metodo = isset($_POST['metodo']) ? $_POST['metodo'] : '';
     $estatus = isset($_POST['estatus']) ? $_POST['estatus'] : '';
-    $accion = isset($_POST['accion']) ? $_POST['accion'] : '';
 
-    print_r($_POST);
-
+    // Preparamos consulta para actualizar
     $consulta = $conexionBD->prepare("UPDATE rentas SET
-                id_local = :id_local,
-                id_cliente = :id_cliente,
-                renta = :renta,
-                deposito = :deposito,
-                adicional = :adicional,
-                fecha_inicio = :fecha_inicio,
-                fecha_fin = :fecha_fin,
-                metodo = :metodo,
-                estatus = :estatus
-                WHERE id_renta = :id_renta");
+            id_local = :id_local,
+            id_cliente = :id_cliente,
+            renta = :renta,
+            deposito = :deposito,
+            adicional = :adicional,
+            fecha_inicio = :fecha_inicio,
+            fecha_fin = :fecha_fin,
+            metodo = :metodo,
+            estatus = :estatus
+        WHERE id_renta = :id_renta ");
 
+    // Vinculamos todos los parámetros
     $consulta->bindParam(':id_local', $id_local);
     $consulta->bindParam(':id_cliente', $id_cliente);
     $consulta->bindParam(':renta', $renta);
@@ -58,22 +66,22 @@ if ($_POST) {
     $consulta->bindParam(':metodo', $metodo);
     $consulta->bindParam(':estatus', $estatus);
     $consulta->bindParam(':id_renta', $txtID);
-
-    $consulta->execute();
-    header("Location:index.php");
+    $consulta->execute();   // Ejecutamos actualización
+    header("Location:index.php");  // Redirigimos al listado
+    exit();
 }
 
-// Locales
+// CARGAR LISTA DE LOCALES
 $consultaLocales = $conexionBD->prepare("SELECT id_local, codigo FROM locales");
 $consultaLocales->execute();
 $listaLocales = $consultaLocales->fetchAll(PDO::FETCH_ASSOC);
 
-// Clientes
+// CARGAR LISTA DE CLIENTES
 $consultaClientes = $conexionBD->prepare("SELECT id_cliente, nombre FROM clientes");
 $consultaClientes->execute();
 $listaClientes = $consultaClientes->fetchAll(PDO::FETCH_ASSOC);
 
-include('../../templates/cabecera.php');
+include('../../templates/cabecera.php'); // Incluimos cabecera visual
 
 ?>
 
@@ -109,7 +117,7 @@ include('../../templates/cabecera.php');
             </div>
 
             <div class="mb-3">
-                <label class="form-label">Cliente</label>
+                <label class="form-label">Arrendatario</label>
                 <select name="id_cliente" class="form-control" required>
                     <?php foreach ($listaClientes as $cliente) { ?>
                         <option value="<?php echo $cliente['id_cliente']; ?>"

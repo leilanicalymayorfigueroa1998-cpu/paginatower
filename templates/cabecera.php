@@ -1,54 +1,122 @@
 <?php
-$url_base = "http://localhost/paginatower/";
+include(__DIR__ . '/../includes/auth.php');
+include(__DIR__ . '/../includes/helpers.php');
+
+$rol = $_SESSION['rol'] ?? '';
+$color = obtenerColorRol($rol);
+
+$idUsuario = $_SESSION['id'] ?? null;  // Asegurar que exista el ID del usuario
+$totalAlertas = 0;  // Inicializar contador
+
+if ($idUsuario) {
+
+    include(__DIR__ . '/../alertas/alertas_automaticas.php');  // Ejecutar alertas automáticas
+
+    // Contar alertas no leídas
+    $consultaAlertas = $conexionBD->prepare("SELECT COUNT(*) 
+        FROM alertas 
+        WHERE id_usuario = :id 
+        AND leida = 0 ");
+
+    $consultaAlertas->bindParam(':id', $idUsuario);
+    $consultaAlertas->execute();
+    $totalAlertas = $consultaAlertas->fetchColumn();
+}
 ?>
 
 <!doctype html>
-<html lang="en">
+<html lang="es">
 
 <head>
-    <title>Title</title>
-    <!-- Required meta tags -->
-    <meta charset="utf-8" />
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Sistema Inmobiliario Tower</title>
 
-    <!-- Bootstrap CSS v5.2.1 -->
-    <link
-        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
-        rel="stylesheet"
-        integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
-        crossorigin="anonymous" />
-
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"
-        integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
-        crossorigin="anonymous"></script>
-
-    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/2.3.6/css/dataTables.dataTables.min.css">
-
-    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/2.3.6/js/dataTables.min.js"></script>
-
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
+    <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
+    <!-- DataTables -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/2.3.6/css/dataTables.dataTables.min.css">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <!-- Estilos propios -->
     <link rel="stylesheet" href="<?php echo $url_base; ?>assets/css/cabecera.css">
     <link rel="stylesheet" href="<?php echo $url_base; ?>assets/css/tablas.css">
 
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.datatables.net/2.3.6/js/dataTables.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 
 <body>
 
+    <!-- ===== TOPBAR ===== -->
+    <div class="topbar">
+        <div class="page-title">
+            🏢 Sistema Tower
+        </div>
+
+        <div class="top-icons">
+
+            <!-- ===== MENSAJES ===== -->
+            <a href="#"><i class="fas fa-comment"></i></a>
+
+            <!-- ===== ALERTAS ===== -->
+            <a href="<?php echo $url_base . 'alertas/'; ?>" class="notification">
+                <i class="fas fa-bell"></i>
+
+                <?php if ($totalAlertas > 0): ?>
+                    <span class="badge"><?php echo $totalAlertas; ?></span>
+                <?php endif; ?>
+            </a>
+
+            <!-- ===== USUARIOS ===== -->
+            <div class="dropdown">
+                <a href="#" class="text-white dropdown-toggle" data-bs-toggle="dropdown">
+                    <i class="fas fa-user"></i>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end shadow border-0">
+                    <li class="dropdown-item text-muted small">
+                        <?php echo $_SESSION['usuario']; ?>
+                    </li>
+                    <li>
+                        <hr class="dropdown-divider">
+                    </li>
+                    <li>
+                        <a class="dropdown-item text-danger fw-semibold"
+                            href="<?php echo $url_base; ?>cerrar.php">
+                            <i class="fas fa-sign-out-alt me-2"></i> Cerrar sesión
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- ===== SIDEBAR ===== -->
     <div class="sidebar">
 
-        <h4>🏢 Sistema Tower</h4>
+        <!-- Usuario -->
+        <div class="user-panel">
+            <div class="user-avatar" style="background-color: <?php echo $color; ?>;">
+                <?php echo strtoupper(substr($_SESSION['usuario'], 0, 1)); ?>
+            </div>
+            <div class="user-info">
+                <div class="user-name"><?php echo $_SESSION['usuario']; ?></div>
+                <div class="user-role"><?php echo ucfirst($rol); ?></div>
+            </div>
+        </div>
 
+        <!-- Menú -->
         <a href="#">📊 Dashboard</a>
-        <a href="<?php echo $url_base; ?>/secciones/movimientos/">🧾 Administracion</a>
-        <a href="javascript:void(0)" onclick="togglePropiedades()">
-            🏠 Propiedades
-        </a>
+        <a href="<?php echo $url_base; ?>/secciones/movimientos/">🧾 Administración</a>
 
+        <a href="javascript:void(0)" onclick="togglePropiedades()">🏠 Propiedades</a>
         <div class="submenu" id="submenuPropiedades">
             <a href="<?php echo $url_base; ?>/secciones/propiedades/">🏠 Propiedades</a>
             <a href="<?php echo $url_base; ?>/secciones/locales/">🏢 Locales</a>
@@ -58,22 +126,11 @@ $url_base = "http://localhost/paginatower/";
 
         <a href="<?php echo $url_base; ?>/secciones/rentas/">📄 Rentas</a>
         <a href="<?php echo $url_base; ?>/secciones/pagos/">💳 Pagos</a>
-
         <a href="<?php echo $url_base; ?>/secciones/dueños/">👤 Dueños</a>
-        <a href="<?php echo $url_base; ?>/secciones/clientes/">👥 Clientes</a>
+        <a href="<?php echo $url_base; ?>/secciones/arrendatario/"> 🏘️ Arrendatario</a>
         <a href="<?php echo $url_base; ?>/secciones/usuarios/">⚙ Usuarios</a>
-
-        <a href="#" style="position:absolute; bottom:20px; color:#f87171;">
-            🚪 Cerrar sesión
-        </a>
     </div>
 
-    <script>
-        function togglePropiedades() {
-            const menu = document.getElementById("submenuPropiedades");
-            menu.style.display = menu.style.display === "block" ? "none" : "block";
-        }
-    </script>
-
+    <!-- ===== CONTENIDO ===== -->
     <div class="content">
         <div class="container-fluid">
