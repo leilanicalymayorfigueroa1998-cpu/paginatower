@@ -61,7 +61,7 @@ include('../../templates/cabecera.php');
 ?>
 
 <div class="card">
-    <div class="card-header">Clientes</div>
+    <div class="card-header">Arrendatario</div>
     <div class="card-body">
 
         <form action="" method="post">
@@ -95,7 +95,7 @@ include('../../templates/cabecera.php');
             <div class="mb-3">
                 <label for="" class="form-label">Telefono</label>
                 <input
-                    type="text"
+                    type="tel"
                     class="form-control"
                     value="<?php echo $telefono; ?>"
                     name="telefono"
@@ -107,7 +107,7 @@ include('../../templates/cabecera.php');
             <div class="mb-3">
                 <label for="" class="form-label">Correo</label>
                 <input
-                    type="text"
+                    type="email"
                     class="form-control"
                     value="<?php echo $correo; ?>"
                     name="correo"
@@ -131,7 +131,7 @@ include('../../templates/cabecera.php');
             <div class="mb-3">
                 <label for="" class="form-label">Correo Aval</label>
                 <input
-                    type="text"
+                    type="email"
                     class="form-control"
                     value="<?php echo $correoaval; ?>"
                     name="correoaval"

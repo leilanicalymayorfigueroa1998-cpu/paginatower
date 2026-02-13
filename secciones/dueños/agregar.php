@@ -52,7 +52,7 @@ include('../../templates/cabecera.php'); ?>
                     <div class="mb-3">
                         <label for="" class="form-label">Telefono</label>
                         <input
-                            type="text"
+                            type="tel"
                             class="form-control"
                             name="telefono"
                             id="telefono"
@@ -64,7 +64,7 @@ include('../../templates/cabecera.php'); ?>
                     <div class="mb-3">
                         <label for="" class="form-label">Correo</label>
                         <input
-                            type="text"
+                            type="email"
                             class="form-control"
                             name="correo"
                             id="correo"

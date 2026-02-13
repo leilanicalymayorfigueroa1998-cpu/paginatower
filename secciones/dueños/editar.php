@@ -44,79 +44,79 @@ if ($_POST) {
 include('../../templates/cabecera.php'); ?>
 
 
-        <div class="card">
-            <div class="card-header">Dueños</div>
-            <div class="card-body">
+<div class="card">
+    <div class="card-header">Dueños</div>
+    <div class="card-body">
 
-                <form action="" method="post">
+        <form action="" method="post">
 
-                    <div class="mb-3">
-                        <label for="" class="form-label">ID</label>
-                        <input
-                            type="text"
-                            class="form-control"
-                            value="<?php echo $txtID; ?>"
-                            name="txtID"
-                            id="txtID"
-                            aria-describedby="helpId"
-                            placeholder="ID" />
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="" class="form-label">Nombre</label>
-                        <input
-                            type="text"
-                            class="form-control"
-                            value="<?php echo $nombre ?>"
-                            name="nombre"
-                            id="nombre"
-                            aria-describedby="helpId"
-                            placeholder="Nombre" />
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="" class="form-label">Telefono</label>
-                        <input
-                            type="text"
-                            class="form-control"
-                            value="<?php echo $telefono ?>"
-                            name="telefono"
-                            id="telefono"
-                            aria-describedby="helpId"
-                            placeholder="Telefono" />
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="" class="form-label">Correo</label>
-                        <input
-                            type="text"
-                            class="form-control"
-                            value="<?php echo $correo ?>"
-                            name="correo"
-                            id="correo"
-                            aria-describedby="helpId"
-                            placeholder="Correo" />
-                    </div>
-
-                    <button type="submit" name="accion" value="agregar" class="btn btn-success">Modificar</button>
-                    <a
-                        name=""
-                        id=""
-                        class="btn btn-primary"
-                        href="index.php"
-                        role="button">Cancelar</a>
-
-
-                </form>
-
+            <div class="mb-3">
+                <label for="" class="form-label">ID</label>
+                <input
+                    type="text"
+                    class="form-control"
+                    value="<?php echo $txtID; ?>"
+                    name="txtID"
+                    id="txtID"
+                    aria-describedby="helpId"
+                    placeholder="ID" />
             </div>
 
-            <div class="card-footer text-muted">
-
-
+            <div class="mb-3">
+                <label for="" class="form-label">Nombre</label>
+                <input
+                    type="text"
+                    class="form-control"
+                    value="<?php echo $nombre ?>"
+                    name="nombre"
+                    id="nombre"
+                    aria-describedby="helpId"
+                    placeholder="Nombre" />
             </div>
 
-        </div>
+            <div class="mb-3">
+                <label for="" class="form-label">Telefono</label>
+                <input
+                    type="tel"
+                    class="form-control"
+                    value="<?php echo $telefono ?>"
+                    name="telefono"
+                    id="telefono"
+                    aria-describedby="helpId"
+                    placeholder="Telefono" />
+            </div>
+
+            <div class="mb-3">
+                <label for="" class="form-label">Correo</label>
+                <input
+                    type="email"
+                    class="form-control"
+                    value="<?php echo $correo ?>"
+                    name="correo"
+                    id="correo"
+                    aria-describedby="helpId"
+                    placeholder="Correo" />
+            </div>
+
+            <button type="submit" name="accion" value="agregar" class="btn btn-success">Modificar</button>
+            <a
+                name=""
+                id=""
+                class="btn btn-primary"
+                href="index.php"
+                role="button">Cancelar</a>
+
+
+        </form>
+
+    </div>
+
+    <div class="card-footer text-muted">
+
+
+    </div>
+
+</div>
 
 
 <?php include('../../templates/pie.php'); ?>

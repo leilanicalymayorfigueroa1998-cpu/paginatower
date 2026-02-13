@@ -35,6 +35,9 @@
     });
 </script>
 
+<script src="/paginatower/js/usuarios.js"></script>
+
+
 </body>
 
 </html>

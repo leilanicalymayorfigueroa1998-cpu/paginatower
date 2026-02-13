@@ -1,13 +1,21 @@
-table.dataTable th,
+/* ===============================
+ESTILO GENERAL DE TABLAS (DataTables)
+=============================== */
+
+table.dataTable th, 
 table.dataTable td {
-    white-space: nowrap !important;
-    padding: 6px 10px !important;
-    font-size: 13px !important;
-    text-align: center !important;
-    vertical-align: middle !important;
+    white-space: nowrap !important;    /* Evita que el texto se divida en varias líneas */
+    padding: 6px 10px !important;      /* Reduce el espacio interno para que la tabla sea más compacta */
+    font-size: 13px !important;        /* Tamaño de letra más pequeño */
+    text-align: center !important;     /* Centra el contenido horizontalmente */
+    vertical-align: middle !important; /* Centra el contenido verticalmente */
 }
 
+ /* ===============================
+   BOTONES DENTRO DE LA TABLA
+=============================== */
+
 table.dataTable .btn {
-    padding: 4px 10px !important;
-    font-size: 13px !important;
+    padding: 4px 10px !important;  /* Botones más pequeños y compactos */
+    font-size: 13px !important;    /* Texto más pequeño en botones */
 }
