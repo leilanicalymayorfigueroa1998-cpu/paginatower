@@ -4,8 +4,8 @@ require_once(__DIR__ . '/../bd.php');
 $hoy = date('Y-m-d');
 $tres_dias = date('Y-m-d', strtotime('+3 days'));
 
-$consulta = $conexionBD->prepare("SELECT id_renta, id_cliente, id_local, fecha_fin
-    FROM rentas
+$consulta = $conexionBD->prepare("SELECT id_contrato, id_cliente, id_local, fecha_fin
+    FROM contratos
     WHERE estatus = 'Activa'
     AND fecha_fin BETWEEN :hoy AND :tres_dias");
 
@@ -27,7 +27,7 @@ foreach ($rentas as $renta) {
         AND tipo = 'renta'
         AND id_usuario = :usuario");
 
-    $existe->bindParam(':id_renta', $renta['id_renta']);
+    $existe->bindParam(':id_contrato', $renta['id_contrato']);
     $existe->bindParam(':usuario', $renta['id_cliente']);
     $existe->execute();
 
@@ -45,7 +45,7 @@ foreach ($rentas as $renta) {
         $insertar->bindParam(':titulo', $titulo);
         $insertar->bindParam(':mensaje', $mensaje);
         $insertar->bindParam(':tipo', $tipo);
-        $insertar->bindParam(':ref', $renta['id_renta']);
+        $insertar->bindParam(':ref', $renta['id_contrato']);
 
         $insertar->execute();
     }

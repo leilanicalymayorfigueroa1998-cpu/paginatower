@@ -1,5 +1,6 @@
 <?php
-
+include('../../includes/auth.php');
+include('../../includes/helpers.php');
 include('../../bd.php');
 
 if ($_POST) {
@@ -23,8 +24,13 @@ $consultaLocales = $conexionBD->prepare("SELECT id_local, codigo  FROM locales")
 $consultaLocales->execute();
 $listaLocales = $consultaLocales->fetchAll(PDO::FETCH_ASSOC);
 
-include('../../templates/cabecera.php'); ?>
+include('../../templates/cabecera.php');
+include('../../templates/topbar.php');
+include('../../templates/sidebar.php');
 
+?>
+
+<div class="main-content">
 
 <div class="card">
     <div class="card-header">Servicios</div>
@@ -90,9 +96,6 @@ include('../../templates/cabecera.php'); ?>
         </form>
 
     </div>
-
-    <div class="card-footer text-muted">
-
 
     </div>
 

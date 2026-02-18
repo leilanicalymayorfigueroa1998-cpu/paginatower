@@ -19,3 +19,7 @@ table.dataTable .btn {
     padding: 4px 10px !important;  /* Botones más pequeños y compactos */
     font-size: 13px !important;    /* Texto más pequeño en botones */
 }
+
+table.dataTable {
+    width: 100% !important;
+}

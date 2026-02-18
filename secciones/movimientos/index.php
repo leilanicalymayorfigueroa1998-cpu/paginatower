@@ -1,5 +1,6 @@
 <?php
-
+include('../../includes/auth.php');
+include('../../includes/helpers.php');
 include('../../bd.php');
 
 if (isset($_GET['txtID'])) {
@@ -35,65 +36,70 @@ $consulta->execute();
 $listaMovimientos = $consulta->fetchAll(PDO::FETCH_ASSOC);
 
 include('../../templates/cabecera.php');
+include('../../templates/topbar.php');
+include('../../templates/sidebar.php');
 
 ?>
 
-<div class="card">
-    <div class="card-header">
+<div class="main-content">
 
-        <a
-            name=""
-            id=""
-            class="btn btn-success"
-            href="agregar.php"
-            role="button">Agregar</a>
-    </div>
 
-    <div class="card-body">
-        <div
-            class="table-responsive">
-            <table
-                class="table">
-                <thead>
+    <div class="card">
+        <div class="card-header">
 
-                    <tr>
-                        <th>ID</th>
-                        <th>Fecha</th>
-                        <th>Propiedad</th>
-                        <th>Operacion</th>
-                        <th>Nota</th>
-                        <th>Abono</th>
-                        <th>Cargo</th>
-                        <th>Origen</th>
-                        <th>Acciones</th>
-                    </tr>
-
-                </thead>
-
-                <tbody>
-                    <?php foreach ($listaMovimientos as $mov) { ?>
-                        <tr>
-                            <td><?= $mov['id_movimiento'] ?></td>
-                            <td><?= $mov['fecha'] ?></td>
-                            <td><?= $mov['propiedad'] ?></td>
-                            <td><?= $mov['operacion'] ?></td>
-                            <td><?= $mov['nota'] ?></td>
-                            <td><?= number_format($mov['abono'], 2) ?></td>
-                            <td><?= number_format($mov['cargo'], 2) ?></td>
-                            <td><?= $mov['origen'] ?></td>
-                            <td>
-                                <a class="btn btn-primary btn-sm" href="editar.php?txtID=<?= $mov['id_movimiento'] ?>">Editar</a>
-                                <a class="btn btn-danger btn-sm" href="index.php?txtID=<?= $mov['id_movimiento'] ?>">Borrar</a>
-                            </td>
-                        </tr>
-                    <?php } ?>
-
-                </tbody>
-            </table>
+            <a
+                name=""
+                id=""
+                class="btn btn-success"
+                href="agregar.php"
+                role="button">Agregar</a>
         </div>
 
+        <div class="card-body">
+            <div
+                class="table-responsive">
+                <table
+                    class="table">
+                    <thead>
+
+                        <tr>
+                            <th>ID</th>
+                            <th>Fecha</th>
+                            <th>Propiedad</th>
+                            <th>Operacion</th>
+                            <th>Nota</th>
+                            <th>Abono</th>
+                            <th>Cargo</th>
+                            <th>Origen</th>
+                            <th>Acciones</th>
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+                        <?php foreach ($listaMovimientos as $mov) { ?>
+                            <tr>
+                                <td><?= $mov['id_movimiento'] ?></td>
+                                <td><?= $mov['fecha'] ?></td>
+                                <td><?= $mov['propiedad'] ?></td>
+                                <td><?= $mov['operacion'] ?></td>
+                                <td><?= $mov['nota'] ?></td>
+                                <td><?= number_format($mov['abono'], 2) ?></td>
+                                <td><?= number_format($mov['cargo'], 2) ?></td>
+                                <td><?= $mov['origen'] ?></td>
+                                <td>
+                                    <a class="btn btn-primary btn-sm" href="editar.php?txtID=<?= $mov['id_movimiento'] ?>">Editar</a>
+                                    <a class="btn btn-danger btn-sm" href="index.php?txtID=<?= $mov['id_movimiento'] ?>">Borrar</a>
+                                </td>
+                            </tr>
+                        <?php } ?>
+
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
     </div>
-    <div class="card-footer text-muted"></div>
 </div>
 
 <?php include('../../templates/pie.php'); ?>

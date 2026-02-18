@@ -11,10 +11,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (!empty($usuario) && !empty($contrasena)) {
 
-        $consulta = $conexionBD->prepare("SELECT u.*, r.nombre AS nombre_rol
-            FROM usuarios u
-            JOIN roles r ON u.id_rol = r.id_rol
-            WHERE u.usuario = :usuario");
+        $consulta = $conexionBD->prepare(" SELECT u.*, 
+           r.nombre AS nombre_rol,
+           d.nombre AS nombre_dueno,
+           c.nombre AS nombre_cliente
+    FROM usuarios u
+    JOIN roles r ON u.id_rol = r.id_rol
+    LEFT JOIN duenos d ON u.id_dueno = d.id_dueno
+    LEFT JOIN clientes c ON u.id_cliente = c.id_cliente
+    WHERE u.usuario = :usuario
+");
 
         $consulta->bindParam(":usuario", $usuario);
         $consulta->execute();
@@ -23,10 +29,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if ($usuarioBD && password_verify($contrasena, $usuarioBD['contrasena'])) {
 
+            $nombreCompleto = $usuarioBD['nombre_dueno']
+                ?: $usuarioBD['nombre_cliente']
+                ?: $usuarioBD['usuario'];
+
             $_SESSION['id'] = $usuarioBD['id'];
             $_SESSION['usuario'] = $usuarioBD['usuario'];
+            $_SESSION['nombre_completo'] = $nombreCompleto;
             $_SESSION['id_rol'] = $usuarioBD['id_rol'];
-            $_SESSION['rol'] = $usuarioBD['nombre_rol']; // solo visual
+            $_SESSION['rol'] = $usuarioBD['nombre_rol'];
 
             header("Location: index.php");
             exit();
@@ -69,14 +80,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             <div class="col-md-4">
 
-                <?php if (isset($mensaje)) { ?>
-
-                    <div
-                        class="alert alert-danger"
-                        role="alert">
-                        <strong> Error: <?php echo $mensaje; ?></strong>
+                <?php if (!empty($mensaje)) { ?>
+                    <div class="alert alert-danger" role="alert">
+                        <strong>Error: <?php echo $mensaje; ?></strong>
                     </div>
-
                 <?php } ?>
 
                 <form action="#" method="post">

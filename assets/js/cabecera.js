@@ -1,9 +1,15 @@
-function togglePropiedades() {  // MOSTRAR / OCULTAR SUBMENÚ PROPIEDADES
-    const menu = document.getElementById("submenuPropiedades");   // Obtiene el menú desplegable
-    const arrow = document.getElementById("arrow");  // Obtiene la flecha del ícono
+function togglePropiedades() {
 
-    menu.classList.toggle("show"); // Agrega o quita la clase "show" para mostrar/ocultar el submenú
-    arrow.classList.toggle("rotate");    // Agrega o quita la clase "rotate" para girar la flecha
+    const menu = document.getElementById("submenuPropiedades");
+    const arrow = document.querySelector(".arrow");
+
+    if (menu) {
+        menu.classList.toggle("show");
+    }
+
+    if (arrow) {
+        arrow.classList.toggle("rotate");
+    }
 }
 
 function cerrarSesion() { // CONFIRMAR CIERRE DE SESIÓN

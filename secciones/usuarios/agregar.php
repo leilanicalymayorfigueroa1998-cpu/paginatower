@@ -1,5 +1,6 @@
 <?php
-
+include('../../includes/auth.php');
+include('../../includes/helpers.php');
 include('../../bd.php');
 
 $mensaje_error = '';
@@ -71,103 +72,103 @@ if ($_POST) {
 }
 
 include('../../templates/cabecera.php');
+include('../../templates/topbar.php');
+include('../../templates/sidebar.php');
 
 ?>
 
-<br />
-<div class="card">
-    <div class="card-header">Datos del Usuario</div>
-    <div class="card-body">
+<div class="main-content">
 
-        <?php if (!empty($mensaje_error)) { ?>
-            <div class="alert alert-danger">
-                <?php echo $mensaje_error; ?>
-            </div>
-        <?php } ?>
+    <div class="card">
+        <div class="card-header">Datos del Usuario</div>
+        <div class="card-body">
 
-        <form action="" method="post">
+            <?php if (!empty($mensaje_error)) { ?>
+                <div class="alert alert-danger">
+                    <?php echo $mensaje_error; ?>
+                </div>
+            <?php } ?>
 
-            <div class="mb-3">
-                <label for="" class="form-label">Usuario</label>
-                <input type="text"
-                    class="form-control"
-                    name="usuario"
-                    value="<?php echo htmlspecialchars($_POST['usuario'] ?? ''); ?>"
-                    required>
-            </div>
+            <form action="" method="post">
 
-            <div class="mb-3">
-                <label class="form-label">Contraseña</label>
-                <input
-                    type="password"
-                    class="form-control"
-                    name="contrasena" required>
-            </div>
+                <div class="mb-3">
+                    <label for="" class="form-label">Usuario</label>
+                    <input type="text"
+                        class="form-control"
+                        name="usuario"
+                        value="<?php echo htmlspecialchars($_POST['usuario'] ?? ''); ?>"
+                        required>
+                </div>
 
-            <div class="mb-3">
-                <label for="" class="form-label">Correo</label>
-                <input type="email"
-                    class="form-control"
-                    name="correo"
-                    value="<?php echo htmlspecialchars($_POST['correo'] ?? ''); ?>">
-            </div>
+                <div class="mb-3">
+                    <label class="form-label">Contraseña</label>
+                    <input
+                        type="password"
+                        class="form-control"
+                        name="contrasena" required>
+                </div>
 
-            <div class="mb-3">
-                <label for="" class="form-label">Rol</label>
-                <select class="form-select" name="id_rol">
-                    <?php
-                    $roles = $conexionBD->query("SELECT * FROM roles")->fetchAll(PDO::FETCH_ASSOC);
-                    foreach ($roles as $rol_item) {
-                        echo "<option value='{$rol_item['id_rol']}'>{$rol_item['nombre']}</option>";
-                    } ?>
-                </select>
-            </div>
+                <div class="mb-3">
+                    <label for="" class="form-label">Correo</label>
+                    <input type="email"
+                        class="form-control"
+                        name="correo"
+                        value="<?php echo htmlspecialchars($_POST['correo'] ?? ''); ?>">
+                </div>
 
-            <div class="mb-3" id="grupo_cliente">
-                <label class="form-label">Arrendatario</label>
-                <select name="id_cliente" class="form-select">
-                    <option value="">Seleccione Arrendatario</option>
-                    <?php
-                    $consultaClientes = $conexionBD->prepare("SELECT id_cliente, nombre FROM clientes");
-                    $consultaClientes->execute();
-                    $clientes = $consultaClientes->fetchAll(PDO::FETCH_ASSOC);
-                    foreach ($clientes as $cliente) {
-                        echo "<option value='{$cliente['id_cliente']}'>{$cliente['nombre']}</option>";
-                    }
-                    ?>
-                </select>
-            </div>
+                <div class="mb-3">
+                    <label for="" class="form-label">Rol</label>
+                    <select class="form-select" name="id_rol">
+                        <?php
+                        $roles = $conexionBD->query("SELECT * FROM roles")->fetchAll(PDO::FETCH_ASSOC);
+                        foreach ($roles as $rol_item) {
+                            echo "<option value='{$rol_item['id_rol']}'>{$rol_item['nombre']}</option>";
+                        } ?>
+                    </select>
+                </div>
 
-            <div class="mb-3" id="grupo_dueno">
-                <label class="form-label">Dueño</label>
-                <select name="id_dueno" class="form-select">
-                    <option value="">Seleccione dueño</option>
-                    <?php
-                    $consultaDuenos = $conexionBD->prepare("SELECT id_dueno, nombre FROM duenos");
-                    $consultaDuenos->execute();
-                    $duenos = $consultaDuenos->fetchAll(PDO::FETCH_ASSOC);
-                    foreach ($duenos as $dueno) {
-                        echo "<option value='{$dueno['id_dueno']}'>{$dueno['nombre']}</option>";
-                    }
-                    ?>
-                </select>
-            </div>
+                <div class="mb-3" id="grupo_cliente">
+                    <label class="form-label">Arrendatario</label>
+                    <select name="id_cliente" class="form-select">
+                        <option value="">Seleccione Arrendatario</option>
+                        <?php
+                        $consultaClientes = $conexionBD->prepare("SELECT id_cliente, nombre FROM clientes");
+                        $consultaClientes->execute();
+                        $clientes = $consultaClientes->fetchAll(PDO::FETCH_ASSOC);
+                        foreach ($clientes as $cliente) {
+                            echo "<option value='{$cliente['id_cliente']}'>{$cliente['nombre']}</option>";
+                        }
+                        ?>
+                    </select>
+                </div>
 
-            <button type="submit" name="accion" value="agregar" class="btn btn-success">Agregar</button>
-            <a
-                name=""
-                id=""
-                class="btn btn-primary"
-                href="index.php"
-                role="button">Cancelar</a>
+                <div class="mb-3" id="grupo_dueno">
+                    <label class="form-label">Dueño</label>
+                    <select name="id_dueno" class="form-select">
+                        <option value="">Seleccione dueño</option>
+                        <?php
+                        $consultaDuenos = $conexionBD->prepare("SELECT id_dueno, nombre FROM duenos");
+                        $consultaDuenos->execute();
+                        $duenos = $consultaDuenos->fetchAll(PDO::FETCH_ASSOC);
+                        foreach ($duenos as $dueno) {
+                            echo "<option value='{$dueno['id_dueno']}'>{$dueno['nombre']}</option>";
+                        }
+                        ?>
+                    </select>
+                </div>
+
+                <button type="submit" name="accion" value="agregar" class="btn btn-success">Agregar</button>
+                <a
+                    name=""
+                    id=""
+                    class="btn btn-primary"
+                    href="index.php"
+                    role="button">Cancelar</a>
 
 
-        </form>
+            </form>
 
-    </div>
-
-    <div class="card-footer text-muted">
-
+        </div>
 
     </div>
 

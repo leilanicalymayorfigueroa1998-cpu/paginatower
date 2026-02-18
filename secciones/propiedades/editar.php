@@ -1,5 +1,6 @@
 <?php
-
+include('../../includes/auth.php');
+include('../../includes/helpers.php');
 include('../../bd.php');
 
 if (isset($_GET['txtID'])) {
@@ -20,13 +21,11 @@ if (isset($_GET['txtID'])) {
 if ($_POST) {
     $txtID  = isset($_POST['txtID']) ? $_POST['txtID'] : '';
     $codigo = isset($_POST['codigo']) ? $_POST['codigo'] : '';
-    
+
     $direccion = isset($_POST['direccion']) ? $_POST['direccion'] : '';
     $latitud = isset($_POST['latitud']) ? $_POST['latitud'] : '';
     $longitud = isset($_POST['longitud']) ? $_POST['longitud'] : '';
     $tipo = isset($_POST['tipo']) ? $_POST['tipo'] : '';
-
-    $accion = isset($_POST['accion']) ? $_POST['accion'] : '';
 
     $consulta = $conexionBD->prepare("UPDATE propiedades SET 
                     codigo = :codigo, 
@@ -46,120 +45,120 @@ if ($_POST) {
     header("Location:index.php?mensaje=editado");
 }
 
-include('../../templates/cabecera.php');
-
 $consultaDuenos = $conexionBD->prepare("SELECT id_dueno, nombre FROM duenos");
 $consultaDuenos->execute();
 $listaDuenos = $consultaDuenos->fetchAll(PDO::FETCH_ASSOC);
 
+include('../../templates/cabecera.php');
+include('../../templates/topbar.php');
+include('../../templates/sidebar.php');
+
 ?>
 
+<div class="main-content">
 
-<div class="card">
-    <div class="card-header">Propiedades</div>
-    <div class="card-body">
+    <div class="card">
+        <div class="card-header">Propiedades</div>
+        <div class="card-body">
 
-        <form action="" method="post">
+            <form action="" method="post">
 
-            <div class="mb-3">
-                <label for="" class="form-label">ID</label>
-                <input
-                    type="text"
-                    class="form-control"
-                    name="txtID"
-                    id="txtID"
-                    value="<?php echo $txtID ?>"
-                    aria-describedby="helpId"
-                    placeholder="ID" />
-            </div>
-
-
-            <div class="mb-3">
-                <label for="" class="form-label">Codigo Propiedad</label>
-                <input
-                    type="text"
-                    class="form-control"
-                    name="codigo"
-                    id="codigo"
-                    value="<?php echo $codigo ?>"
-                    aria-describedby="helpId"
-                    placeholder="Codigo" />
-            </div>
-
-            <div class="mb-3">
-                <label class="form-label">Dueño</label>
-                <select name="id_dueno" class="form-select" required>
-                    <option value="">-- Selecciona dueño --</option>
-                    <?php foreach ($listaDuenos as $dueno) { ?>
-                        <option value="<?php echo $dueno['id_dueno']; ?>"
-                            <?php echo ($dueno['id_dueno'] == $id_dueno) ? 'selected' : ''; ?>>
-                            <?php echo $dueno['nombre']; ?>
-                        </option>
-                    <?php } ?>
-                </select>
-            </div>
-
-            <div class="mb-3">
-                <label for="" class="form-label">Direccion</label>
-                <input
-                    type="text"
-                    class="form-control"
-                    name="direccion"
-                    id="direccion"
-                    value="<?php echo $direccion ?>"
-                    aria-describedby="helpId"
-                    placeholder="Direccion" />
-            </div>
-
-            <div class="mb-3">
-                <label for="" class="form-label">Latitud</label>
-                <input
-                    type="text"
-                    class="form-control"
-                    name="latitud"
-                    id="latitud"
-                    value="<?php echo $latitud ?>"
-                    aria-describedby="helpId"
-                    placeholder="Latitud" />
-            </div>
-
-            <div class="mb-3">
-                <label for="" class="form-label">Longitud</label>
-                <input
-                    type="text"
-                    class="form-control"
-                    name="longitud"
-                    id="longitud"
-                    value="<?php echo $longitud ?>"
-                    aria-describedby="helpId"
-                    placeholder="Longitud" />
-            </div>
-
-            <div class="mb-3">
-                <label class="form-label">Tipo</label>
-                <select name="tipo" class="form-select" required>
-                    <option value="Local" <?php echo ($tipo == 'Local') ? 'selected' : ''; ?>>Local</option>
-                    <option value="Casa" <?php echo ($tipo == 'Casa') ? 'selected' : ''; ?>>Casa</option>
-                    <option value="Departamento" <?php echo ($tipo == 'Departamento') ? 'selected' : ''; ?>>Departamento</option>
-                    <option value="Oficina" <?php echo ($tipo == 'Oficina') ? 'selected' : ''; ?>>Oficina</option>
-                </select>
-            </div>
-
-            <button type="submit" name="accion" value="agregar" class="btn btn-success">Modificar</button>
-            <a
-                name=""
-                id=""
-                class="btn btn-primary"
-                href="index.php"
-                role="button">Cancelar</a>
+                <div class="mb-3">
+                    <label for="" class="form-label">ID</label>
+                    <input
+                        type="text"
+                        class="form-control"
+                        name="txtID"
+                        id="txtID"
+                        value="<?php echo $txtID ?>"
+                        aria-describedby="helpId"
+                        placeholder="ID" />
+                </div>
 
 
-        </form>
+                <div class="mb-3">
+                    <label for="" class="form-label">Codigo Propiedad</label>
+                    <input
+                        type="text"
+                        class="form-control"
+                        name="codigo"
+                        id="codigo"
+                        value="<?php echo $codigo ?>"
+                        aria-describedby="helpId"
+                        placeholder="Codigo" />
+                </div>
 
-    </div>
+                <div class="mb-3">
+                    <label class="form-label">Dueño</label>
+                    <select name="id_dueno" class="form-select" required>
+                        <option value="">-- Selecciona dueño --</option>
+                        <?php foreach ($listaDuenos as $dueno) { ?>
+                            <option value="<?php echo $dueno['id_dueno']; ?>"
+                                <?php echo ($dueno['id_dueno'] == $id_dueno) ? 'selected' : ''; ?>>
+                                <?php echo $dueno['nombre']; ?>
+                            </option>
+                        <?php } ?>
+                    </select>
+                </div>
 
-    <div class="card-footer text-muted">
+                <div class="mb-3">
+                    <label for="" class="form-label">Direccion</label>
+                    <input
+                        type="text"
+                        class="form-control"
+                        name="direccion"
+                        id="direccion"
+                        value="<?php echo $direccion ?>"
+                        aria-describedby="helpId"
+                        placeholder="Direccion" />
+                </div>
 
+                <div class="mb-3">
+                    <label for="" class="form-label">Latitud</label>
+                    <input
+                        type="text"
+                        class="form-control"
+                        name="latitud"
+                        id="latitud"
+                        value="<?php echo $latitud ?>"
+                        aria-describedby="helpId"
+                        placeholder="Latitud" />
+                </div>
+
+                <div class="mb-3">
+                    <label for="" class="form-label">Longitud</label>
+                    <input
+                        type="text"
+                        class="form-control"
+                        name="longitud"
+                        id="longitud"
+                        value="<?php echo $longitud ?>"
+                        aria-describedby="helpId"
+                        placeholder="Longitud" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Tipo</label>
+                    <select name="tipo" class="form-select" required>
+                        <option value="Local" <?php echo ($tipo == 'Local') ? 'selected' : ''; ?>>Local</option>
+                        <option value="Casa" <?php echo ($tipo == 'Casa') ? 'selected' : ''; ?>>Casa</option>
+                        <option value="Departamento" <?php echo ($tipo == 'Departamento') ? 'selected' : ''; ?>>Departamento</option>
+                        <option value="Oficina" <?php echo ($tipo == 'Oficina') ? 'selected' : ''; ?>>Oficina</option>
+                    </select>
+                </div>
+
+                <button type="submit" name="accion" value="agregar" class="btn btn-success">Modificar</button>
+                <a
+                    name=""
+                    id=""
+                    class="btn btn-primary"
+                    href="index.php"
+                    role="button">Cancelar</a>
+
+
+            </form>
+
+        </div>
 
     </div>
 

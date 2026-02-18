@@ -1,5 +1,6 @@
 <?php
-
+include('../../includes/auth.php');
+include('../../includes/helpers.php');
 include('../../bd.php');
 
 if (isset($_GET['txtID'])) {
@@ -40,9 +41,12 @@ if ($_POST) {
     header("Location:index.php");
 }
 
+include('../../templates/cabecera.php');
+include('../../templates/topbar.php');
+include('../../templates/sidebar.php');
+?>
 
-include('../../templates/cabecera.php'); ?>
-
+<div class="main-content">
 
 <div class="card">
     <div class="card-header">Dueños</div>
@@ -110,9 +114,6 @@ include('../../templates/cabecera.php'); ?>
         </form>
 
     </div>
-
-    <div class="card-footer text-muted">
-
 
     </div>
 

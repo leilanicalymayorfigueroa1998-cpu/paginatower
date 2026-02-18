@@ -1,4 +1,6 @@
 <?php
+include('../../includes/auth.php');
+include('../../includes/helpers.php');
 include('../../bd.php');
 
 if ($_POST) {
@@ -30,123 +32,121 @@ if ($_POST) {
 }
 
 include('../../templates/cabecera.php');
-
+include('../../templates/topbar.php');
+include('../../templates/sidebar.php');
 ?>
 
-<div class="card">
-    <div class="card-header">Arrendatario</div>
-    <div class="card-body">
+<div class="main-content">
 
-        <form action="" method="post">
+    <div class="card">
+        <div class="card-header">Arrendatario</div>
+        <div class="card-body">
 
-
-            <div class="mb-3">
-                <label for="" class="form-label">ID</label>
-                <input
-                    type="text"
-                    class="form-control"
-                    name="txtID"
-                    id="txtID"
-                    aria-describedby="helpId"
-                    placeholder="ID" />
-            </div>
+            <form action="" method="post">
 
 
-            <div class="mb-3">
-                <label for="" class="form-label">Nombre</label>
-                <input
-                    type="text"
-                    class="form-control"
-                    name="nombre"
-                    id="nombre"
-                    aria-describedby="helpId"
-                    placeholder="Nombre" />
-            </div>
-
-            <div class="mb-3">
-                <label for="" class="form-label">Telefono</label>
-                <input
-                    type="tel"
-                    class="form-control"
-                    name="telefono"
-                    id="telefono"
-                    aria-describedby="helpId"
-                    placeholder="Telefono" />
-            </div>
-
-            <div class="mb-3">
-                <label for="" class="form-label">Correo</label>
-                <input
-                    type="email"
-                    class="form-control"
-                    name="correo"
-                    id="correo"
-                    aria-describedby="helpId"
-                    placeholder="Correo" />
-            </div>
-
-            <div class="mb-3">
-                <label for="" class="form-label">Aval</label>
-                <input
-                    type="text"
-                    class="form-control"
-                    name="aval"
-                    id="aval"
-                    aria-describedby="helpId"
-                    placeholder="Aval" />
-            </div>
-
-            <div class="mb-3">
-                <label for="" class="form-label">Correo Aval</label>
-                <input
-                    type="email"
-                    class="form-control"
-                    name="correoaval"
-                    id="correoaval"
-                    aria-describedby="helpId"
-                    placeholder="correoaval" />
-            </div>
-
-            <div class="mb-3">
-                <label for="" class="form-label">Direccion</label>
-                <input
-                    type="text"
-                    class="form-control"
-                    name="direccion"
-                    id="direccion"
-                    aria-describedby="helpId"
-                    placeholder="Direccion" />
-            </div>
-
-            <div class="mb-3">
-                <label for="" class="form-label">Ciudad</label>
-                <input
-                    type="text"
-                    class="form-control"
-                    name="ciudad"
-                    id="ciudad"
-                    aria-describedby="helpId"
-                    placeholder="Ciudad" />
-            </div>
-
-            <button type="submit" name="accion" value="agregar" class="btn btn-success">Agregar</button>
-            <a
-                name=""
-                id=""
-                class="btn btn-primary"
-                href="index.php"
-                role="button">Cancelar</a>
+                <div class="mb-3">
+                    <label for="" class="form-label">ID</label>
+                    <input
+                        type="text"
+                        class="form-control"
+                        name="txtID"
+                        id="txtID"
+                        aria-describedby="helpId"
+                        placeholder="ID" />
+                </div>
 
 
-        </form>
+                <div class="mb-3">
+                    <label for="" class="form-label">Nombre</label>
+                    <input
+                        type="text"
+                        class="form-control"
+                        name="nombre"
+                        id="nombre"
+                        aria-describedby="helpId"
+                        placeholder="Nombre" />
+                </div>
+
+                <div class="mb-3">
+                    <label for="" class="form-label">Telefono</label>
+                    <input
+                        type="tel"
+                        class="form-control"
+                        name="telefono"
+                        id="telefono"
+                        aria-describedby="helpId"
+                        placeholder="Telefono" />
+                </div>
+
+                <div class="mb-3">
+                    <label for="" class="form-label">Correo</label>
+                    <input
+                        type="email"
+                        class="form-control"
+                        name="correo"
+                        id="correo"
+                        aria-describedby="helpId"
+                        placeholder="Correo" />
+                </div>
+
+                <div class="mb-3">
+                    <label for="" class="form-label">Aval</label>
+                    <input
+                        type="text"
+                        class="form-control"
+                        name="aval"
+                        id="aval"
+                        aria-describedby="helpId"
+                        placeholder="Aval" />
+                </div>
+
+                <div class="mb-3">
+                    <label for="" class="form-label">Correo Aval</label>
+                    <input
+                        type="email"
+                        class="form-control"
+                        name="correoaval"
+                        id="correoaval"
+                        aria-describedby="helpId"
+                        placeholder="correoaval" />
+                </div>
+
+                <div class="mb-3">
+                    <label for="" class="form-label">Direccion</label>
+                    <input
+                        type="text"
+                        class="form-control"
+                        name="direccion"
+                        id="direccion"
+                        aria-describedby="helpId"
+                        placeholder="Direccion" />
+                </div>
+
+                <div class="mb-3">
+                    <label for="" class="form-label">Ciudad</label>
+                    <input
+                        type="text"
+                        class="form-control"
+                        name="ciudad"
+                        id="ciudad"
+                        aria-describedby="helpId"
+                        placeholder="Ciudad" />
+                </div>
+
+                <button type="submit" name="accion" value="agregar" class="btn btn-success">Agregar</button>
+                <a
+                    name=""
+                    id=""
+                    class="btn btn-primary"
+                    href="index.php"
+                    role="button">Cancelar</a>
+
+
+            </form>
+
+        </div>
 
     </div>
 
-    <div class="card-footer text-muted">
-
-
-    </div>
-
-</div>
-
-<?php include('../../templates/pie.php'); ?>
+    <?php include('../../templates/pie.php'); ?>

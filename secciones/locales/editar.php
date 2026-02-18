@@ -1,5 +1,6 @@
 <?php
-
+include('../../includes/auth.php');
+include('../../includes/helpers.php');
 include('../../bd.php');
 
 if (isset($_GET['txtID'])) {
@@ -55,115 +56,116 @@ $consultaProp->execute();
 $listaPropiedades = $consultaProp->fetchAll(PDO::FETCH_ASSOC);
 
 include('../../templates/cabecera.php');
+include('../../templates/topbar.php');
+include('../../templates/sidebar.php');
 
 ?>
 
+<div class="main-content">
 
-<div class="card">
-    <div class="card-header">Locales</div>
-    <div class="card-body">
+    <div class="card">
+        <div class="card-header">Locales</div>
+        <div class="card-body">
 
-        <form action="" method="post">
+            <form action="" method="post">
 
-            <div class="mb-3">
-                <label for="" class="form-label">ID</label>
-                <input
-                    type="text"
-                    class="form-control"
-                    name="txtID"
-                    id="txtID"
-                    value="<?php echo $txtID ?>"
-                    aria-describedby="helpId"
-                    placeholder="ID" />
-            </div>
+                <div class="mb-3">
+                    <label for="" class="form-label">ID</label>
+                    <input
+                        type="text"
+                        class="form-control"
+                        name="txtID"
+                        id="txtID"
+                        value="<?php echo $txtID ?>"
+                        aria-describedby="helpId"
+                        placeholder="ID" />
+                </div>
 
-            <div class="mb-3">
-                <label class="form-label">Propiedad</label>
-                <select name="id_propiedad" class="form-control" required>
-                    <?php foreach ($listaPropiedades as $prop) { ?>
-                        <option value="<?php echo $prop['id_propiedad']; ?>"
-                            <?php echo ($prop['id_propiedad'] == $id_propiedad) ? 'selected' : ''; ?>>
-                            <?php echo $prop['codigo']; ?>
+                <div class="mb-3">
+                    <label class="form-label">Propiedad</label>
+                    <select name="id_propiedad" class="form-control" required>
+                        <?php foreach ($listaPropiedades as $prop) { ?>
+                            <option value="<?php echo $prop['id_propiedad']; ?>"
+                                <?php echo ($prop['id_propiedad'] == $id_propiedad) ? 'selected' : ''; ?>>
+                                <?php echo $prop['codigo']; ?>
+                            </option>
+                        <?php } ?>
+                    </select>
+                </div>
+
+
+                <div class="mb-3">
+                    <label for="" class="form-label">Codigo</label>
+                    <input
+                        type="text"
+                        class="form-control"
+                        name="codigo"
+                        id="codigo"
+                        value="<?php echo $codigo ?>"
+                        aria-describedby="helpId"
+                        placeholder="Codigo" />
+                </div>
+
+                <div class="mb-3">
+                    <label for="" class="form-label">Medidas</label>
+                    <input
+                        type="text"
+                        class="form-control"
+                        name="medidas"
+                        id="medidas"
+                        value="<?php echo $medidas ?>"
+                        aria-describedby="helpId"
+                        placeholder="Medidas" />
+                </div>
+
+                <div class="mb-3">
+                    <label for="" class="form-label">Descripcion</label>
+                    <input
+                        type="text"
+                        class="form-control"
+                        name="descripcion"
+                        id="descripcion"
+                        value="<?php echo $descripcion ?>"
+                        aria-describedby="helpId"
+                        placeholder="Descripcion" />
+                </div>
+
+                <div class="mb-3">
+                    <label for="" class="form-label">Estacionamiento</label>
+                    <input
+                        type="text"
+                        class="form-control"
+                        name="estacionamiento"
+                        id="estacionamiento"
+                        value="<?php echo $estacionamiento ?>"
+                        aria-describedby="helpId"
+                        placeholder="Estacionamiento" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Estatus</label>
+                    <select name="estatus" class="form-control" required>
+                        <option value="Disponible" <?php echo ($estatus == 'Disponible') ? 'selected' : ''; ?>>
+                            Disponible
                         </option>
-                    <?php } ?>
-                </select>
-            </div>
+                        <option value="Ocupado" <?php echo ($estatus == 'Ocupado') ? 'selected' : ''; ?>>
+                            Ocupado
+                        </option>
+                    </select>
+                </div>
+
+                <button type="submit" name="accion" value="agregar" class="btn btn-success">Modificar</button>
+                <a
+                    name=""
+                    id=""
+                    class="btn btn-primary"
+                    href="index.php"
+                    role="button">Cancelar</a>
 
 
-            <div class="mb-3">
-                <label for="" class="form-label">Codigo</label>
-                <input
-                    type="text"
-                    class="form-control"
-                    name="codigo"
-                    id="codigo"
-                    value="<?php echo $codigo ?>"
-                    aria-describedby="helpId"
-                    placeholder="Codigo" />
-            </div>
+            </form>
 
-            <div class="mb-3">
-                <label for="" class="form-label">Medidas</label>
-                <input
-                    type="text"
-                    class="form-control"
-                    name="medidas"
-                    id="medidas"
-                    value="<?php echo $medidas ?>"
-                    aria-describedby="helpId"
-                    placeholder="Medidas" />
-            </div>
-
-            <div class="mb-3">
-                <label for="" class="form-label">Descripcion</label>
-                <input
-                    type="text"
-                    class="form-control"
-                    name="descripcion"
-                    id="descripcion"
-                    value="<?php echo $descripcion ?>"
-                    aria-describedby="helpId"
-                    placeholder="Descripcion" />
-            </div>
-
-            <div class="mb-3">
-                <label for="" class="form-label">Estacionamiento</label>
-                <input
-                    type="text"
-                    class="form-control"
-                    name="estacionamiento"
-                    id="estacionamiento"
-                    value="<?php echo $estacionamiento ?>"
-                    aria-describedby="helpId"
-                    placeholder="Estacionamiento" />
-            </div>
-
-            <div class="mb-3">
-                <label class="form-label">Estatus</label>
-                <select name="estatus" class="form-control" required>
-                    <option value="Disponible" <?php echo ($estatus == 'Disponible') ? 'selected' : ''; ?>>
-                        Disponible
-                    </option>
-                    <option value="Ocupado" <?php echo ($estatus == 'Ocupado') ? 'selected' : ''; ?>>
-                        Ocupado
-                    </option>
-                </select>
-            </div>
-
-            <button type="submit" name="accion" value="agregar" class="btn btn-success">Modificar</button>
-            <a
-                name=""
-                id=""
-                class="btn btn-primary"
-                href="index.php"
-                role="button">Cancelar</a>
-
-
-        </form>
-
-    </div>
-
-    <div class="card-footer text-muted">
+        </div>
 
 
     </div>

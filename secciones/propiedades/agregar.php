@@ -1,5 +1,6 @@
 <?php
-
+include('../../includes/auth.php');
+include('../../includes/helpers.php');
 include('../../bd.php');
 
 if ($_POST) {
@@ -28,97 +29,96 @@ $consultaDuenos->execute();
 $listaDuenos = $consultaDuenos->fetchAll(PDO::FETCH_ASSOC);
 
 include('../../templates/cabecera.php');
-
+include('../../templates/topbar.php');
+include('../../templates/sidebar.php');
 ?>
+<div class="main-content">
 
-<div class="card">
-    <div class="card-header">Propiedades</div>
-    <div class="card-body">
+    <div class="card">
+        <div class="card-header">Propiedades</div>
+        <div class="card-body">
 
-        <form action="" method="post">
+            <form action="" method="post">
 
-            <div class="mb-3">
-                <label for="" class="form-label">ID</label>
-                <input
-                    type="text"
-                    class="form-control"
-                    name="txtID"
-                    id="txtID"
-                    aria-describedby="helpId"
-                    placeholder="ID" />
-            </div>
-
-
-            <div class="mb-3">
-                <label for="" class="form-label">Codigo Propiedad</label>
-                <input
-                    type="text"
-                    class="form-control"
-                    name="codigo"
-                    id="codigo"
-                    aria-describedby="helpId"
-                    placeholder="Codigo" />
-            </div>
-
-            <div class="mb-3">
-                <label for="" class="form-label">Direccion</label>
-                <input
-                    type="text"
-                    class="form-control"
-                    name="direccion"
-                    id="direccion"
-                    aria-describedby="helpId"
-                    placeholder="Direccion" />
-            </div>
-
-            <div class="mb-3">
-                <label for="" class="form-label">Latitud</label>
-                <input
-                    type="text"
-                    class="form-control"
-                    name="latitud"
-                    id="latitud"
-                    aria-describedby="helpId"
-                    placeholder="Latitud" />
-            </div>
-
-            <div class="mb-3">
-                <label for="" class="form-label">Longitud</label>
-                <input
-                    type="text"
-                    class="form-control"
-                    name="longitud"
-                    id="longitud"
-                    aria-describedby="helpId"
-                    placeholder="Longitud" />
-            </div>
-
-            <div class="mb-3">
-                <label for="tipo" class="form-label">Tipo</label>
-                <select name="tipo" id="tipo" class="form-control" required>
-                    <option value="">-- Selecciona tipo de propiedad --</option>
-                    <option value="Local">Local</option>
-                    <option value="Casa">Casa</option>
-                    <option value="Departamento">Departamento</option>
-                    <option value="Oficina">Oficina</option>
-                </select>
-            </div>
-
-            <button type="submit" name="accion" value="agregar" class="btn btn-success">Agregar</button>
-            <a
-                name=""
-                id=""
-                class="btn btn-primary"
-                href="index.php"
-                role="button">Cancelar</a>
+                <div class="mb-3">
+                    <label for="" class="form-label">ID</label>
+                    <input
+                        type="text"
+                        class="form-control"
+                        name="txtID"
+                        id="txtID"
+                        aria-describedby="helpId"
+                        placeholder="ID" />
+                </div>
 
 
-        </form>
+                <div class="mb-3">
+                    <label for="" class="form-label">Codigo Propiedad</label>
+                    <input
+                        type="text"
+                        class="form-control"
+                        name="codigo"
+                        id="codigo"
+                        aria-describedby="helpId"
+                        placeholder="Codigo" />
+                </div>
 
-    </div>
+                <div class="mb-3">
+                    <label for="" class="form-label">Direccion</label>
+                    <input
+                        type="text"
+                        class="form-control"
+                        name="direccion"
+                        id="direccion"
+                        aria-describedby="helpId"
+                        placeholder="Direccion" />
+                </div>
 
-    <div class="card-footer text-muted">
+                <div class="mb-3">
+                    <label for="" class="form-label">Latitud</label>
+                    <input
+                        type="text"
+                        class="form-control"
+                        name="latitud"
+                        id="latitud"
+                        aria-describedby="helpId"
+                        placeholder="Latitud" />
+                </div>
 
+                <div class="mb-3">
+                    <label for="" class="form-label">Longitud</label>
+                    <input
+                        type="text"
+                        class="form-control"
+                        name="longitud"
+                        id="longitud"
+                        aria-describedby="helpId"
+                        placeholder="Longitud" />
+                </div>
+
+                <div class="mb-3">
+                    <label for="tipo" class="form-label">Tipo</label>
+                    <select name="tipo" id="tipo" class="form-control" required>
+                        <option value="">-- Selecciona tipo de propiedad --</option>
+                        <option value="Local">Local</option>
+                        <option value="Casa">Casa</option>
+                        <option value="Departamento">Departamento</option>
+                        <option value="Oficina">Oficina</option>
+                    </select>
+                </div>
+
+                <button type="submit" name="accion" value="agregar" class="btn btn-success">Agregar</button>
+                <a
+                    name=""
+                    id=""
+                    class="btn btn-primary"
+                    href="index.php"
+                    role="button">Cancelar</a>
+
+
+            </form>
+
+        </div>
 
     </div>
 

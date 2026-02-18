@@ -8,3 +8,5 @@ if (!isset($_SESSION['usuario'])) {  // VERIFICAR SI EL USUARIO ESTÁ LOGUEADO
     header("Location:" . $url_base . "login.php");  // Redirige al login
     exit(); // Detiene la ejecución del archivo
 }
+
+$rol = $_SESSION['rol'] ?? '';

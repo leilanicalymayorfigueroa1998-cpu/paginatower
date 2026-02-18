@@ -1,117 +1,132 @@
 <?php
-
+include('../../includes/auth.php');
+include('../../includes/helpers.php');
 include('../../bd.php');
 
 if ($_POST) {
     $txtID  = isset($_POST['txtID']) ? $_POST['txtID'] : '';
-    $id_renta = isset($_POST['id_renta']) ? $_POST['id_renta'] : '';
+    $id_contrato = isset($_POST['id_contrato']) ? $_POST['id_contrato'] : '';
     $fecha_pago = isset($_POST['fecha_pago']) ? $_POST['fecha_pago'] : '';
     $monto = isset($_POST['monto']) ? $_POST['monto'] : '';
+    $metodo_pago = isset($_POST['metodo_pago']) ? $_POST['metodo_pago'] : '';
     $estatus = isset($_POST['estatus']) ? $_POST['estatus'] : '';
 
 
-    $accion = isset($_POST['accion']) ? $_POST['accion'] : '';
-
-    $consulta = $conexionBD->prepare("INSERT INTO pagos (id_pago, id_renta, fecha_pago, monto, estatus) 
-                                   VALUES (NULL, :id_renta, :fecha_pago, :monto, :estatus)");
+    $consulta = $conexionBD->prepare("INSERT INTO pagos (id_pago, id_contrato, fecha_pago, monto, metodo_pago, estatus) 
+                                   VALUES (NULL, :id_contrato, :fecha_pago, :monto, :metodo_pago, :estatus)");
 
 
-    $consulta->bindParam(':id_renta', $id_renta);
+    $consulta->bindParam(':id_contrato', $id_contrato);
     $consulta->bindParam(':fecha_pago', $fecha_pago);
     $consulta->bindParam(':monto', $monto);
+    $consulta->bindParam(':metodo_pago', $metodo_pago);
     $consulta->bindParam(':estatus', $estatus);
     $consulta->execute();
     header("Location:index.php");
 }
 
-$consultaRentas = $conexionBD->prepare("SELECT r.id_renta, l.codigo, c.nombre
-    FROM rentas r
+$consultaContrato = $conexionBD->prepare("SELECT r.id_contrato, l.codigo, c.nombre
+    FROM contratos r
     INNER JOIN locales l ON r.id_local = l.id_local
     INNER JOIN clientes c ON r.id_cliente = c.id_cliente");
-$consultaRentas->execute();
-$listaRentas = $consultaRentas->fetchAll(PDO::FETCH_ASSOC);
+
+$consultaContrato->execute();
+$listaContratos = $consultaContrato->fetchAll(PDO::FETCH_ASSOC);
 
 include('../../templates/cabecera.php');
+include('../../templates/topbar.php');
+include('../../templates/sidebar.php');
 
 ?>
 
-<br />
-<div class="card">
-    <div class="card-header">Rentas</div>
-    <div class="card-body">
+<div class="main-content">
 
-        <form action="" method="post">
+    <div class="card">
+        <div class="card-header">Rentas</div>
+        <div class="card-body">
 
-            <div class="mb-3">
-                <label for="" class="form-label">Pago</label>
-                <input
-                    type="text"
-                    class="form-control"
-                    name="txtID"
-                    id="txtID"
-                    aria-describedby="helpId"
-                    placeholder="ID" />
-            </div>
+            <form action="" method="post">
 
-            <div class="mb-3">
-                <label class="form-label">Renta</label>
-                <select name="id_renta" class="form-control" required>
-                    <option value="">-- Selecciona una renta --</option>
+                <div class="mb-3">
+                    <label for="" class="form-label">Pago</label>
+                    <input
+                        type="text"
+                        class="form-control"
+                        name="txtID"
+                        id="txtID"
+                        aria-describedby="helpId"
+                        placeholder="ID" />
+                </div>
 
-                    <?php foreach ($listaRentas as $renta) { ?>
-                        <option value="<?php echo $renta['id_renta']; ?>">
-                            <?php echo $renta['codigo'] . ' - ' . $renta['nombre']; ?>
-                        </option>
-                    <?php } ?>
-                </select>
-            </div>
+                <div class="mb-3">
+                    <label class="form-label">Contrato</label>
+                    <select name="id_contrato" class="form-control" required>
+                        <option value="">-- Selecciona un contrato --</option>
 
-            <div class="mb-3">
-                <label for="" class="form-label">Fecha Pago</label>
-                <input
-                    type="date"
-                    class="form-control"
-                    name="fecha_pago"
-                    id="fecha_pago"
-                    aria-describedby="helpId"
-                    placeholder="Fecha Pago" />
-            </div>
+                        <?php foreach ($listaContratos as $contrato) { ?>
+                            <option value="<?php echo $contrato['id_contrato']; ?>">
+                                <?php echo $contrato['codigo'] . ' - ' . $contrato['nombre']; ?>
+                            </option>
+                        <?php } ?>
+                    </select>
+                </div>
 
-            <div class="mb-3">
-                <label for="" class="form-label">Monto</label>
-                <input
-                    type="text"
-                    class="form-control"
-                    name="monto"
-                    id="monto"
-                    aria-describedby="helpId"
-                    placeholder="monto" />
-            </div>
+                <div class="mb-3">
+                    <label for="" class="form-label">Fecha Pago</label>
+                    <input
+                        type="date"
+                        class="form-control"
+                        name="fecha_pago"
+                        id="fecha_pago"
+                        aria-describedby="helpId"
+                        placeholder="Fecha Pago" />
+                </div>
 
-            <div class="mb-3">
-                <label class="form-label">Estatus</label>
-                <select name="estatus" class="form-control" required>
-                    <option value="">-- Selecciona estatus --</option>
-                    <option value="Pagado">Pagado</option>
-                    <option value="Pendiente">Pendiente</option>
-                    <option value="Vencido">Vencido</option>
-                </select>
-            </div>
-            <button type="submit" name="accion" value="agregar" class="btn btn-success">Agregar</button>
-            <a
-                name=""
-                id=""
-                class="btn btn-primary"
-                href="index.php"
-                role="button">Cancelar</a>
+                <div class="mb-3">
+                    <label for="" class="form-label">Monto</label>
+                    <input
+                        type="text"
+                        class="form-control"
+                        name="monto"
+                        id="monto"
+                        aria-describedby="helpId"
+                        placeholder="monto" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Método de pago</label>
+                    <select name="metodo_pago" class="form-control" required>
+                        <option value="">-- Selecciona método --</option>
+                        <option value="Efectivo">Efectivo</option>
+                        <option value="Transferencia">Transferencia</option>
+                        <option value="Depósito">Depósito</option>
+                        <option value="Depósito">SPEI</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Estatus</label>
+                    <select name="estatus" class="form-control" required>
+                        <option value="">-- Selecciona estatus --</option>
+                        <option value="Pagado">Pagado</option>
+                        <option value="Pendiente">Pendiente</option>
+                        <option value="Vencido">Vencido</option>
+                        <option value="Vencido">Cancelado</option>
+                    </select>
+                </div>
+
+                <button type="submit" name="accion" value="agregar" class="btn btn-success">Agregar</button>
+                <a
+                    name=""
+                    id=""
+                    class="btn btn-primary"
+                    href="index.php"
+                    role="button">Cancelar</a>
 
 
-        </form>
+            </form>
 
-    </div>
-
-    <div class="card-footer text-muted">
-
+        </div>
 
     </div>
 

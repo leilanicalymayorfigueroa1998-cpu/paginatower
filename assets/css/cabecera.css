@@ -1,192 +1,147 @@
+/* ===========================
+   BASE
+=========================== */
+
 body {
-    background: #f1f5f9;
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
 }
+
+/* ===========================
+   SIDEBAR
+=========================== */
 
 .sidebar {
     position: fixed;
-    /* Se queda fija aunque hagas scroll */
     top: 0;
-    /* Pegada arriba */
     left: 0;
-    /* Pegada a la izquierda */
     width: 260px;
-    /* Ancho del menú */
     height: 100vh;
-    /* Altura completa de la pantalla */
-    background: #111827;
-    /* Azul oscuro */
-    padding-top: 20px;
-    /* Espacio superior */
-    display: flex;
-    flex-direction: column;
-    /* Elementos uno debajo del otro */
+    background: #0f172a;
+    overflow-y: auto;
 }
 
-.sidebar {
-    /* Degradado del sidebar */
-    background: linear-gradient(180deg, #0f172a, #111827);
-}
-
-.sidebar h4 {
-    /* Título dentro del sidebar */
-    color: white;
-    padding: 0 20px;
-    margin-bottom: 30px;
-    font-weight: 600;
-}
+/* Links del sidebar */
 
 .sidebar a {
-    /* Enlaces del menú */
     display: flex;
-    /* Alinea icono y texto */
     align-items: center;
     gap: 12px;
-    /* Espacio entre icono y texto */
     padding: 12px 20px;
     color: #9ca3af;
-    /* Gris claro */
     text-decoration: none;
     font-size: 15px;
     transition: 0.3s ease;
-    /* Animación suave */
     border-radius: 8px;
     margin: 4px 12px;
 }
 
 .sidebar a:hover {
-    /* Hover del menú */
     background: #1f2937;
     color: white;
 }
 
 .sidebar a.active {
-    /* Enlace activo */
     background: rgba(255, 255, 255, 0.08);
     border-left: 3px solid #3b82f6;
-    /* Línea azul lateral */
     color: white;
 }
 
 /* ===========================
-   CONTENIDO PRINCIPAL
-=========================== */
-
-.content {
-    margin-left: 260px;
-    /* Empuja contenido a la derecha del sidebar */
-    margin-top: 60px;
-    /* Espacio debajo del topbar */
-    padding: 20px;
-    min-height: 100vh;
-    /* Altura mínima completa */
-    background: #f3f4f6;
-}
-
-.submenu {
-    /* Submenú oculto por defecto */
-    padding-left: 20px;
-    display: none;
-    /* Se muestra con JS */
-}
-
-.submenu a {
-    /* Enlaces del submenú */
-    font-size: 14px;
-    padding: 10px 20px;
-    color: #9ca3af;
-}
-
-.submenu a:hover {
-    background: #1f2937;
-    color: white;
-}
-
-/* ===========================
-   TARJETAS (Cards)
-=========================== */
-
-.card {
-    border-radius: 14px;
-    /* Bordes redondeados */
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
-    /* Sombra suave */
-}
-
-
-/* ===========================
-   PANEL DE USUARIO
+   PANEL USUARIO
 =========================== */
 
 .user-panel {
-    background: #1f2937;
-    margin: 0 12px 25px 12px;
-    padding: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 20px;
+    margin: 15px 12px;
+    background: rgba(255, 255, 255, 0.06);
     border-radius: 12px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.user-avatar {
-    /* Círculo con inicial del usuario */
-    width: 42px;
-    height: 42px;
-    min-width: 42px;
-    border-radius: 50%;
-    /* Lo hace redondo */
-    color: white;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 16px;
-}
-
-/* Contenedor de nombre y rol */
-.user-info {
-    display: flex;
-    flex-direction: column;
-}
-
-.user-name {
-    font-size: 14px;
-    font-weight: 600;
     color: #ffffff;
 }
 
+.user-name {
+    font-weight: 600;
+}
+
 .user-role {
-    font-size: 12px;
-    color: #9ca3af;
+    font-size: 13px;
+    color: #cbd5e1;
+}
+
+.user-avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: #ffffff;
 }
 
 /* ===========================
-   TOPBAR (Barra superior)
+   SUBMENÚ
+=========================== */
+
+.submenu {
+    display: none;
+    padding-left: 20px;
+}
+
+.submenu.show {
+    display: block;
+}
+
+.submenu a {
+    display: block;
+    padding: 8px 0;
+    font-size: 14px;
+    opacity: 0.85;
+    transition: 0.2s;
+}
+
+.submenu a:hover {
+    opacity: 1;
+    transform: translateX(4px);
+}
+
+/* Flecha */
+
+.arrow {
+    margin-left: auto;
+    transition: transform 0.3s ease;
+}
+
+.arrow.rotate {
+    transform: rotate(180deg);
+}
+
+/* ===========================
+   TOPBAR
 =========================== */
 
 .topbar {
     position: fixed;
     top: 0;
     left: 260px;
-    /* Empieza después del sidebar */
     right: 0;
     height: 60px;
     background: linear-gradient(90deg, #1e293b, #334155);
     display: flex;
     justify-content: space-between;
-    /* Título izquierda - iconos derecha */
     align-items: center;
     padding: 0 25px;
     color: white;
     z-index: 1000;
-    /* Siempre encima */
 }
 
-/* Iconos de la barra superior */
 .top-icons {
     display: flex;
     align-items: center;
     gap: 25px;
-    /* Separación entre iconos */
 }
 
 .top-icons a {
@@ -195,37 +150,35 @@ body {
     transition: 0.3s;
 }
 
-/* Hover iconos */
 .top-icons a:hover {
     color: #60a5fa;
 }
 
+/* ===========================
+   CONTENIDO
+=========================== */
 
-/* Botón cerrar sesión */
-.logout {
-    position: absolute;
-    bottom: 20px;
-    color: #f87171;
+.content {
+    margin-left: 260px;
+    margin-top: 60px;
+    padding: 20px;
+    min-height: calc(100vh - 60px);
+    background: #f3f4f6;
 }
 
+/* ===========================
+   TARJETAS
+=========================== */
 
-/* Título de la topbar */
-.page-title {
-    color: white;
-    font-weight: 500;
-    font-size: 18px;
-}
-
-
-/* Estilo adicional para DataTables */
-.card,
-.dataTables_wrapper {
+.card {
     border-radius: 14px;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
 }
 
+/* ===========================
+   BADGES
+=========================== */
 
-/* Estilo general de los badges */
 .badge {
     padding: 6px 10px;
     font-size: 12px;

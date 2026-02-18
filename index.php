@@ -1,23 +1,35 @@
 <?php
+include('includes/auth.php');
+include('includes/helpers.php');
+include('bd.php');
 
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+$rol = $_SESSION['rol'] ?? '';
+$color = obtenerColorRol($rol);
 
-if (!isset($_SESSION['usuario'])) {
-    header("Location: login.php");
-    exit();
+$idUsuario = $_SESSION['id'] ?? null;
+$totalAlertas = 0;
+
+if ($idUsuario) {
+    $consulta = $conexionBD->prepare("
+        SELECT COUNT(*) 
+        FROM alertas 
+        WHERE id_usuario = :id 
+        AND leida = 0
+    ");
+    $consulta->bindParam(':id', $idUsuario);
+    $consulta->execute();
+    $totalAlertas = $consulta->fetchColumn();
 }
 
 include('templates/cabecera.php');
+include('templates/topbar.php');
+include('templates/sidebar.php');
 ?>
 
-<div class="mb-4">
-    <h2 class="fw-semibold">Panel de Control</h2>
-    <p class="text-muted">
-        Bienvenida, <?php echo $_SESSION['usuario']; ?>.
-        Gestiona las operaciones del sistema desde este panel.
-    </p>
+<div class="content">
+    <div class="container-fluid">
+        <h2>Panel de Control</h2>
+    </div>
 </div>
 
 <?php include('templates/pie.php'); ?>

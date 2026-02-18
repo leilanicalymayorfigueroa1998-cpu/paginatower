@@ -1,5 +1,6 @@
 <?php
-
+include('../../includes/auth.php');
+include('../../includes/helpers.php');
 include('../../bd.php');
 
 if ($_POST) {
@@ -17,80 +18,82 @@ if ($_POST) {
     header("Location:index.php");
 }
 
-include('../../templates/cabecera.php'); ?>
+include('../../templates/cabecera.php');
+include('../../templates/topbar.php');
+include('../../templates/sidebar.php');
+?>
+
+<div class="main-content">
 
 
-        <div class="card">
-            <div class="card-header">Dueños</div>
-            <div class="card-body">
+    <div class="card">
+        <div class="card-header">Dueños</div>
+        <div class="card-body">
 
-                <form action="" method="post">
+            <form action="" method="post">
 
-                    <div class="mb-3">
-                        <label for="" class="form-label">ID</label>
-                        <input
-                            type="text"
-                            class="form-control"
-                            name="txtID"
-                            id="txtID"
-                            aria-describedby="helpId"
-                            placeholder="ID" />
-                    </div>
+                <div class="mb-3">
+                    <label for="" class="form-label">ID</label>
+                    <input
+                        type="text"
+                        class="form-control"
+                        name="txtID"
+                        id="txtID"
+                        aria-describedby="helpId"
+                        placeholder="ID" />
+                </div>
 
-                    <div class="mb-3">
-                        <label for="" class="form-label">Nombre</label>
-                        <input
-                            type="text"
-                            class="form-control"
-                            name="nombre"
-                            id="nombre"
+                <div class="mb-3">
+                    <label for="" class="form-label">Nombre</label>
+                    <input
+                        type="text"
+                        class="form-control"
+                        name="nombre"
+                        id="nombre"
 
-                            aria-describedby="helpId"
-                            placeholder="Nombre" />
-                    </div>
+                        aria-describedby="helpId"
+                        placeholder="Nombre" />
+                </div>
 
-                    <div class="mb-3">
-                        <label for="" class="form-label">Telefono</label>
-                        <input
-                            type="tel"
-                            class="form-control"
-                            name="telefono"
-                            id="telefono"
+                <div class="mb-3">
+                    <label for="" class="form-label">Telefono</label>
+                    <input
+                        type="tel"
+                        class="form-control"
+                        name="telefono"
+                        id="telefono"
 
-                            aria-describedby="helpId"
-                            placeholder="Telefono" />
-                    </div>
+                        aria-describedby="helpId"
+                        placeholder="Telefono" />
+                </div>
 
-                    <div class="mb-3">
-                        <label for="" class="form-label">Correo</label>
-                        <input
-                            type="email"
-                            class="form-control"
-                            name="correo"
-                            id="correo"
+                <div class="mb-3">
+                    <label for="" class="form-label">Correo</label>
+                    <input
+                        type="email"
+                        class="form-control"
+                        name="correo"
+                        id="correo"
 
-                            aria-describedby="helpId"
-                            placeholder="Correo" />
-                    </div>
+                        aria-describedby="helpId"
+                        placeholder="Correo" />
+                </div>
 
-                    <button type="submit" name="accion" value="agregar" class="btn btn-success">Agregar</button>
-                    <a
-                        name=""
-                        id=""
-                        class="btn btn-primary"
-                        href="index.php"
-                        role="button">Cancelar</a>
-
-
-                </form>
-
-            </div>
-
-            <div class="card-footer text-muted">
+                <button type="submit" name="accion" value="agregar" class="btn btn-success">Agregar</button>
+                <a
+                    name=""
+                    id=""
+                    class="btn btn-primary"
+                    href="index.php"
+                    role="button">Cancelar</a>
 
 
-            </div>
+            </form>
 
         </div>
+
+    </div>
+
+</div>
 
 <?php include('../../templates/pie.php'); ?>

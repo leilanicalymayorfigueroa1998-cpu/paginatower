@@ -1,5 +1,6 @@
 <?php
-
+include('../../includes/auth.php');
+include('../../includes/helpers.php');
 include('../../bd.php');
 
 if (isset($_GET['txtID'])) {
@@ -69,136 +70,139 @@ $consultaPropiedades->execute();
 $propiedades = $consultaPropiedades->fetchAll(PDO::FETCH_ASSOC);
 
 include('../../templates/cabecera.php');
+include('../../templates/topbar.php');
+include('../../templates/sidebar.php');
 
 ?>
 
+<div class="main-content">
 
-<div class="card">
-    <div class="card-header">Movimientos Financieros</div>
-    <div class="card-body">
 
-        <form action="" method="post">
 
-            <div class="mb-3">
-                <label for="" class="form-label">ID</label>
-                <input
-                    type="text"
-                    class="form-control"
-                    name="txtID"
-                    id="txtID"
-                    value="<?php echo $txtID ?>"
-                    aria-describedby="helpId"
-                    placeholder="ID" />
-            </div>
+    <div class="card">
+        <div class="card-header">Movimientos Financieros</div>
+        <div class="card-body">
 
-            <div class="mb-3">
-                <label for="" class="form-label">Fecha</label>
-                <input
-                    type="text"
-                    class="form-control"
-                    name="fecha"
-                    id="fecha"
-                    value="<?php echo $fecha ?>"
-                    aria-describedby="helpId"
-                    placeholder="Fecha" />
-            </div>
+            <form action="" method="post">
 
-            <div class="mb-3">
-                <label class="form-label">Propiedad</label>
-                <select name="id_propiedad" class="form-control" required>
-                    <option value="">Seleccione una propiedad</option>
+                <div class="mb-3">
+                    <label for="" class="form-label">ID</label>
+                    <input
+                        type="text"
+                        class="form-control"
+                        name="txtID"
+                        id="txtID"
+                        value="<?php echo $txtID ?>"
+                        aria-describedby="helpId"
+                        placeholder="ID" />
+                </div>
 
-                    <?php foreach ($propiedades as $p) { ?>
-                        <option
-                            value="<?php echo $p['id_propiedad']; ?>"
-                            <?php echo ($p['id_propiedad'] == $id_propiedad) ? 'selected' : ''; ?>>
+                <div class="mb-3">
+                    <label for="" class="form-label">Fecha</label>
+                    <input
+                        type="text"
+                        class="form-control"
+                        name="fecha"
+                        id="fecha"
+                        value="<?php echo $fecha ?>"
+                        aria-describedby="helpId"
+                        placeholder="Fecha" />
+                </div>
 
-                            <?php echo $p['codigo']; ?>
+                <div class="mb-3">
+                    <label class="form-label">Propiedad</label>
+                    <select name="id_propiedad" class="form-control" required>
+                        <option value="">Seleccione una propiedad</option>
+
+                        <?php foreach ($propiedades as $p) { ?>
+                            <option
+                                value="<?php echo $p['id_propiedad']; ?>"
+                                <?php echo ($p['id_propiedad'] == $id_propiedad) ? 'selected' : ''; ?>>
+
+                                <?php echo $p['codigo']; ?>
+                            </option>
+                        <?php } ?>
+                    </select>
+
+                    <small class="form-text text-muted">
+                        Las propiedades se toman del catálogo de Propiedades.
+                    </small>
+                </div>
+
+
+                <div class="mb-3">
+                    <label class="form-label">Tipo de operación</label>
+                    <select name="id_tipo_operacion" class="form-select" required>
+                        <?php foreach ($tiposOperacion as $tipo) { ?>
+                            <option value="<?php echo $tipo['id']; ?>"
+                                <?php echo ($tipo['id'] == $id_tipo_operacion) ? 'selected' : ''; ?>>
+                                <?php echo $tipo['codigo'] . " - " . $tipo['concepto']; ?>
+                            </option>
+                        <?php } ?>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label for="" class="form-label">Nota</label>
+                    <input
+                        type="text"
+                        class="form-control"
+                        name="nota"
+                        id="nota"
+                        value="<?php echo $nota ?>"
+                        aria-describedby="helpId"
+                        placeholder="Nota" />
+                </div>
+
+                <div class="mb-3">
+                    <label for="" class="form-label">Abono</label>
+                    <input
+                        type="text"
+                        class="form-control"
+                        name="abono"
+                        id="Abono"
+                        value="<?php echo $abono ?>"
+                        aria-describedby="helpId"
+                        placeholder="Abono" />
+                </div>
+
+                <div class="mb-3">
+                    <label for="" class="form-label">Cargo</label>
+                    <input
+                        type="text"
+                        class="form-control"
+                        name="cargo"
+                        id="cargo"
+                        value="<?php echo $cargo ?>"
+                        aria-describedby="helpId"
+                        placeholder="Cargo" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Origen</label>
+                    <select name="origen" class="form-select" required>
+                        <option value="CUENTA" <?php echo ($origen == 'CUENTA') ? 'selected' : ''; ?>>
+                            Cuenta
                         </option>
-                    <?php } ?>
-                </select>
-
-                <small class="form-text text-muted">
-                    Las propiedades se toman del catálogo de Propiedades.
-                </small>
-            </div>
-
-
-            <div class="mb-3">
-                <label class="form-label">Tipo de operación</label>
-                <select name="id_tipo_operacion" class="form-select" required>
-                    <?php foreach ($tiposOperacion as $tipo) { ?>
-                        <option value="<?php echo $tipo['id']; ?>"
-                            <?php echo ($tipo['id'] == $id_tipo_operacion) ? 'selected' : ''; ?>>
-                            <?php echo $tipo['codigo'] . " - " . $tipo['concepto']; ?>
+                        <option value="EFECTIVO" <?php echo ($origen == 'EFECTIVO') ? 'selected' : ''; ?>>
+                            Efectivo
                         </option>
-                    <?php } ?>
-                </select>
-            </div>
-
-            <div class="mb-3">
-                <label for="" class="form-label">Nota</label>
-                <input
-                    type="text"
-                    class="form-control"
-                    name="nota"
-                    id="nota"
-                    value="<?php echo $nota ?>"
-                    aria-describedby="helpId"
-                    placeholder="Nota" />
-            </div>
-
-            <div class="mb-3">
-                <label for="" class="form-label">Abono</label>
-                <input
-                    type="text"
-                    class="form-control"
-                    name="abono"
-                    id="Abono"
-                    value="<?php echo $abono ?>"
-                    aria-describedby="helpId"
-                    placeholder="Abono" />
-            </div>
-
-            <div class="mb-3">
-                <label for="" class="form-label">Cargo</label>
-                <input
-                    type="text"
-                    class="form-control"
-                    name="cargo"
-                    id="cargo"
-                    value="<?php echo $cargo ?>"
-                    aria-describedby="helpId"
-                    placeholder="Cargo" />
-            </div>
-
-            <div class="mb-3">
-                <label class="form-label">Origen</label>
-                <select name="origen" class="form-select" required>
-                    <option value="CUENTA" <?php echo ($origen == 'CUENTA') ? 'selected' : ''; ?>>
-                        Cuenta
-                    </option>
-                    <option value="EFECTIVO" <?php echo ($origen == 'EFECTIVO') ? 'selected' : ''; ?>>
-                        Efectivo
-                    </option>
-                </select>
-            </div>
+                    </select>
+                </div>
 
 
-            <button type="submit" name="accion" value="agregar" class="btn btn-success">Modificar</button>
-            <a
-                name=""
-                id=""
-                class="btn btn-primary"
-                href="index.php"
-                role="button">Cancelar</a>
+                <button type="submit" name="accion" value="agregar" class="btn btn-success">Modificar</button>
+                <a
+                    name=""
+                    id=""
+                    class="btn btn-primary"
+                    href="index.php"
+                    role="button">Cancelar</a>
 
 
-        </form>
+            </form>
 
-    </div>
-
-    <div class="card-footer text-muted">
+        </div>
 
 
     </div>
