@@ -1,44 +1,45 @@
 <?php
 include('../../includes/auth.php');
 include('../../includes/helpers.php');
+include('../../includes/permisos.php');
 include('../../bd.php');
 
-if (isset($_GET['txtID'])) {
-    $txtID = isset($_GET['txtID']) ? $_GET['txtID'] : '';
+require_once '../../services/DuenoService.php';
 
-    $consulta = $conexionBD->prepare("SELECT * FROM duenos WHERE id_dueno=:id_dueno");
-    $consulta->bindParam(':id_dueno', $txtID);
-    $consulta->execute();
+$idRol = $_SESSION['id_rol'] ?? null;
 
-    $dueño = $consulta->fetch(PDO::FETCH_LAZY);
-    $nombre = $dueño['nombre'];
-    $telefono = $dueño['telefono'];
-    $correo = $dueño['correo'];
+if (!$idRol) {
+    header("Location: ../../login.php");
+    exit();
 }
 
-if ($_POST) {
+verificarPermiso($conexionBD, $idRol, 'duenos', 'editar');
 
-    $txtID  = isset($_POST['txtID']) ? $_POST['txtID'] : '';
-    $nombre = isset($_POST['nombre']) ? $_POST['nombre'] : '';
-    $telefono = isset($_POST['telefono']) ? $_POST['telefono'] : '';
-    $correo = isset($_POST['correo']) ? $_POST['correo'] : '';
-    $accion = isset($_POST['accion']) ? $_POST['accion'] : '';
+$service = new DuenoService($conexionBD);
 
-    print_r($_POST);
+$id = intval($_GET['txtID'] ?? 0);
 
-    $consulta = $conexionBD->prepare("UPDATE duenos 
-        SET nombre =:nombre, 
-                telefono = :telefono,
-                correo = :correo
-                WHERE id_dueno=:id_dueno");
-
-    $consulta->bindParam(':nombre', $nombre);
-    $consulta->bindParam(':telefono', $telefono);
-    $consulta->bindParam(':correo', $correo);
-    $consulta->bindParam(':id_dueno', $txtID);
-
-    $consulta->execute();
+if ($id <= 0) {
     header("Location:index.php");
+    exit();
+}
+
+// ==============================
+// 🔎 CARGAR DATOS (GET)
+// ==============================
+
+if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+
+    $dueno = $service->obtenerPorId($id);
+
+    if (!$dueno) {
+        header("Location:index.php");
+        exit();
+    }
+
+    $nombre = $dueno['nombre'];
+    $telefono = $dueno['telefono'];
+    $correo = $dueno['correo'];
 }
 
 include('../../templates/cabecera.php');
@@ -46,74 +47,52 @@ include('../../templates/topbar.php');
 include('../../templates/sidebar.php');
 ?>
 
-<div class="main-content">
+<div class="content">
 
-<div class="card">
-    <div class="card-header">Dueños</div>
-    <div class="card-body">
+    <div class="card">
+        <div class="card-header">Editar Dueño</div>
+        <div class="card-body">
 
-        <form action="" method="post">
+            <form action="actualizar.php" method="post">
 
-            <div class="mb-3">
-                <label for="" class="form-label">ID</label>
-                <input
-                    type="text"
-                    class="form-control"
-                    value="<?php echo $txtID; ?>"
-                    name="txtID"
-                    id="txtID"
-                    aria-describedby="helpId"
-                    placeholder="ID" />
-            </div>
+                <input type="hidden" name="csrf_token" value="<?= generarTokenCSRF(); ?>">
+                <input type="hidden" name="txtID" value="<?= (int)$id ?>">
 
-            <div class="mb-3">
-                <label for="" class="form-label">Nombre</label>
-                <input
-                    type="text"
-                    class="form-control"
-                    value="<?php echo $nombre ?>"
-                    name="nombre"
-                    id="nombre"
-                    aria-describedby="helpId"
-                    placeholder="Nombre" />
-            </div>
+                <div class="mb-3">
+                    <label class="form-label">Nombre</label>
+                    <input
+                        type="text"
+                        class="form-control"
+                        value="<?= htmlspecialchars($nombre ?? '') ?>"
+                        name="nombre"
+                        required>
+                </div>
 
-            <div class="mb-3">
-                <label for="" class="form-label">Telefono</label>
-                <input
-                    type="tel"
-                    class="form-control"
-                    value="<?php echo $telefono ?>"
-                    name="telefono"
-                    id="telefono"
-                    aria-describedby="helpId"
-                    placeholder="Telefono" />
-            </div>
+                <div class="mb-3">
+                    <label class="form-label">Teléfono</label>
+                    <input
+                        type="tel"
+                        class="form-control"
+                        value="<?= htmlspecialchars($telefono ?? '') ?>"
+                        name="telefono"
+                        required>
+                </div>
 
-            <div class="mb-3">
-                <label for="" class="form-label">Correo</label>
-                <input
-                    type="email"
-                    class="form-control"
-                    value="<?php echo $correo ?>"
-                    name="correo"
-                    id="correo"
-                    aria-describedby="helpId"
-                    placeholder="Correo" />
-            </div>
+                <div class="mb-3">
+                    <label class="form-label">Correo</label>
+                    <input
+                        type="email"
+                        class="form-control"
+                        value="<?= htmlspecialchars($correo ?? '') ?>"
+                        name="correo">
+                </div>
 
-            <button type="submit" name="accion" value="agregar" class="btn btn-success">Modificar</button>
-            <a
-                name=""
-                id=""
-                class="btn btn-primary"
-                href="index.php"
-                role="button">Cancelar</a>
+                <button type="submit" class="btn btn-success">Modificar</button>
+                <a class="btn btn-secondary" href="index.php">Cancelar</a>
 
+            </form>
 
-        </form>
-
-    </div>
+        </div>
 
     </div>
 

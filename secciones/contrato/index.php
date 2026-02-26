@@ -1,83 +1,67 @@
 <?php
 include('../../includes/auth.php');
 include('../../includes/helpers.php');
-include('../../bd.php'); // Conexión a la base de datos
+include('../../bd.php');
+include('../../includes/permisos.php');
 
-// ELIMINAR RENTA
+$idRol = $_SESSION['id_rol'];
+verificarPermiso($conexionBD, $idRol, 'contratos', 'ver');
 
-if (isset($_GET['txtID'])) {  // Si viene un ID por la URL (ej: index.php?txtID=5)
-
-    $txtID = $_GET['txtID'];    // Guardamos el ID que viene por GET
-
-    // Preparamos consulta para eliminar la renta
-    $consulta = $conexionBD->prepare("DELETE FROM contratos WHERE id_contrato = :id_contrato");
-
-    $consulta->bindParam(':id_contrato', $txtID);   // Vinculamos el parámetro
-    $consulta->execute();   // Ejecutamos la consulta
-    header("Location:index.php");   // Redirigimos nuevamente al listado
-    exit;
-}
-
-// Consulta que obtiene rentas junto con datos del local y cliente
 $consulta = $conexionBD->prepare("SELECT
-        r.id_contrato,
-        l.codigo AS local,
-        c.nombre AS cliente,
-        r.renta,
-        r.deposito,
-        r.adicional,
-        r.fecha_inicio,
-        r.fecha_fin,
-        r.estatus,
+    r.id_contrato,
+    l.codigo AS local,
+    a.nombre AS arrendatario,
+    r.renta,
+    r.deposito,
+    r.adicional,
+    r.fecha_inicio,
+    r.fecha_fin,
+    r.estatus,
+    r.duracion,
 
-        IFNULL(SUM(
-            CASE 
-                WHEN p.estatus IN ('Pendiente','Vencido') 
-                THEN p.monto 
-                ELSE 0 
-            END
-        ),0) AS deuda_total
+    TIMESTAMPDIFF(MONTH, r.fecha_inicio, CURDATE()) AS antiguedad_meses,
 
-    FROM contratos r
+    (
+        SELECT IFNULL(SUM(p.monto),0)
+        FROM pagos p
+        WHERE p.id_contrato = r.id_contrato
+        AND p.estatus IN ('Pendiente','Vencido')
+    ) AS deuda_total
 
-    INNER JOIN locales l ON l.id_local = r.id_local
-    INNER JOIN clientes c ON c.id_cliente = r.id_cliente
-    LEFT JOIN pagos p ON p.id_contrato = r.id_contrato
-
-    GROUP BY r.id_contrato
-    ORDER BY r.id_contrato DESC
+FROM contratos r
+INNER JOIN locales l ON l.id_local = r.id_local
+INNER JOIN arrendatarios a ON a.id_arrendatario = r.id_arrendatario
+ORDER BY r.id_contrato DESC
 ");
-$consulta->execute(); // Ejecutamos la consulta
-$listaRentas = $consulta->fetchAll(PDO::FETCH_ASSOC); // Guardamos todos los resultados en un arreglo
+
+$consulta->execute();
+$listaRentas = $consulta->fetchAll(PDO::FETCH_ASSOC);
 
 include('../../templates/cabecera.php');
 include('../../templates/topbar.php');
 include('../../templates/sidebar.php');
 ?>
 
-<div class="main-content">
+<div class="content">
 
     <div class="card">
         <div class="card-header">
 
-            <a
-                name=""
-                id=""
-                class="btn btn-success"
-                href="agregar.php"
-                role="button">Agregar</a>
+            <?php if (tienePermiso($conexionBD, $idRol, 'contratos', 'crear')): ?>
+                <a class="btn btn-success" href="crear.php">
+                    + Nuevo contrato
+                </a>
+            <?php endif; ?>
+
         </div>
 
         <div class="card-body">
-            <div
-                class="table-responsive-sm">
+            <div class="table-responsive-sm">
 
-                <table class="table">
+                <table class="table table-striped">
 
                     <thead>
-
                         <tr>
-                            <th>ID</th>
                             <th>Local</th>
                             <th>Arrendatario</th>
                             <th>Renta</th>
@@ -85,33 +69,52 @@ include('../../templates/sidebar.php');
                             <th>Adicional</th>
                             <th>Fecha Inicio</th>
                             <th>Fecha Fin</th>
+                            <th>Antigüedad</th>
                             <th>Estatus</th>
+                            <th>Duración</th>
                             <th>Deuda</th>
                             <th>Acciones</th>
                         </tr>
-
                     </thead>
 
                     <tbody>
 
-                        <?php foreach ($listaRentas as $value) { ?>
+                        <?php foreach ($listaRentas as $value): ?>
                             <tr>
 
-                                <!-- Mostramos datos básicos -->
-                                <td><?php echo $value['id_contrato']; ?></td>
-                                <td><?php echo $value['local']; ?></td>
-                                <td><?php echo $value['cliente']; ?></td>
-                                <td><?php echo $value['renta']; ?></td>
-                                <td><?php echo $value['deposito']; ?></td>
-                                <td><?php echo $value['adicional']; ?></td>
-                                <td><?php echo $value['fecha_inicio']; ?></td>
-                                <td><?php echo $value['fecha_fin']; ?></td>
+                                <td><?= htmlspecialchars($value['local']) ?></td>
+                                <td><?= htmlspecialchars($value['arrendatario']) ?></td>
+                                <td>$<?= number_format($value['renta'], 2) ?></td>
+                                <td>$<?= number_format($value['deposito'], 2) ?></td>
+                                <td>$<?= number_format($value['adicional'], 2) ?></td>
+                                <td><?= date('d/m/Y', strtotime($value['fecha_inicio'])) ?></td>
 
-                                <!-- COLUMNA ESTATUS DINÁMICO -->
+                                <!-- FECHA FIN -->
+                                <td>
+                                    <?php if (!empty($value['fecha_fin'])): ?>
+                                        <?= date('d/m/Y', strtotime($value['fecha_fin'])) ?>
+                                    <?php else: ?>
+                                        —
+                                    <?php endif; ?>
+                                </td>
+
+                                <!-- ANTIGUEDAD -->
+
                                 <td>
                                     <?php
+                                    $inicio = new DateTime($value['fecha_inicio']);
+                                    $hoy = new DateTime();
+                                    $diff = $inicio->diff($hoy);
 
+                                    echo $diff->y . " años, " . $diff->m . " meses";
+                                    ?>
+                                </td>
+
+                                <!-- ESTATUS -->
+                                <td>
+                                    <?php
                                     $hoy = date('Y-m-d');
+                                    $duracion = $value['duracion'] ?? 'Fijo';
 
                                     switch ($value['estatus']) {
 
@@ -128,58 +131,74 @@ include('../../templates/sidebar.php');
                                             break;
 
                                         case 'Activa':
-                                            if ($value['fecha_fin'] < $hoy) {
+
+                                            if ($duracion === 'Indefinido') {
+                                                echo '<span class="badge bg-primary">Activa (Indefinida)</span>';
+                                            } elseif (!empty($value['fecha_fin']) && $value['fecha_fin'] < $hoy) {
                                                 echo '<span class="badge bg-danger">Vencida</span>';
-                                            } elseif ($value['fecha_fin'] <= date('Y-m-d', strtotime('+5 days'))) {
+                                            } elseif (!empty($value['fecha_fin']) && $value['fecha_fin'] <= date('Y-m-d', strtotime('+5 days'))) {
                                                 echo '<span class="badge bg-warning text-dark">Por vencer</span>';
                                             } else {
                                                 echo '<span class="badge bg-success">Activa</span>';
                                             }
+
                                             break;
                                     }
-
-
                                     ?>
                                 </td>
 
+                                <!-- DURACION -->
                                 <td>
-                                    <?php if ($value['deuda_total'] > 0) { ?>
-                                        <span class="badge bg-danger">
-                                            $<?php echo number_format($value['deuda_total'], 2); ?>
-                                        </span>
-                                    <?php } else { ?>
-                                        <span class="badge bg-success">$0.00</span>
-                                    <?php } ?>
+                                    <?php if ($duracion === 'Indefinido'): ?>
+                                        <span class="badge bg-info">Indefinido</span>
+                                    <?php else: ?>
+                                        <span class="badge bg-secondary">Plazo fijo</span>
+                                    <?php endif; ?>
                                 </td>
 
+                                <!-- DEUDA -->
                                 <td>
-                                    <!-- Botón editar -->
-                                    <a class="btn btn-primary"
-                                        href="editar.php?txtID=<?php echo $value['id_contrato']; ?>">
-                                        Editar
-                                    </a>
+                                    <?php if ($value['deuda_total'] > 0): ?>
+                                        <span class="badge bg-danger">
+                                            $<?= number_format($value['deuda_total'], 2); ?>
+                                        </span>
+                                    <?php else: ?>
+                                        <span class="badge bg-success">$0.00</span>
+                                    <?php endif; ?>
+                                </td>
 
-                                    <!-- Botón borrar -->
-                                    <a class="btn btn-danger"
-                                        href="index.php?txtID=<?php echo $value['id_contrato']; ?>">
-                                        Borrar
-                                    </a>
+                                <!-- ACCIONES -->
+                                <td>
+
+                                    <?php if (tienePermiso($conexionBD, $idRol, 'contratos', 'editar')): ?>
+                                        <a class="btn btn-primary btn-sm"
+                                            href="editar.php?txtID=<?= (int)$value['id_contrato']; ?>">
+                                            Editar
+                                        </a>
+                                    <?php endif; ?>
+
+                                    <?php if (tienePermiso($conexionBD, $idRol, 'contratos', 'eliminar')): ?>
+                                        <form action="eliminar.php" method="post" style="display:inline;">
+                                            <input type="hidden" name="csrf_token" value="<?= generarTokenCSRF(); ?>">
+                                            <input type="hidden" name="txtID" value="<?= (int)$value['id_contrato']; ?>">
+                                            <button type="submit" class="btn btn-danger btn-sm"
+                                                onclick="return confirm('¿Seguro que deseas eliminar este contrato?');">
+                                                Borrar
+                                            </button>
+                                        </form>
+                                    <?php endif; ?>
+
                                 </td>
 
                             </tr>
-                        <?php } ?>
+                        <?php endforeach; ?>
 
                     </tbody>
-
                 </table>
 
-
             </div>
-
         </div>
-
     </div>
-
 </div>
 
 <?php include('../../templates/pie.php'); ?>

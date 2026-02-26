@@ -12,25 +12,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!empty($usuario) && !empty($contrasena)) {
 
         $consulta = $conexionBD->prepare(" SELECT u.*, 
-           r.nombre AS nombre_rol,
-           d.nombre AS nombre_dueno,
-           c.nombre AS nombre_cliente
-    FROM usuarios u
-    JOIN roles r ON u.id_rol = r.id_rol
-    LEFT JOIN duenos d ON u.id_dueno = d.id_dueno
-    LEFT JOIN clientes c ON u.id_cliente = c.id_cliente
-    WHERE u.usuario = :usuario
-");
+                   r.nombre AS nombre_rol,
+                   d.nombre AS nombre_dueno,
+                   c.nombre AS nombre_arrendatario
+            FROM usuarios u
+            JOIN roles r ON u.id_rol = r.id_rol
+            LEFT JOIN duenos d ON u.id_dueno = d.id_dueno
+            LEFT JOIN arrendatarios c ON u.id_arrendatario = c.id_arrendatario
+            WHERE u.usuario = :usuario");
 
-        $consulta->bindParam(":usuario", $usuario);
-        $consulta->execute();
+        $consulta->execute([':usuario' => $usuario]);
 
         $usuarioBD = $consulta->fetch(PDO::FETCH_ASSOC);
 
         if ($usuarioBD && password_verify($contrasena, $usuarioBD['contrasena'])) {
 
+            // 🔐 Seguridad
+            session_regenerate_id(true);
+
             $nombreCompleto = $usuarioBD['nombre_dueno']
-                ?: $usuarioBD['nombre_cliente']
+                ?: $usuarioBD['nombre_arrendatario']
                 ?: $usuarioBD['usuario'];
 
             $_SESSION['id'] = $usuarioBD['id'];
@@ -38,6 +39,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['nombre_completo'] = $nombreCompleto;
             $_SESSION['id_rol'] = $usuarioBD['id_rol'];
             $_SESSION['rol'] = $usuarioBD['nombre_rol'];
+
+            // 🔥 Cargar permisos en sesión
+            $consultaPermisos = $conexionBD->prepare("SELECT m.nombre AS modulo, p.accion
+                FROM rol_permiso rp
+                INNER JOIN permisos p ON rp.id_permiso = p.id_permiso
+                INNER JOIN modulos m ON p.id_modulo = m.id_modulo
+                WHERE rp.id_rol = :rol
+            ");
+
+            $consultaPermisos->execute([
+                ':rol' => $usuarioBD['id_rol']
+            ]);
+
+            $_SESSION['permisos'] = $consultaPermisos->fetchAll(PDO::FETCH_ASSOC);
+
+            // 🔐 Si el rol no tiene permisos, bloquear acceso
+            if (empty($_SESSION['permisos'])) {
+                session_destroy();
+                die("Este rol no tiene permisos asignados.");
+            }
 
             header("Location: index.php");
             exit();
@@ -82,7 +103,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 <?php if (!empty($mensaje)) { ?>
                     <div class="alert alert-danger" role="alert">
-                        <strong>Error: <?php echo $mensaje; ?></strong>
+                        <strong> Error: <?php echo htmlspecialchars($mensaje); ?> </strong>
                     </div>
                 <?php } ?>
 

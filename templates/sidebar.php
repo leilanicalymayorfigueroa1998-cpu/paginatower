@@ -22,7 +22,7 @@ $color = isset($rol) ? obtenerColorRol($rol) : '#6c757d';
         </div>
     </div>
 
-    <a href="#">📊 Dashboard</a>
+    <a href="<?php echo $url_base; ?>/secciones/dashboard/">📊 Dashboard</a>
     <a href="<?php echo $url_base; ?>/secciones/movimientos/">🧾 Administración</a>
 
     <a href="javascript:void(0)" onclick="togglePropiedades()" class="menu-toggle">

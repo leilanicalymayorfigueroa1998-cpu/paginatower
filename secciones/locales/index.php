@@ -1,104 +1,107 @@
 <?php
 include('../../includes/auth.php');
 include('../../includes/helpers.php');
+include('../../includes/permisos.php');
 include('../../bd.php');
 
-if (isset($_GET['txtID'])) {
-    $txtID = isset($_GET['txtID']) ? $_GET['txtID'] : '';
+require_once('../../app/services/LocalService.php');
 
-    $consulta = $conexionBD->prepare("DELETE FROM locales WHERE id_local = :id_local");
-    $consulta->bindParam(':id_local', $txtID);
-    $consulta->execute();
-    header("Location:index.php");
+$idRol = $_SESSION['id_rol'] ?? null;
+
+if (!$idRol) {
+    header("Location: ../../login.php");
+    exit();
 }
 
-$consulta = $conexionBD->prepare(" SELECT
-        l.id_local,
-        p.codigo AS propiedad,
-        l.codigo,
-        l.medidas,
-        l.descripcion,
-        l.estacionamiento,
-        l.estatus
-    FROM locales l
-    INNER JOIN propiedades p
-        ON p.id_propiedad = l.id_propiedad
-    ORDER BY l.id_local DESC");
+// 🔐 Permiso para ver módulo
+verificarPermiso($conexionBD, $idRol, 'locales', 'ver');
 
-$consulta->execute();
-$listaLocales = $consulta->fetchAll(PDO::FETCH_ASSOC);
+$service = new LocalService($conexionBD);
+$listaLocales = $service->obtenerTodos();
+
+// 🔎 Permisos para botones
+$puedeCrear    = tienePermiso($conexionBD, $idRol, 'locales', 'crear');
+$puedeEditar   = tienePermiso($conexionBD, $idRol, 'locales', 'editar');
+$puedeEliminar = tienePermiso($conexionBD, $idRol, 'locales', 'eliminar');
 
 include('../../templates/cabecera.php');
 include('../../templates/topbar.php');
 include('../../templates/sidebar.php');
-
 ?>
 
-<div class="main-content">
+<div class="content">
 
     <div class="card">
         <div class="card-header">
 
-            <a
-                name=""
-                id=""
-                class="btn btn-success"
-                href="agregar.php"
-                role="button">Agregar</a>
-        </div>
 
-        <div class="card-body">
-            <div
-                class="table-responsive">
-                <table
-                    class="table">
-                    <thead>
-
-                        <tr>
-                            <th>ID</th>
-                            <th>Propiedad</th>
-                            <th>Codigo</th>
-                            <th>Medidas</th>
-                            <th>Descripcion</th>
-                            <th>Estacionamiento</th>
-                            <th>Estatus</th>
-                            <th style="width: 120px;">Acciones</th>
-                        </tr>
-
-                    </thead>
-
-                    <tbody>
-
-                        <?php foreach ($listaLocales as $key => $value) { ?>
-
-                            <tr>
-                                <td><?php echo $value['id_local']; ?></td>
-                                <td><?php echo $value['propiedad']; ?></td>
-                                <td><?php echo $value['codigo']; ?></td>
-                                <td><?php echo $value['medidas']; ?></td>
-                                <td><?php echo $value['descripcion']; ?></td>
-                                <td><?php echo $value['estacionamiento']; ?></td>
-                                <td><?php echo $value['estatus']; ?></td>
-                                <td>
-                                    <a class="btn btn-primary"
-                                        href="editar.php?txtID=<?php echo $value['id_local']; ?>">
-                                        Editar
-                                    </a>
-                                    <a class="btn btn-danger"
-                                        href="index.php?txtID=<?php echo $value['id_local']; ?>">
-                                        Borrar
-                                    </a>
-                                </td>
-                            </tr>
-
-                        <?php   } ?>
-
-                    </tbody>
-                </table>
-            </div>
-
+            <?php if ($puedeCrear): ?>
+                <a class="btn btn-success" href="crear.php">Agregar</a>
+            <?php endif; ?>
         </div>
     </div>
+
+    <div class="card-body">
+        <div
+            class="table-responsive">
+            <table
+                class="table">
+                <thead>
+
+                    <tr>
+
+                        <th>Propiedad</th>
+                        <th>Codigo</th>
+                        <th>Medidas</th>
+                        <th>Descripcion</th>
+                        <th>Estacionamiento</th>
+                        <th>Estatus</th>
+                        <th style="width: 120px;">Acciones</th>
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    <?php foreach ($listaLocales as $value) { ?>
+                        <tr>
+                            <td><?= $value['propiedad']; ?></td>
+                            <td><?= $value['codigo']; ?></td>
+                            <td><?= $value['medidas']; ?></td>
+                            <td><?= $value['descripcion']; ?></td>
+                            <td><?= $value['estacionamiento']; ?></td>
+                            <td>
+                                <?php if ($value['estatus'] === 'Disponible'): ?>
+                                    <span class="badge bg-success">Disponible</span>
+                                <?php else: ?>
+                                    <span class="badge bg-danger">Ocupado</span>
+                                <?php endif; ?>
+                            </td>
+                            <td>
+                                <?php if ($puedeEditar): ?>
+                                    <a class="btn btn-primary btn-sm"
+                                        href="editar.php?txtID=<?= $value['id_local']; ?>">
+                                        Editar
+                                    </a>
+                                <?php endif; ?>
+
+                                <?php if ($puedeEliminar): ?>
+                                    <a class="btn btn-danger btn-sm"
+                                        href="eliminar.php?txtID=<?= $value['id_local']; ?>"
+                                        onclick="return confirm('¿Seguro que deseas eliminar este local?')">
+                                        Borrar
+                                    </a>
+                                <?php endif; ?>
+                            </td>
+                        </tr>
+                    <?php } ?>
+
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</div>
 </div>
 
 <?php include('../../templates/pie.php'); ?>

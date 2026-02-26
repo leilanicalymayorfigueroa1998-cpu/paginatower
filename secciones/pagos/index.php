@@ -1,28 +1,33 @@
 <?php
 include('../../includes/auth.php');
 include('../../includes/helpers.php');
+include('../../includes/permisos.php');
 include('../../bd.php');
 
-if (isset($_GET['txtID'])) {
-    $txtID = isset($_GET['txtID']) ? $_GET['txtID'] : '';
+$idRol = $_SESSION['id_rol'] ?? null;
 
-    $consulta = $conexionBD->prepare("DELETE FROM pagos WHERE id_pago = :id_pago");
-    $consulta->bindParam(':id_pago', $txtID);
-    $consulta->execute();
-    header("Location:index.php");
-    exit();
+$puedeCrear   = false;
+$puedeEditar  = false;
+$puedeEliminar = false;
+
+if ($idRol) {
+    $puedeCrear    = tienePermiso($conexionBD, $idRol, 'pagos', 'crear');
+    $puedeEditar   = tienePermiso($conexionBD, $idRol, 'pagos', 'editar');
+    $puedeEliminar = tienePermiso($conexionBD, $idRol, 'pagos', 'eliminar');
 }
 
-$consulta = $conexionBD->prepare("SELECT p.id_pago,
-       l.codigo AS contrato,
-       p.fecha_pago,
-       p.monto,
-       p.metodo_pago,
-       p.estatus
-FROM pagos p
-INNER JOIN contratos r ON p.id_contrato = r.id_contrato
-INNER JOIN locales l ON r.id_local = l.id_local
-ORDER BY p.id_pago DESC");
+$consulta = $conexionBD->prepare("
+    SELECT p.id_pago,
+           l.codigo AS contrato,
+           p.fecha_pago,
+           p.monto,
+           p.metodo_pago,
+           p.estatus
+    FROM pagos p
+    INNER JOIN contratos r ON p.id_contrato = r.id_contrato
+    INNER JOIN locales l ON r.id_local = l.id_local
+    ORDER BY p.id_pago DESC
+");
 
 $consulta->execute();
 $listaPagos = $consulta->fetchAll(PDO::FETCH_ASSOC);
@@ -32,17 +37,16 @@ include('../../templates/topbar.php');
 include('../../templates/sidebar.php');
 ?>
 
-<div class="main-content">
+<div class="content">
 
     <div class="card">
         <div class="card-header">
 
-            <a
-                name=""
-                id=""
-                class="btn btn-success"
-                href="agregar.php"
-                role="button">Agregar</a>
+            <?php if ($puedeCrear): ?>
+                <a class="btn btn-success" href="crear.php">
+                    + Nuevo Pago
+                </a>
+            <?php endif; ?>
         </div>
 
         <div class="card-body">
@@ -52,7 +56,7 @@ include('../../templates/sidebar.php');
                     class="table">
                     <thead>
                         <tr>
-                            <th>ID</th>
+
                             <th>Renta</th>
                             <th>Fecha pago</th>
                             <th>Monto</th>
@@ -66,7 +70,6 @@ include('../../templates/sidebar.php');
 
                         <?php foreach ($listaPagos as $key => $value) { ?>
                             <tr class="">
-                                <td scope="row"><?php echo $value['id_pago'] ?> </td>
                                 <td><?php echo $value['contrato'] ?></td>
                                 <td><?php echo $value['fecha_pago'] ?></td>
                                 <td><?php echo $value['monto'] ?></td>
@@ -94,19 +97,25 @@ include('../../templates/sidebar.php');
 
 
                                 <td>
-                                    <a
-                                        name=""
-                                        id=""
-                                        class="btn btn-primary"
-                                        href="editar.php?txtID=<?php echo $value['id_pago']; ?>"
-                                        role="button">Editar</a>
 
-                                    <a
-                                        name=""
-                                        id=""
-                                        class="btn btn-danger"
-                                        href="index.php?txtID=<?php echo $value['id_pago']; ?>"
-                                        role="button">Borrar</a>
+                                    <?php if ($puedeEditar): ?>
+                                        <a class="btn btn-primary btn-sm"
+                                            href="editar.php?txtID=<?= htmlspecialchars($value['id_pago']) ?>">
+                                            Editar
+                                        </a>
+                                    <?php endif; ?>
+
+                                    <?php if ($puedeEliminar): ?>
+                                        <form action="eliminar.php" method="post" style="display:inline;">
+                                            <input type="hidden" name="csrf_token" value="<?= generarTokenCSRF(); ?>">
+                                            <input type="hidden" name="txtID" value="<?= $value['id_pago']; ?>">
+                                            <button type="submit"
+                                                class="btn btn-danger btn-sm"
+                                                onclick="return confirm('¿Seguro que deseas eliminar este pago?');">
+                                                Borrar
+                                            </button>
+                                        </form>
+                                    <?php endif; ?>
 
                                 </td>
 

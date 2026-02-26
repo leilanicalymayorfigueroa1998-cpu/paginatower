@@ -1,90 +1,109 @@
 <?php
 include('../../includes/auth.php');
 include('../../includes/helpers.php');
+include('../../includes/permisos.php');
 include('../../bd.php');
 
+$idRol = $_SESSION['id_rol'] ?? null;
 
-if (isset($_GET['txtID'])) {
-    $txtID = isset($_GET['txtID']) ? $_GET['txtID'] : '';
-
-    $consulta = $conexionBD->prepare("DELETE FROM duenos WHERE id_dueno = :id_dueno");
-    $consulta->bindParam(':id_dueno', $txtID);
-    $consulta->execute();
-    header("Location:index.php");
+if (!$idRol) {
+    header("Location: ../../login.php");
+    exit();
 }
 
-$consulta = $conexionBD->prepare("SELECT * FROM duenos");
+verificarPermiso($conexionBD, $idRol, 'duenos', 'ver');
+
+$puedeCrear    = tienePermiso($conexionBD, $idRol, 'duenos', 'crear');
+$puedeEditar   = tienePermiso($conexionBD, $idRol, 'duenos', 'editar');
+$puedeEliminar = tienePermiso($conexionBD, $idRol, 'duenos', 'eliminar');
+
+$consulta = $conexionBD->prepare("SELECT 
+        id_dueno,
+        nombre,
+        telefono,
+        correo
+    FROM duenos
+    ORDER BY id_dueno DESC");
+
 $consulta->execute();
-$listaDueños = $consulta->fetchAll(PDO::FETCH_ASSOC);
+$listaDuenos = $consulta->fetchAll(PDO::FETCH_ASSOC);
 
 include('../../templates/cabecera.php');
 include('../../templates/topbar.php');
 include('../../templates/sidebar.php');
 ?>
 
-<div class="main-content">
+<div class="content">
 
     <div class="card">
         <div class="card-header">
 
-            <a
-                name=""
-                id=""
-                class="btn btn-success"
-                href="agregar.php"
-                role="button">Agregar</a>
+            <?php if ($puedeCrear): ?>
+                <a class="btn btn-success" href="crear.php">
+                    + Nuevo Dueño
+                </a>
+            <?php endif; ?>
+
         </div>
 
         <div class="card-body">
-            <div
-                class="table-responsive-sm">
-                <table
-                    class="table">
-                    <thead>
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead class="table-dark">
                         <tr>
-                            <th>ID</th>
                             <th>Nombre</th>
-                            <th>Telefono</th>
+                            <th>Teléfono</th>
                             <th>Correo</th>
                             <th>Acciones</th>
-
                         </tr>
                     </thead>
                     <tbody>
 
-                        <?php foreach ($listaDueños as $key => $value) { ?>
+                        <?php foreach ($listaDuenos as $value): ?>
+                            <tr>
+                                <td><?= htmlspecialchars($value['nombre']) ?></td>
+                                <td><?= htmlspecialchars($value['telefono']) ?></td>
+                                <td><?= htmlspecialchars($value['correo']) ?></td>
 
-                            <tr class="">
-                                <td scope="row"><?php echo $value['id_dueno'] ?> </td>
-                                <td><?php echo $value['nombre'] ?></td>
-                                <td><?php echo $value['telefono'] ?></td>
-                                <td><?php echo $value['correo'] ?></td>
                                 <td>
-                                    <a
-                                        name=""
-                                        id=""
-                                        class="btn btn-primary"
-                                        href="editar.php?txtID=<?php echo $value['id_dueno']; ?>"
-                                        role="button">Editar</a>
 
-                                    <a
-                                        name=""
-                                        id=""
-                                        class="btn btn-danger"
-                                        href="index.php?txtID=<?php echo $value['id_dueno']; ?>"
-                                        role="button">Borrar</a>
+                                    <?php if ($puedeEditar): ?>
+                                        <a class="btn btn-primary btn-sm"
+                                            href="editar.php?txtID=<?= htmlspecialchars($value['id_dueno']) ?>">
+                                            Editar
+                                        </a>
+                                    <?php endif; ?>
+
+                                    <?php if ($puedeEliminar): ?>
+                                        <form method="POST" action="eliminar.php" style="display:inline;">
+                                            <input type="hidden" name="id"
+                                                value="<?= htmlspecialchars($value['id_dueno']) ?>">
+                                            <input type="hidden" name="csrf_token"
+                                                value="<?= generarTokenCSRF(); ?>">
+                                            <button type="submit"
+                                                class="btn btn-danger btn-sm"
+                                                onclick="return confirm('¿Eliminar este dueño?');">
+                                                Borrar
+                                            </button>
+                                        </form>
+                                    <?php endif; ?>
 
                                 </td>
 
-
                             </tr>
+                        <?php endforeach; ?>
 
-                        <?php   } ?>
+                        <?php if (empty($listaDuenos)): ?>
+                            <tr>
+                                <td colspan="5" class="text-center">
+                                    No hay dueños registrados.
+                                </td>
+                            </tr>
+                        <?php endif; ?>
 
                     </tbody>
                 </table>
             </div>
-
         </div>
     </div>
 </div>

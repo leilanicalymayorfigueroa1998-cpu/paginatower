@@ -1,243 +1,170 @@
 <?php
 include('../../includes/auth.php');
 include('../../includes/helpers.php');
-include('../../bd.php'); // CONEXIÓN A BASE DE DATOS
+include('../../bd.php');
+include('../../includes/permisos.php');
 
-// CARGAR DATOS PARA EDITAR
+$idRol = $_SESSION['id_rol'];
+verificarPermiso($conexionBD, $idRol, 'contratos', 'editar');
 
-if (isset($_GET['txtID'])) {  // Si viene un ID por la URL (ej: editar.php?txtID=3)
-
-    $txtID = isset($_GET['txtID']) ? $_GET['txtID'] : ''; // Guardamos el ID recibido
-
-    // Buscamos la renta correspondiente en la base de datos
-    $consulta = $conexionBD->prepare("SELECT * FROM contratos WHERE id_contrato = :id_contrato");
-    $consulta->bindParam(':id_contrato', $txtID);       // Vinculamos el parámetro
-    $consulta->execute();                            // Ejecutamos la consulta
-    $con = $consulta->fetch(PDO::FETCH_LAZY);        // Guardamos el resultado
-
-    // Asignamos cada campo a una variable
-    $id_local = $con['id_local'];
-    $id_cliente = $con['id_cliente'];
-    $renta = $con['renta'];
-    $deposito = $con['deposito'];
-    $adicional = $con['adicional'];
-    $fecha_inicio = $con['fecha_inicio'];
-    $fecha_fin = $con['fecha_fin'];
-    $estatus = $con['estatus'];
-}
-
-// ACTUALIZAR DATOS (CUANDO SE ENVÍA EL FORMULARIO)
-
-if ($_POST) {
-
-    // Recibimos datos del formulario
-    $txtID  = isset($_POST['txtID']) ? $_POST['txtID'] : '';
-    $id_local = isset($_POST['id_local']) ? $_POST['id_local'] : '';
-    $id_cliente = isset($_POST['id_cliente']) ? $_POST['id_cliente'] : '';
-    $renta = isset($_POST['renta']) ? $_POST['renta'] : '';
-    $deposito = isset($_POST['deposito']) ? $_POST['deposito'] : '';
-    $adicional = isset($_POST['adicional']) ? $_POST['adicional'] : '';
-    $fecha_inicio = isset($_POST['fecha_inicio']) ? $_POST['fecha_inicio'] : '';
-    $fecha_fin = isset($_POST['fecha_fin']) ? $_POST['fecha_fin'] : '';
-    $estatus = isset($_POST['estatus']) ? $_POST['estatus'] : '';
-
-    // Preparamos consulta para actualizar
-    $consulta = $conexionBD->prepare("UPDATE contratos SET
-            id_local = :id_local,
-            id_cliente = :id_cliente,
-            renta = :renta,
-            deposito = :deposito,
-            adicional = :adicional,
-            fecha_inicio = :fecha_inicio,
-            fecha_fin = :fecha_fin,
-            estatus = :estatus
-        WHERE id_contrato = :id_contrato ");
-
-    // Vinculamos todos los parámetros
-    $consulta->bindParam(':id_local', $id_local);
-    $consulta->bindParam(':id_cliente', $id_cliente);
-    $consulta->bindParam(':renta', $renta);
-    $consulta->bindParam(':deposito', $deposito);
-    $consulta->bindParam(':adicional', $adicional);
-    $consulta->bindParam(':fecha_inicio', $fecha_inicio);
-    $consulta->bindParam(':fecha_fin', $fecha_fin);
-    $consulta->bindParam(':estatus', $estatus);
-    $consulta->bindParam(':id_contrato', $txtID);
-    $consulta->execute();   // Ejecutamos actualización
-
-    // 🔹 Si el contrato se cancela o finaliza, cancelar pagos pendientes
-    if ($estatus == 'Cancelada' || $estatus == 'Finalizada') {
-
-        $consultaPagos = $conexionBD->prepare("
-        UPDATE pagos 
-        SET estatus = 'Cancelado'
-        WHERE id_contrato = :id_contrato
-        AND estatus = 'Pendiente'
-    ");
-
-        $consultaPagos->bindParam(':id_contrato', $txtID);
-        $consultaPagos->execute();
-    }
-
-    header("Location:index.php");
+if (!isset($_GET['txtID']) || !is_numeric($_GET['txtID'])) {
+    header("Location: index.php");
     exit();
 }
 
-// CARGAR LISTA DE LOCALES
-$consultaLocales = $conexionBD->prepare("SELECT id_local, codigo FROM locales");
+$txtID = (int) $_GET['txtID'];
+
+// Buscar contrato
+$consulta = $conexionBD->prepare("SELECT * FROM contratos WHERE id_contrato = :id");
+$consulta->execute([':id' => $txtID]);
+$contrato = $consulta->fetch(PDO::FETCH_ASSOC);
+
+if (!$contrato) {
+    die("Contrato no encontrado.");
+}
+
+// Cargar listas
+$consultaLocales = $conexionBD->prepare("SELECT id_local, codigo 
+FROM locales 
+ORDER BY codigo ASC");
 $consultaLocales->execute();
 $listaLocales = $consultaLocales->fetchAll(PDO::FETCH_ASSOC);
 
-// CARGAR LISTA DE CLIENTES
-$consultaClientes = $conexionBD->prepare("SELECT id_cliente, nombre FROM clientes");
-$consultaClientes->execute();
-$listaClientes = $consultaClientes->fetchAll(PDO::FETCH_ASSOC);
+// Cargar Arrendatarios
+$consultaArrendatarios = $conexionBD->prepare("SELECT id_arrendatario, nombre 
+FROM arrendatarios 
+ORDER BY nombre ASC");
+$consultaArrendatarios->execute();
+$listaArrendatarios = $consultaArrendatarios->fetchAll(PDO::FETCH_ASSOC);
 
 include('../../templates/cabecera.php');
 include('../../templates/topbar.php');
 include('../../templates/sidebar.php');
 ?>
 
-<div class="main-content">
-
+<div class="content">
     <div class="card">
-        <div class="card-header">Contratos</div>
+        <div class="card-header">Editar Contrato</div>
         <div class="card-body">
 
-            <form action="" method="post">
+            <form action="actualizar.php" method="post">
 
-                <div class="mb-3">
-                    <label for="" class="form-label">ID</label>
-                    <input
-                        type="hidden"
-                        class="form-control"
-                        name="txtID"
-                        id="txtID"
-                        value="<?php echo $txtID ?>"
-                        aria-describedby="helpId"
-                        placeholder="ID" />
-                </div>
+                <input type="hidden" name="csrf_token" value="<?= generarTokenCSRF(); ?>">
+                <input type="hidden" name="txtID" value="<?= htmlspecialchars($contrato['id_contrato']) ?>">
 
+                <!-- LOCAL -->
                 <div class="mb-3">
                     <label class="form-label">Local</label>
                     <select name="id_local" class="form-control" required>
-                        <?php foreach ($listaLocales as $local) { ?>
-                            <option value="<?php echo $local['id_local']; ?>"
-                                <?php echo ($local['id_local'] == $id_local) ? 'selected' : ''; ?>>
-                                <?php echo $local['codigo']; ?>
+                        <?php foreach ($listaLocales as $local): ?>
+                            <option value="<?= htmlspecialchars($local['id_local']) ?>"
+                                <?= ($local['id_local'] == $contrato['id_local']) ? 'selected' : '' ?>>
+                                <?= htmlspecialchars($local['codigo']) ?>
                             </option>
-                        <?php } ?>
+                        <?php endforeach; ?>
                     </select>
                 </div>
 
+                <!-- ARRENDATARIO -->
                 <div class="mb-3">
                     <label class="form-label">Arrendatario</label>
-                    <select name="id_cliente" class="form-control" required>
-                        <?php foreach ($listaClientes as $cliente) { ?>
-                            <option value="<?php echo $cliente['id_cliente']; ?>"
-                                <?php echo ($cliente['id_cliente'] == $id_cliente) ? 'selected' : ''; ?>>
-                                <?php echo $cliente['nombre']; ?>
+                    <select name="id_arrendatario" class="form-control" required>
+                        <?php foreach ($listaArrendatarios as $arr): ?>
+                            <option value="<?= htmlspecialchars($arr['id_arrendatario']) ?>"
+                                <?= ($arr['id_arrendatario'] == $contrato['id_arrendatario']) ? 'selected' : '' ?>>
+                                <?= htmlspecialchars($arr['nombre']) ?>
                             </option>
-                        <?php } ?>
+                        <?php endforeach; ?>
                     </select>
                 </div>
 
+                <!-- RENTA -->
                 <div class="mb-3">
-                    <label for="" class="form-label">Renta </label>
-                    <input
-                        type="text"
-                        class="form-control"
-                        name="renta"
-                        id="renta"
-                        value="<?php echo $renta ?>"
-                        aria-describedby="helpId"
-                        placeholder="Renta" />
+                    <label class="form-label">Renta</label>
+                    <input type="number" step="0.01" name="renta"
+                        value="<?= htmlspecialchars($contrato['renta']) ?>"
+                        class="form-control" required>
+                </div>
+
+                <!-- DEPOSITO -->
+                <div class="mb-3">
+                    <label class="form-label">Depósito</label>
+                    <input type="number" step="0.01" name="deposito"
+                        value="<?= htmlspecialchars($contrato['deposito']) ?>"
+                        class="form-control">
+                </div>
+
+                <!-- ADICIONAL -->
+                <div class="mb-3">
+                    <label class="form-label">Adicional</label>
+                    <input type="number" step="0.01" name="adicional"
+                        value="<?= htmlspecialchars($contrato['adicional']) ?>"
+                        class="form-control">
+                </div>
+
+                <!-- FECHAS -->
+                <div class="mb-3">
+                    <label class="form-label">Fecha Inicio</label>
+                    <input type="date" name="fecha_inicio"
+                        value="<?= htmlspecialchars($contrato['fecha_inicio']) ?>"
+                        class="form-control" required>
                 </div>
 
                 <div class="mb-3">
-                    <label for="" class="form-label">Deposito</label>
-                    <input
-                        type="text"
-                        class="form-control"
-                        name="deposito"
-                        id="deposito"
-                        value="<?php echo $deposito ?>"
-                        aria-describedby="helpId"
-                        placeholder="Deposito" />
-                </div>
-
-                <div class="mb-3">
-                    <label for="" class="form-label">Adicional</label>
-                    <input
-                        type="text"
-                        class="form-control"
-                        name="adicional"
-                        id="adicional"
-                        value="<?php echo $adicional ?>"
-                        aria-describedby="helpId"
-                        placeholder="Adicional" />
-                </div>
-
-                <div class="mb-3">
-                    <label for="" class="form-label">Fecha Inicio</label>
-                    <input
-                        type="date"
-                        class="form-control"
-                        name="fecha_inicio"
-                        id="fecha_inicio"
-                        value="<?php echo $fecha_inicio ?>"
-                        aria-describedby="helpId"
-                        placeholder="Fecha Inicio" />
-                </div>
-
-                <div class="mb-3">
-                    <label for="" class="form-label">Fecha Fin</label>
-                    <input
-                        type="date"
+                    <label class="form-label">Fecha Fin</label>
+                    <input type="date"
                         class="form-control"
                         name="fecha_fin"
                         id="fecha_fin"
-                        value="<?php echo $fecha_fin ?>"
-                        aria-describedby="helpId"
-                        placeholder="Fecha Fin" />
+                        value="<?= htmlspecialchars($contrato['fecha_fin']) ?>"
+                        readonly>
                 </div>
 
+                <!-- ESTATUS -->
                 <div class="mb-3">
                     <label class="form-label">Estatus</label>
                     <select name="estatus" class="form-control" required>
-                        <option value="Pendiente" <?php echo ($estatus == 'Pendiente') ? 'selected' : ''; ?>>
-                            Pendiente
+                        <?php
+                        $estados = ['Pendiente', 'Activa', 'Cancelada', 'Finalizada'];
+                        foreach ($estados as $estado):
+                        ?>
+                            <option value="<?= $estado ?>"
+                                <?= ($estado == $contrato['estatus']) ? 'selected' : '' ?>>
+                                <?= $estado ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Duración</label>
+                    <select name="duracion" id="duracion" class="form-control" required>
+
+                        <option value="6"
+                            <?= ($contrato['duracion'] == '6') ? 'selected' : '' ?>>
+                            6 meses
                         </option>
-                        <option value="Activa" <?php echo ($estatus == 'Activa') ? 'selected' : ''; ?>>
-                            Activa
+
+                        <option value="12"
+                            <?= ($contrato['duracion'] == '12') ? 'selected' : '' ?>>
+                            12 meses
                         </option>
-                        <option value="Cancelada" <?php echo ($estatus == 'Cancelada') ? 'selected' : ''; ?>>
-                            Cancelada
-                        </option>
-                        <option value="Finalizada" <?php echo ($estatus == 'Finalizada') ? 'selected' : ''; ?>>
-                            Finalizada
+
+                        <option value="indefinido"
+                            <?= ($contrato['duracion'] == 'indefinido') ? 'selected' : '' ?>>
+                            Indefinido
                         </option>
 
                     </select>
                 </div>
 
-
-                <button type="submit" name="accion" value="agregar" class="btn btn-success">Modificar</button>
-                <a
-                    name=""
-                    id=""
-                    class="btn btn-primary"
-                    href="index.php"
-                    role="button">Cancelar</a>
-
+                <button type="submit" class="btn btn-success">Modificar</button>
+                <a href="index.php" class="btn btn-secondary">Cancelar</a>
 
             </form>
 
         </div>
-
-
     </div>
-
 </div>
 
 <?php include('../../templates/pie.php'); ?>

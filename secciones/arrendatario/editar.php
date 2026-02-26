@@ -1,60 +1,105 @@
 <?php
 include('../../includes/auth.php');
 include('../../includes/helpers.php');
+include('../../includes/permisos.php');
 include('../../bd.php');
 
-if (isset($_GET['txtID'])) {
-    $txtID = isset($_GET['txtID']) ? $_GET['txtID'] : '';
+// 🔐 Verificar rol
+$idRol = $_SESSION['id_rol'] ?? null;
 
-    $consulta = $conexionBD->prepare("SELECT * FROM clientes WHERE id_cliente=:id_cliente");
-    $consulta->bindParam(':id_cliente', $txtID);
-    $consulta->execute();
-
-    $cliente = $consulta->fetch(PDO::FETCH_LAZY);
-    $nombre = $cliente['nombre'];
-    $telefono = $cliente['telefono'];
-    $correo = $cliente['correo'];
-    $aval = $cliente['aval'];
-    $correoaval = $cliente['correoaval'];
-    $direccion = $cliente['direccion'];
-    $ciudad = $cliente['ciudad'];
+if (!$idRol) {
+    header("Location: ../../login.php");
+    exit();
 }
 
-if ($_POST) {
-    $txtID  = isset($_POST['txtID']) ? $_POST['txtID'] : '';
-    $nombre = isset($_POST['nombre']) ? $_POST['nombre'] : '';
-    $apellidos = isset($_POST['apellidos']) ? $_POST['apellidos'] : '';
-    $telefono = isset($_POST['telefono']) ? $_POST['telefono'] : '';
-    $correo = isset($_POST['correo']) ? $_POST['correo'] : '';
-    $aval = isset($_POST['aval']) ? $_POST['aval'] : '';
-    $correoaval = isset($_POST['correoaval']) ? $_POST['correoaval'] : '';
-    $direccion = isset($_POST['direccion']) ? $_POST['direccion'] : '';
-    $ciudad = isset($_POST['ciudad']) ? $_POST['ciudad'] : '';
-    $accion = isset($_POST['accion']) ? $_POST['accion'] : '';
+verificarPermiso($conexionBD, $idRol, 'arrendatarios', 'editar');
 
-    print_r($_POST);
+// 🔎 Validar ID
+$id = intval($_GET['txtID'] ?? $_POST['txtID'] ?? 0);
 
-    $consulta = $conexionBD->prepare("UPDATE clientes SET 
-    nombre = :nombre,
-    telefono = :telefono,
-    correo = :correo,
-    aval = :aval,
-    correoaval = :correoaval,
-    direccion = :direccion,
-    ciudad = :ciudad
-    WHERE id_cliente = :id_cliente");
+if ($id <= 0) {
+    header("Location: index.php");
+    exit();
+}
 
-    $consulta->bindParam(':nombre', $nombre);
-    $consulta->bindParam(':telefono', $telefono);
-    $consulta->bindParam(':correo', $correo);
-    $consulta->bindParam(':aval', $aval);
-    $consulta->bindParam(':correoaval', $correoaval);
-    $consulta->bindParam(':direccion', $direccion);
-    $consulta->bindParam(':ciudad', $ciudad);
-    $consulta->bindParam(':id_cliente', $txtID);
+/* ==============================
+   🔎 CARGAR DATOS (GET)
+================================ */
+if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 
-    $consulta->execute();
-    header("Location:index.php");
+    $consulta = $conexionBD->prepare("
+        SELECT * FROM arrendatarios 
+        WHERE id_arrendatario = :id
+    ");
+
+    $consulta->execute([':id' => $id]);
+    $tenant = $consulta->fetch(PDO::FETCH_ASSOC);
+
+    if (!$tenant) {
+        header("Location: index.php");
+        exit();
+    }
+
+    extract($tenant);
+}
+
+/* ==============================
+   🔄 ACTUALIZAR (POST)
+================================ */
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+    if (!validarTokenCSRF($_POST['csrf_token'] ?? '')) {
+        die("Acceso inválido (CSRF)");
+    }
+
+    unset($_SESSION['csrf_token']);
+
+    $nombre = trim($_POST['nombre'] ?? '');
+    $telefono = trim($_POST['telefono'] ?? '');
+    $correo = trim($_POST['correo'] ?? '');
+    $aval = trim($_POST['aval'] ?? '');
+    $correoaval = trim($_POST['correoaval'] ?? '');
+    $direccion = trim($_POST['direccion'] ?? '');
+    $ciudad = trim($_POST['ciudad'] ?? '');
+
+    // ✅ Validaciones
+    if (empty($nombre) || empty($telefono)) {
+        die("Nombre y teléfono son obligatorios.");
+    }
+
+    if (!empty($correo) && !filter_var($correo, FILTER_VALIDATE_EMAIL)) {
+        die("Correo inválido.");
+    }
+
+    if (!empty($correoaval) && !filter_var($correoaval, FILTER_VALIDATE_EMAIL)) {
+        die("Correo del aval inválido.");
+    }
+
+    $consulta = $conexionBD->prepare("
+        UPDATE arrendatarios SET
+            nombre = :nombre,
+            telefono = :telefono,
+            correo = :correo,
+            aval = :aval,
+            correoaval = :correoaval,
+            direccion = :direccion,
+            ciudad = :ciudad
+        WHERE id_arrendatario = :id
+    ");
+
+    $consulta->execute([
+        ':nombre' => $nombre,
+        ':telefono' => $telefono,
+        ':correo' => $correo ?: null,
+        ':aval' => $aval ?: null,
+        ':correoaval' => $correoaval ?: null,
+        ':direccion' => $direccion ?: null,
+        ':ciudad' => $ciudad ?: null,
+        ':id' => $id
+    ]);
+
+    header("Location: index.php");
+    exit();
 }
 
 include('../../templates/cabecera.php');
@@ -62,122 +107,72 @@ include('../../templates/topbar.php');
 include('../../templates/sidebar.php');
 ?>
 
-<div class="main-content">
+<div class="content">
 
     <div class="card">
-        <div class="card-header">Arrendatario</div>
+        <div class="card-header">Editar Arrendatario</div>
         <div class="card-body">
 
-            <form action="" method="post">
+            <form method="post" autocomplete="off">
 
-
-                <div class="mb-3">
-                    <label for="" class="form-label">ID</label>
-                    <input
-                        type="text"
-                        class="form-control"
-                        value="<?php echo $txtID; ?>"
-                        name="txtID"
-                        id="txtID"
-                        aria-describedby="helpId"
-                        placeholder="ID" />
-                </div>
-
+                <input type="hidden" name="csrf_token" value="<?= generarTokenCSRF(); ?>">
+                <input type="hidden" name="txtID" value="<?= (int)$id ?>">
 
                 <div class="mb-3">
-                    <label for="" class="form-label">Nombre</label>
-                    <input
-                        type="text"
-                        class="form-control"
-                        value="<?php echo $nombre; ?>"
+                    <label class="form-label">Nombre</label>
+                    <input type="text" class="form-control"
                         name="nombre"
-                        id="nombre"
-                        aria-describedby="helpId"
-                        placeholder="Nombre" />
+                        value="<?= htmlspecialchars($nombre ?? '') ?>"
+                        required>
                 </div>
 
                 <div class="mb-3">
-                    <label for="" class="form-label">Telefono</label>
-                    <input
-                        type="tel"
-                        class="form-control"
-                        value="<?php echo $telefono; ?>"
+                    <label class="form-label">Teléfono</label>
+                    <input type="tel" class="form-control"
                         name="telefono"
-                        id="telefono"
-                        aria-describedby="helpId"
-                        placeholder="Telefono" />
+                        value="<?= htmlspecialchars($telefono ?? '') ?>"
+                        required>
                 </div>
 
                 <div class="mb-3">
-                    <label for="" class="form-label">Correo</label>
-                    <input
-                        type="email"
-                        class="form-control"
-                        value="<?php echo $correo; ?>"
+                    <label class="form-label">Correo</label>
+                    <input type="email" class="form-control"
                         name="correo"
-                        id="correo"
-                        aria-describedby="helpId"
-                        placeholder="Correo" />
+                        value="<?= htmlspecialchars($correo ?? '') ?>">
                 </div>
 
                 <div class="mb-3">
-                    <label for="" class="form-label">Aval</label>
-                    <input
-                        type="text"
-                        class="form-control"
-                        value="<?php echo $aval; ?>"
+                    <label class="form-label">Aval</label>
+                    <input type="text" class="form-control"
                         name="aval"
-                        id="aval"
-                        aria-describedby="helpId"
-                        placeholder="Aval" />
+                        value="<?= htmlspecialchars($aval ?? '') ?>">
                 </div>
 
                 <div class="mb-3">
-                    <label for="" class="form-label">Correo Aval</label>
-                    <input
-                        type="email"
-                        class="form-control"
-                        value="<?php echo $correoaval; ?>"
+                    <label class="form-label">Correo Aval</label>
+                    <input type="email" class="form-control"
                         name="correoaval"
-                        id="correoaval"
-                        aria-describedby="helpId"
-                        placeholder="correoaval" />
+                        value="<?= htmlspecialchars($correoaval ?? '') ?>">
                 </div>
 
                 <div class="mb-3">
-                    <label for="" class="form-label">Direccion</label>
-                    <input
-                        type="text"
-                        class="form-control"
-                        value="<?php echo $direccion; ?>"
+                    <label class="form-label">Dirección</label>
+                    <input type="text" class="form-control"
                         name="direccion"
-                        id="direccion"
-                        aria-describedby="helpId"
-                        placeholder="Direccion" />
+                        value="<?= htmlspecialchars($direccion ?? '') ?>">
                 </div>
 
                 <div class="mb-3">
-                    <label for="" class="form-label">Ciudad</label>
-                    <input
-                        type="text"
-                        class="form-control"
-                        value="<?php echo $ciudad; ?>"
+                    <label class="form-label">Ciudad</label>
+                    <input type="text" class="form-control"
                         name="ciudad"
-                        id="ciudad"
-                        aria-describedby="helpId"
-                        placeholder="Ciudad" />
+                        value="<?= htmlspecialchars($ciudad ?? '') ?>">
                 </div>
 
-                <button type="submit" name="accion" value="agregar" class="btn btn-success">Modificar</button>
-                <a
-                    name=""
-                    id=""
-                    class="btn btn-primary"
-                    href="index.php"
-                    role="button">Cancelar</a>
+                <button type="submit" class="btn btn-success">Modificar</button>
+                <a class="btn btn-secondary" href="index.php">Cancelar</a>
 
             </form>
-
         </div>
 
     </div>

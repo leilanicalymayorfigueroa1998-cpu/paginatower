@@ -49,7 +49,7 @@ include('../../templates/sidebar.php');
 
 ?>
 
-<div class="main-content">
+<div class="content">
 
     <div class="card">
         <div class="card-header">Dueños</div>

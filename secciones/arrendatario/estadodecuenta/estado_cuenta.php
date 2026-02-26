@@ -3,7 +3,7 @@ include('../../bd.php');
 include('../../templates/cabecera.php');
 
 // 1️⃣ Verificar que sea cliente
-if ($_SESSION['rol'] != 'cliente') {
+if ($_SESSION['rol'] != 'arrendatarios') {
     header("Location: ../../index.php");
     exit();
 }
@@ -11,23 +11,23 @@ if ($_SESSION['rol'] != 'cliente') {
 // 2️⃣ Obtener id_cliente del usuario logueado
 $idUsuario = $_SESSION['id'];
 
-$consultaUsuario = $conexionBD->prepare("SELECT id_cliente FROM usuarios WHERE id = :id");
+$consultaUsuario = $conexionBD->prepare("SELECT id_arrendatario FROM usuarios WHERE id = :id");
 $consultaUsuario->bindParam(':id', $idUsuario);
 $consultaUsuario->execute();
 
 $usuario = $consultaUsuario->fetch(PDO::FETCH_ASSOC);
-$idCliente = $usuario['id_cliente'] ?? null;
+$idArrendatario = $usuario['id_arrendatario'] ?? null;
 
 // 🔐 Validación extra
-if (!$idCliente) {
+if (!$idArrendatario) {
     echo "<div class='alert alert-warning'>No tienes cliente asignado.</div>";
     include('../../templates/pie.php');
     exit();
 }
 
 // 3️⃣ Obtener renta activa
-$consultaRenta = $conexionBD->prepare("SELECT * FROM rentas WHERE id_cliente = :id_cliente AND estatus = 'Activa'");
-$consultaRenta->bindParam(':id_cliente', $idCliente);
+$consultaRenta = $conexionBD->prepare("SELECT * FROM rentas WHERE id_arrendatario = :id_arrendatario AND estatus = 'Activa'");
+$consultaRenta->bindParam(':id_arrendatario', $idCliente);
 $consultaRenta->execute();
 
 $renta = $consultaRenta->fetch(PDO::FETCH_ASSOC);

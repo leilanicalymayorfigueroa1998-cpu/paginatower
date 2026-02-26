@@ -41,7 +41,7 @@ include('../../templates/sidebar.php');
 
 ?>
 
-<div class="main-content">
+<div class="content">
 
 
     <div class="card">

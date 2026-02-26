@@ -1,99 +1,125 @@
 <?php
 include('../../includes/auth.php');
 include('../../includes/helpers.php');
+include('../../includes/permisos.php');
 include('../../bd.php');
 
-if (isset($_GET['txtID'])) {
-    $txtID = isset($_GET['txtID']) ? $_GET['txtID'] : '';
+$idRol = $_SESSION['id_rol'] ?? null;
 
-    $consulta = $conexionBD->prepare("DELETE FROM clientes WHERE id_cliente = :id_cliente");
-    $consulta->bindParam(':id_cliente', $txtID);
-    $consulta->execute();
-    header("Location:index.php");
+if (!$idRol) {
+    header("Location: ../../login.php");
+    exit();
 }
 
-$consulta = $conexionBD->prepare("SELECT * FROM clientes");
+verificarPermiso($conexionBD, $idRol, 'arrendatarios', 'ver');
+
+// 🔹 Optimizar permisos (evitar múltiples consultas)
+$puedeCrear    = tienePermiso($conexionBD, $idRol, 'arrendatarios', 'crear');
+$puedeEditar   = tienePermiso($conexionBD, $idRol, 'arrendatarios', 'editar');
+$puedeEliminar = tienePermiso($conexionBD, $idRol, 'arrendatarios', 'eliminar');
+
+// 🔹 Consulta optimizada (columnas específicas)
+$consulta = $conexionBD->prepare("
+    SELECT 
+        id_arrendatario,
+        nombre,
+        telefono,
+        correo,
+        aval,
+        correoaval,
+        direccion,
+        ciudad
+    FROM arrendatarios
+    ORDER BY id_arrendatario DESC
+");
+
 $consulta->execute();
-$listaClientes = $consulta->fetchAll(PDO::FETCH_ASSOC);
+$listaArrendatarios = $consulta->fetchAll(PDO::FETCH_ASSOC);
 
 include('../../templates/cabecera.php');
 include('../../templates/topbar.php');
 include('../../templates/sidebar.php');
 ?>
 
-<div class="main-content">
+<div class="content">
 
     <div class="card">
         <div class="card-header">
 
-            <a
-                name=""
-                id=""
-                class="btn btn-success"
-                href="agregar.php"
-                role="button">Agregar</a>
+            <?php if ($puedeCrear): ?>
+                <a class="btn btn-success" href="crear.php">
+                    + Nuevo Arrendatario
+                </a>
+            <?php endif; ?>
 
         </div>
 
         <div class="card-body">
-            <div
-                class="table-responsive">
-                <table
-                    class="table">
-                    <thead>
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead class="table-dark">
                         <tr>
-                            <th>ID</th>
                             <th>Nombre</th>
-                            <th>Telefono</th>
+                            <th>Teléfono</th>
                             <th>Correo</th>
                             <th>Aval</th>
                             <th>Correo Aval</th>
-                            <th>Direccion</th>
+                            <th>Dirección</th>
                             <th>Ciudad</th>
                             <th>Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
 
-                        <?php foreach ($listaClientes as $key => $value) { ?>
-                            <tr class="">
-
-                                <td scope="row"><?php echo $value['id_cliente'] ?> </td>
-                                <td><?php echo $value['nombre'] ?></td>
-                                <td><?php echo $value['telefono'] ?></td>
-                                <td><?php echo $value['correo'] ?></td>
-                                <td><?php echo $value['aval'] ?></td>
-                                <td><?php echo $value['correoaval'] ?></td>
-                                <td><?php echo $value['direccion'] ?></td>
-                                <td><?php echo $value['ciudad'] ?></td>
+                        <?php foreach ($listaArrendatarios as $value): ?>
+                            <tr>
+                                <td><?= htmlspecialchars($value['nombre']) ?></td>
+                                <td><?= htmlspecialchars($value['telefono']) ?></td>
+                                <td><?= htmlspecialchars($value['correo']) ?></td>
+                                <td><?= htmlspecialchars($value['aval']) ?></td>
+                                <td><?= htmlspecialchars($value['correoaval']) ?></td>
+                                <td><?= htmlspecialchars($value['direccion']) ?></td>
+                                <td><?= htmlspecialchars($value['ciudad']) ?></td>
 
                                 <td>
 
-                                    <a
-                                        name=""
-                                        id=""
-                                        class="btn btn-primary"
-                                        href="editar.php?txtID=<?php echo $value['id_cliente']; ?>"
-                                        role="button">Editar</a>
+                                    <?php if ($puedeEditar): ?>
+                                        <a class="btn btn-primary btn-sm"
+                                            href="editar.php?txtID=<?= htmlspecialchars($value['id_arrendatario']) ?>">
+                                            Editar
+                                        </a>
+                                    <?php endif; ?>
 
-                                    <a
-                                        name=""
-                                        id=""
-                                        class="btn btn-danger"
-                                        href="index.php?txtID=<?php echo $value['id_cliente']; ?>"
-                                        role="button">Borrar</a>
-
-
-
+                                    <?php if ($puedeEliminar): ?>
+                                        <form method="POST" action="eliminar.php" style="display:inline;">
+                                            <input type="hidden" name="id_arrendatario"
+                                                value="<?= htmlspecialchars($value['id_arrendatario']) ?>">
+                                            <input type="hidden" name="csrf_token"
+                                                value="<?= generarTokenCSRF(); ?>">
+                                            <button type="submit"
+                                                class="btn btn-danger btn-sm"
+                                                onclick="return confirm('¿Eliminar este arrendatario?');">
+                                                Borrar
+                                            </button>
+                                        </form>
+                                    <?php endif; ?>
 
                                 </td>
+
                             </tr>
-                        <?php   } ?>
+                        <?php endforeach; ?>
+
+                        <?php if (empty($listaArrendatarios)): ?>
+                            <tr>
+                                <td colspan="9" class="text-center">
+                                    No hay arrendatarios registrados.
+                                </td>
+                            </tr>
+                        <?php endif; ?>
 
                     </tbody>
                 </table>
             </div>
-
         </div>
     </div>
 </div>
