@@ -56,11 +56,10 @@ include('../../templates/sidebar.php');
         </div>
 
         <div class="card-body">
-            <div class="table-responsive-sm">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead class="table-dark">
 
-                <table class="table table-striped">
-
-                    <thead>
                         <tr>
                             <th>Local</th>
                             <th>Arrendatario</th>

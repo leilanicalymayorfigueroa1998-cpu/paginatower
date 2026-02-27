@@ -1,58 +1,35 @@
 <?php
 include('../../includes/auth.php');
 include('../../includes/helpers.php');
+include('../../includes/permisos.php');
 include('../../bd.php');
 
-if (isset($_GET['txtID'])) {
-    $txtID = isset($_GET['txtID']) ? $_GET['txtID'] : '';
+require_once(__DIR__ . '/../../services/PropiedadService.php');
 
-    $consulta = $conexionBD->prepare("SELECT * FROM propiedades WHERE id_propiedad=:id_propiedad");
-    $consulta->bindParam(':id_propiedad', $txtID);
-    $consulta->execute();
+verificarPermiso($conexionBD, $_SESSION['id_rol'], 'propiedades', 'editar');
 
-    $propiedad = $consulta->fetch(PDO::FETCH_LAZY);
-    $codigo = $propiedad['codigo'];
-    $direccion = $propiedad['direccion'];
-    $latitud = $propiedad['latitud'];
-    $longitud = $propiedad['longitud'];
-    $tipo = $propiedad['tipo'];
+$id = $_GET['txtID'] ?? null;
+
+if (!$id || !is_numeric($id)) {
+    header("Location:index.php");
+    exit();
 }
 
-if ($_POST) {
-    $txtID  = isset($_POST['txtID']) ? $_POST['txtID'] : '';
-    $codigo = isset($_POST['codigo']) ? $_POST['codigo'] : '';
+$service = new PropiedadService($conexionBD);
 
-    $direccion = isset($_POST['direccion']) ? $_POST['direccion'] : '';
-    $latitud = isset($_POST['latitud']) ? $_POST['latitud'] : '';
-    $longitud = isset($_POST['longitud']) ? $_POST['longitud'] : '';
-    $tipo = isset($_POST['tipo']) ? $_POST['tipo'] : '';
+$propiedad = $service->obtenerPorId($id);
 
-    $consulta = $conexionBD->prepare("UPDATE propiedades SET 
-                    codigo = :codigo, 
-                    direccion = :direccion,
-                    latitud = :latitud,
-                    longitud = :longitud,
-                    tipo = :tipo
-                WHERE id_propiedad = :id_propiedad");
-
-    $consulta->bindParam(':codigo', $codigo);
-    $consulta->bindParam(':direccion', $direccion);
-    $consulta->bindParam(':latitud', $latitud);
-    $consulta->bindParam(':longitud', $longitud);
-    $consulta->bindParam(':tipo', $tipo);
-    $consulta->bindParam(':id_propiedad', $txtID);;
-    $consulta->execute();
-    header("Location:index.php?mensaje=editado");
+if (!$propiedad) {
+    header("Location:index.php");
+    exit();
 }
 
-$consultaDuenos = $conexionBD->prepare("SELECT id_dueno, nombre FROM duenos");
-$consultaDuenos->execute();
-$listaDuenos = $consultaDuenos->fetchAll(PDO::FETCH_ASSOC);
+$tipos = $service->obtenerTipos();
+$duenos = $service->obtenerDuenos();
 
 include('../../templates/cabecera.php');
 include('../../templates/topbar.php');
 include('../../templates/sidebar.php');
-
 ?>
 
 <div class="content">
@@ -61,100 +38,75 @@ include('../../templates/sidebar.php');
         <div class="card-header">Propiedades</div>
         <div class="card-body">
 
-            <form action="" method="post">
+            <form action="actualizar.php" method="post">
+
+                <input type="hidden" name="csrf_token" value="<?= generarTokenCSRF(); ?>">
+                <input type="hidden" name="txtID" value="<?= $propiedad['id_propiedad']; ?>">
 
                 <div class="mb-3">
-                    <label for="" class="form-label">ID</label>
-                    <input
-                        type="text"
-                        class="form-control"
-                        name="txtID"
-                        id="txtID"
-                        value="<?php echo $txtID ?>"
-                        aria-describedby="helpId"
-                        placeholder="ID" />
-                </div>
-
-
-                <div class="mb-3">
-                    <label for="" class="form-label">Codigo Propiedad</label>
-                    <input
-                        type="text"
+                    <label class="form-label">Código</label>
+                    <input type="text"
                         class="form-control"
                         name="codigo"
-                        id="codigo"
-                        value="<?php echo $codigo ?>"
-                        aria-describedby="helpId"
-                        placeholder="Codigo" />
+                        value="<?= htmlspecialchars($propiedad['codigo']); ?>"
+                        required>
                 </div>
 
                 <div class="mb-3">
                     <label class="form-label">Dueño</label>
                     <select name="id_dueno" class="form-select" required>
-                        <option value="">-- Selecciona dueño --</option>
-                        <?php foreach ($listaDuenos as $dueno) { ?>
-                            <option value="<?php echo $dueno['id_dueno']; ?>"
-                                <?php echo ($dueno['id_dueno'] == $id_dueno) ? 'selected' : ''; ?>>
-                                <?php echo $dueno['nombre']; ?>
+                        <option value="">Seleccione dueño</option>
+                        <?php foreach ($duenos as $dueno): ?>
+                            <option value="<?= $dueno['id_dueno']; ?>"
+                                <?= ($dueno['id_dueno'] == $propiedad['id_dueno']) ? 'selected' : ''; ?>>
+                                <?= htmlspecialchars($dueno['nombre']); ?>
                             </option>
-                        <?php } ?>
+                        <?php endforeach; ?>
                     </select>
-                </div>
-
-                <div class="mb-3">
-                    <label for="" class="form-label">Direccion</label>
-                    <input
-                        type="text"
-                        class="form-control"
-                        name="direccion"
-                        id="direccion"
-                        value="<?php echo $direccion ?>"
-                        aria-describedby="helpId"
-                        placeholder="Direccion" />
-                </div>
-
-                <div class="mb-3">
-                    <label for="" class="form-label">Latitud</label>
-                    <input
-                        type="text"
-                        class="form-control"
-                        name="latitud"
-                        id="latitud"
-                        value="<?php echo $latitud ?>"
-                        aria-describedby="helpId"
-                        placeholder="Latitud" />
-                </div>
-
-                <div class="mb-3">
-                    <label for="" class="form-label">Longitud</label>
-                    <input
-                        type="text"
-                        class="form-control"
-                        name="longitud"
-                        id="longitud"
-                        value="<?php echo $longitud ?>"
-                        aria-describedby="helpId"
-                        placeholder="Longitud" />
                 </div>
 
                 <div class="mb-3">
                     <label class="form-label">Tipo</label>
-                    <select name="tipo" class="form-select" required>
-                        <option value="Local" <?php echo ($tipo == 'Local') ? 'selected' : ''; ?>>Local</option>
-                        <option value="Casa" <?php echo ($tipo == 'Casa') ? 'selected' : ''; ?>>Casa</option>
-                        <option value="Departamento" <?php echo ($tipo == 'Departamento') ? 'selected' : ''; ?>>Departamento</option>
-                        <option value="Oficina" <?php echo ($tipo == 'Oficina') ? 'selected' : ''; ?>>Oficina</option>
+                    <select name="id_tipo" class="form-select" required>
+                        <?php foreach ($tipos as $tipo): ?>
+                            <option value="<?= $tipo['id_tipo']; ?>"
+                                <?= ($tipo['id_tipo'] == $propiedad['id_tipo']) ? 'selected' : ''; ?>>
+                                <?= htmlspecialchars($tipo['nombre']); ?>
+                            </option>
+                        <?php endforeach; ?>
                     </select>
                 </div>
 
-                <button type="submit" name="accion" value="agregar" class="btn btn-success">Modificar</button>
-                <a
-                    name=""
-                    id=""
-                    class="btn btn-primary"
-                    href="index.php"
-                    role="button">Cancelar</a>
 
+                <div class="mb-3">
+                    <label class="form-label">Dirección</label>
+                    <input type="text"
+                        class="form-control"
+                        name="direccion"
+                        value="<?= htmlspecialchars($propiedad['direccion']); ?>"
+                        required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Latitud</label>
+                    <input type="number"
+                        step="0.0000001"
+                        class="form-control"
+                        name="latitud"
+                        value="<?= htmlspecialchars($propiedad['latitud']); ?>">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Longitud</label>
+                    <input type="number"
+                        step="0.0000001"
+                        class="form-control"
+                        name="longitud"
+                        value="<?= htmlspecialchars($propiedad['longitud']); ?>">
+                </div>
+
+                <button type="submit" class="btn btn-success">Modificar</button>
+                <a class="btn btn-secondary" href="index.php">Cancelar</a>
 
             </form>
 

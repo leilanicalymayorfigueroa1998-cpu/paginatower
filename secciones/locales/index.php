@@ -42,11 +42,9 @@ include('../../templates/sidebar.php');
     </div>
 
     <div class="card-body">
-        <div
-            class="table-responsive">
-            <table
-                class="table">
-                <thead>
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead class="table-dark">
 
                     <tr>
 
