@@ -4,7 +4,7 @@ include('../../includes/helpers.php');
 include('../../includes/permisos.php');
 include('../../bd.php');
 
-require_once('../../app/services/LocalService.php');
+require_once(__DIR__ . '/../../services/LocalService.php');
 
 $idRol = $_SESSION['id_rol'] ?? null;
 
@@ -36,7 +36,7 @@ include('../../templates/sidebar.php');
 
 
             <?php if ($puedeCrear): ?>
-                <a class="btn btn-success" href="crear.php">Agregar</a>
+                <a class="btn btn-success" href="crear.php">+ Agregar Inmueble </a>
             <?php endif; ?>
         </div>
     </div>
@@ -47,8 +47,6 @@ include('../../templates/sidebar.php');
                 <thead class="table-dark">
 
                     <tr>
-
-                        <th>Propiedad</th>
                         <th>Codigo</th>
                         <th>Medidas</th>
                         <th>Descripcion</th>
@@ -63,7 +61,6 @@ include('../../templates/sidebar.php');
 
                     <?php foreach ($listaLocales as $value) { ?>
                         <tr>
-                            <td><?= $value['propiedad']; ?></td>
                             <td><?= $value['codigo']; ?></td>
                             <td><?= $value['medidas']; ?></td>
                             <td><?= $value['descripcion']; ?></td>

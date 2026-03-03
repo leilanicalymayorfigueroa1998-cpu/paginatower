@@ -4,31 +4,7 @@ include('../../includes/helpers.php');
 include('../../includes/permisos.php');
 include('../../bd.php');
 
-require_once(__DIR__ . '/../../services/ServiciosService.php');
-
-$idRol = $_SESSION['id_rol'] ?? null;
-
-if (!$idRol) {
-    header("Location: ../../login.php");
-    exit();
-}
-
-verificarPermiso($conexionBD, $idRol, 'servicios', 'editar');
-
-$id = filter_input(INPUT_GET, 'txtID', FILTER_VALIDATE_INT);
-
-if (!$id) {
-    header("Location:index.php");
-    exit();
-}
-
-$service = new ServiciosService($conexionBD);
-$servicio = $service->obtenerPorId($id);
-
-if (!$servicio) {
-    header("Location:index.php");
-    exit();
-}
+verificarPermiso($conexionBD, $_SESSION['id_rol'], 'servicios', 'crear');
 
 $consultaLocales = $conexionBD->prepare("SELECT id_local, codigo FROM locales");
 $consultaLocales->execute();
@@ -40,21 +16,26 @@ include('../../templates/sidebar.php');
 ?>
 
 <div class="content">
+
     <div class="card">
-        <div class="card-header">Editar Servicio</div>
+        <div class="card-header">Nuevo Servicio</div>
         <div class="card-body">
 
-            <form action="actualizar.php" method="post">
+            <?php if (isset($_GET['mensaje']) && $_GET['mensaje'] === 'error'): ?>
+                <div class="alert alert-warning">
+                    <?= htmlspecialchars($_GET['detalle'] ?? 'Todos los campos son obligatorios'); ?>
+                </div>
+            <?php endif; ?>
 
+            <form action="guardar.php" method="post">
                 <input type="hidden" name="csrf_token" value="<?= generarTokenCSRF(); ?>">
-                <input type="hidden" name="txtID" value="<?= $servicio['id_servicio']; ?>">
 
                 <div class="mb-3">
                     <label class="form-label">Local</label>
                     <select name="id_local" class="form-control" required>
+                        <option value="">-- Selecciona un local --</option>
                         <?php foreach ($listaLocales as $local): ?>
-                            <option value="<?= $local['id_local']; ?>"
-                                <?= ($local['id_local'] == $servicio['id_local']) ? 'selected' : ''; ?>>
+                            <option value="<?= $local['id_local']; ?>">
                                 <?= htmlspecialchars($local['codigo']); ?>
                             </option>
                         <?php endforeach; ?>
@@ -65,45 +46,38 @@ include('../../templates/sidebar.php');
                 <div class="mb-3">
                     <label class="form-label">CFE Activo</label>
                     <select name="cfe" id="cfe" class="form-control" onchange="toggleContrato('cfe')">
-                        <option value="1" <?= $servicio['cfe'] ? 'selected' : ''; ?>>Sí</option>
-                        <option value="0" <?= !$servicio['cfe'] ? 'selected' : ''; ?>>No</option>
+                        <option value="1">Sí</option>
+                        <option value="0">No</option>
                     </select>
                 </div>
 
                 <div class="mb-3" id="grupo_contrato_cfe">
                     <label class="form-label">Contrato CFE</label>
-                    <input type="text"
-                           name="contrato_cfe"
-                           id="contrato_cfe"
-                           class="form-control"
-                           value="<?= htmlspecialchars($servicio['contrato_cfe'] ?? ''); ?>">
+                    <input type="text" name="contrato_cfe" id="contrato_cfe" class="form-control">
                 </div>
 
                 <!-- Agua -->
                 <div class="mb-3">
                     <label class="form-label">Agua Activo</label>
                     <select name="agua" id="agua" class="form-control" onchange="toggleContrato('agua')">
-                        <option value="1" <?= $servicio['agua'] ? 'selected' : ''; ?>>Sí</option>
-                        <option value="0" <?= !$servicio['agua'] ? 'selected' : ''; ?>>No</option>
+                        <option value="1">Sí</option>
+                        <option value="0">No</option>
                     </select>
                 </div>
 
                 <div class="mb-3" id="grupo_contrato_agua">
                     <label class="form-label">Contrato Agua</label>
-                    <input type="text"
-                           name="contrato_agua"
-                           id="contrato_agua"
-                           class="form-control"
-                           value="<?= htmlspecialchars($servicio['contrato_agua'] ?? ''); ?>">
+                    <input type="text" name="contrato_agua" id="contrato_agua" class="form-control">
                 </div>
 
-                <button type="submit" class="btn btn-success">Actualizar</button>
+                <button type="submit" class="btn btn-success">Guardar</button>
                 <a href="index.php" class="btn btn-secondary">Cancelar</a>
 
             </form>
 
         </div>
     </div>
+
 </div>
 
 <script src="../../assets/js/servicios.js"></script>

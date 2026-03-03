@@ -4,7 +4,7 @@ include('../../includes/helpers.php');
 include('../../includes/permisos.php');
 include('../../bd.php');
 
-require_once '../../app/services/LocalService.php';
+require_once(__DIR__ . '/../../services/LocalService.php');
 
 $idRol = $_SESSION['id_rol'] ?? null;
 
@@ -52,25 +52,14 @@ include('../../templates/sidebar.php');
 ?>
 
 <div class="content">
+
     <div class="card">
-        <div class="card-header">Crear Local</div>
+        <div class="card-header">Crear Inmueble</div>
         <div class="card-body">
 
-           <form action="guardar.php" method="post">
+            <form action="guardar.php" method="post" autocomplete="off">
 
                 <input type="hidden" name="csrf_token" value="<?= generarTokenCSRF(); ?>">
-
-                <div class="mb-3">
-                    <label>Propiedad</label>
-                    <select name="id_propiedad" class="form-control" required>
-                        <option value="">-- Selecciona una propiedad --</option>
-                        <?php foreach ($listaPropiedades as $prop) { ?>
-                            <option value="<?= $prop['id_propiedad']; ?>">
-                                <?= strtoupper($prop['codigo']); ?>
-                            </option>
-                        <?php } ?>
-                    </select>
-                </div>
 
                 <div class="mb-3">
                     <label>Código Local</label>
@@ -102,8 +91,7 @@ include('../../templates/sidebar.php');
                 </div>
 
                 <button type="submit" class="btn btn-success">Guardar</button>
-                <a href="index.php" class="btn btn-primary">Cancelar</a>
-
+                <a class="btn btn-secondary" href="index.php">Cancelar</a>
             </form>
 
         </div>

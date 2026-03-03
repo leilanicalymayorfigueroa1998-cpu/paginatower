@@ -15,24 +15,37 @@ if (!$idRol) {
 
 verificarPermiso($conexionBD, $idRol, 'restricciones', 'editar');
 
-$id = filter_input(INPUT_GET, 'txtID', FILTER_VALIDATE_INT);
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    header("Location:index.php");
+    exit();
+}
+
+if (!validarTokenCSRF($_POST['csrf_token'] ?? '')) {
+    die("Acceso inválido (CSRF)");
+}
+
+unset($_SESSION['csrf_token']);
+
+$id = filter_input(INPUT_POST, 'txtID', FILTER_VALIDATE_INT);
 
 if (!$id) {
     header("Location:index.php");
     exit();
 }
 
-$service = new RestriccionService($conexionBD);
-$registro = $service->obtenerPorId($id);
+$id_local = $_POST['id_local'] ?? null;
+$restriccion = trim($_POST['restriccion'] ?? '');
 
-if (!$registro) {
-    header("Location:index.php");
+if (empty($id_local) || empty($restriccion)) {
+    header("Location: editar.php?txtID=$id&mensaje=error");
     exit();
 }
 
-$consultaLocales = $conexionBD->prepare("SELECT id_local, codigo FROM locales");
-$consultaLocales->execute();
-$listaLocales = $consultaLocales->fetchAll(PDO::FETCH_ASSOC);
+$service = new RestriccionService($conexionBD);
+$service->actualizarRestriccion($id, $id_local, $restriccion);
+
+header("Location:index.php?mensaje=editado");
+exit();
 
 include('../../templates/cabecera.php');
 include('../../templates/topbar.php');
@@ -43,13 +56,6 @@ include('../../templates/sidebar.php');
     <div class="card">
         <div class="card-header">Editar Restricción</div>
         <div class="card-body">
-
-            <?php if (isset($_GET['mensaje']) && $_GET['mensaje'] == "error"): ?>
-                <div class="alert alert-warning">
-                    Todos los campos son obligatorios ⚠️
-                </div>
-            <?php endif; ?>
-
             <form action="actualizar.php" method="post">
 
                 <input type="hidden" name="csrf_token" value="<?= generarTokenCSRF(); ?>">
