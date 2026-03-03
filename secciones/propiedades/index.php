@@ -43,7 +43,7 @@ include('../../templates/sidebar.php');
 
         <div class="card-header">
             <?php if ($puedeCrear): ?>
-                <a class="btn btn-success" href="crear.php">Agregar</a>
+                <a class="btn btn-success" href="crear.php"> + Nueva Propiedad </a>
             <?php endif; ?>
         </div>
 

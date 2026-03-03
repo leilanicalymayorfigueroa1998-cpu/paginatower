@@ -1,7 +1,7 @@
 <?php
 include('../../includes/auth.php');
 include('../../bd.php');
-require_once('../../app/services/LocalService.php');
+require_once(__DIR__ . '/../../services/LocalService.php');
 
 $service = new LocalService($conexionBD);
 

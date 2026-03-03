@@ -4,7 +4,7 @@ include('../../includes/helpers.php');
 include('../../includes/permisos.php');
 include('../../bd.php');
 
-require_once('../../app/services/LocalService.php');
+require_once(__DIR__ . '/../../services/LocalService.php');
 
 $idRol = $_SESSION['id_rol'] ?? null;
 

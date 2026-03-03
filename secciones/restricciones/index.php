@@ -1,96 +1,82 @@
 <?php
 include('../../includes/auth.php');
 include('../../includes/helpers.php');
+include('../../includes/permisos.php');
 include('../../bd.php');
 
-if (isset($_GET['txtID'])) {
-    $txtID = isset($_GET['txtID']) ? $_GET['txtID'] : '';
+require_once(__DIR__ . '/../../services/RestriccionService.php');
 
-    $consulta = $conexionBD->prepare("DELETE FROM restricciones WHERE id_restriccion = :id_restriccion");
-    $consulta->bindParam(':id_restriccion', $txtID);
-    $consulta->execute();
-    header("Location:index.php");
-}
+verificarPermiso($conexionBD, $_SESSION['id_rol'], 'restricciones', 'ver');
 
-$consulta = $conexionBD->prepare("SELECT r.id_restriccion,
-           l.codigo AS local,
-           r.restriccion
-    FROM restricciones r
-    INNER JOIN locales l ON r.id_local = l.id_local");
+$service = new RestriccionService($conexionBD);
+$listaRestricciones = $service->obtenerTodas();
 
-$consulta->execute();
-$lista_restricciones = $consulta->fetchAll(PDO::FETCH_ASSOC);
+// Permisos para botones
+$puedeCrear    = tienePermiso($conexionBD, $_SESSION['id_rol'], 'restricciones', 'crear');
+$puedeEditar   = tienePermiso($conexionBD, $_SESSION['id_rol'], 'restricciones', 'editar');
+$puedeEliminar = tienePermiso($conexionBD, $_SESSION['id_rol'], 'restricciones', 'eliminar');
 
 include('../../templates/cabecera.php');
 include('../../templates/topbar.php');
 include('../../templates/sidebar.php');
-
 ?>
 
 <div class="content">
 
     <div class="card">
-        <div class="card-header">
 
-            <a
-                name=""
-                id=""
-                class="btn btn-success"
-                href="agregar.php"
-                role="button">Agregar</a>
+        <div class="card-header">
+            <?php if ($puedeCrear): ?>
+                <a class="btn btn-success" href="crear.php">+ Nueva Restriccion</a>
+            <?php endif; ?>
         </div>
 
         <div class="card-body">
-            <div
-                class="table-responsive-sm">
-                <table
-                    class="table">
-                    <thead>
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead class="table-dark">
                         <tr>
-                            <th>ID</th>
                             <th>Local</th>
-                            <th>Restriccciones</th>
-                            <th>Acciones</th>
-
+                            <th>Restricción</th>
+                            <th class="text-center">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
 
-                        <?php foreach ($lista_restricciones as $key => $value) { ?>
+                        <?php foreach ($listaRestricciones as $value): ?>
+                            <tr>
 
-                            <tr class="">
-                                <td scope="row"><?php echo $value['id_restriccion'] ?> </td>
-                                <td><?php echo $value['local'] ?></td>
-                                <td><?php echo $value['restriccion'] ?></td>
+                                <td><?= htmlspecialchars($value['codigo']) ?></td>
 
-                                <td>
-                                    <a
-                                        name=""
-                                        id=""
-                                        class="btn btn-primary"
-                                        href="editar.php?txtID=<?php echo $value['id_restriccion']; ?>"
-                                        role="button">Editar</a>
+                                <td><?= htmlspecialchars($value['restriccion']) ?></td>
 
-                                    <a
-                                        name=""
-                                        id=""
-                                        class="btn btn-danger"
-                                        href="index.php?txtID=<?php echo $value['id_restriccion']; ?>"
-                                        role="button">Borrar</a>
+                                <td class="text-center">
+
+                                    <?php if ($puedeEditar): ?>
+                                        <a class="btn btn-primary btn-sm"
+                                            href="editar.php?txtID=<?= $value['id_restriccion']; ?>">
+                                            Editar
+                                        </a>
+                                    <?php endif; ?>
+
+                                    <?php if ($puedeEliminar): ?>
+                                        <a class="btn btn-danger btn-sm"
+                                            href="eliminar.php?txtID=<?= $value['id_restriccion']; ?>"
+                                            onclick="return confirm('¿Seguro que deseas eliminar esta restricción?');">
+                                            Borrar
+                                        </a>
+                                    <?php endif; ?>
 
                                 </td>
 
-
                             </tr>
-
-                        <?php   } ?>
+                        <?php endforeach; ?>
 
                     </tbody>
                 </table>
             </div>
-
         </div>
-    </div>
-</div>
 
-<?php include('../../templates/pie.php'); ?>
+    </div>
+
+    <?php include('../../templates/pie.php'); ?>

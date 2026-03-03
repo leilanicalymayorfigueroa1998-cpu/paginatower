@@ -35,7 +35,7 @@ include('../../templates/sidebar.php');
 <div class="content">
 
     <div class="card">
-        <div class="card-header">Propiedades</div>
+        <div class="card-header"> Editar Propiedad </div>
         <div class="card-body">
 
             <form action="actualizar.php" method="post">
