@@ -45,10 +45,11 @@ include('../../templates/sidebar.php');
                 <table class="table table-striped table-hover">
                     <thead class="table-dark">
                         <tr>
-
                             <th>Local</th>
                             <th>CFE</th>
+                            <th>Numero CFE</th>
                             <th>Agua</th>
+                            <th>Contrato Agua</th>
                             <th class="text-center">Acciones</th>
                         </tr>
                     </thead>
@@ -66,11 +67,15 @@ include('../../templates/sidebar.php');
                                         : '<span class="badge bg-danger">Inactivo</span>'; ?>
                                 </td>
 
+                                <td><?= htmlspecialchars($value['contrato_cfe']); ?></td>
+
                                 <td>
                                     <?= $value['agua']
                                         ? '<span class="badge bg-success">Activo</span>'
                                         : '<span class="badge bg-danger">Inactivo</span>'; ?>
                                 </td>
+
+                                <td><?= htmlspecialchars($value['contrato_agua']); ?></td>
 
                                 <td class="text-center">
 

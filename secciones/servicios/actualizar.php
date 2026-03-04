@@ -4,7 +4,7 @@ include('../../includes/helpers.php');
 include('../../includes/permisos.php');
 include('../../bd.php');
 
-require_once(__DIR__ . '/../../services/ServiciosService.php.php');
+require_once(__DIR__ . '/../../services/ServiciosService.php');
 
 $idRol = $_SESSION['id_rol'] ?? null;
 
@@ -55,3 +55,5 @@ $service->actualizar($id, $id_local, $cfe, $agua, $contrato_cfe, $contrato_agua)
 
 header("Location:index.php?mensaje=editado");
 exit();
+
+?>

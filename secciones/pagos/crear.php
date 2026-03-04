@@ -1,16 +1,47 @@
 <?php
 include('../../includes/auth.php');
 include('../../includes/helpers.php');
+include('../../includes/permisos.php');
 include('../../bd.php');
 
-$consultaContrato = $conexionBD->prepare("SELECT r.id_contrato, l.codigo, c.nombre
-    FROM contratos r
-    INNER JOIN locales l ON r.id_local = l.id_local
-    INNER JOIN arrendatarios c ON r.id_arrendatario = c.id_arrendatario");
+require_once(__DIR__ . '/../../services/PagosService.php');
 
-$consultaContrato->execute();
-$listaContratos = $consultaContrato->fetchAll(PDO::FETCH_ASSOC);
+// 🔐 Verificar sesión
+$idRol = $_SESSION['id_rol'] ?? null;
 
+if (!$idRol) {
+    header("Location: ../../login.php");
+    exit();
+}
+
+// 🔐 Verificar permiso para crear pagos
+verificarPermiso($conexionBD, $idRol, 'pagos', 'crear');
+
+try {
+
+    $consultaContrato = $conexionBD->prepare("
+        SELECT 
+            r.id_contrato,
+            l.codigo AS codigo_local,
+            a.nombre AS nombre_arrendatario
+        FROM contratos r
+        INNER JOIN locales l 
+            ON r.id_local = l.id_local
+        INNER JOIN arrendatarios a 
+            ON r.id_arrendatario = a.id_arrendatario
+        WHERE r.estatus = 'Activa'
+        ORDER BY l.codigo ASC
+    ");
+
+    $consultaContrato->execute();
+    $listaContratos = $consultaContrato->fetchAll(PDO::FETCH_ASSOC);
+
+} catch (Exception $e) {
+
+    die("Error al cargar contratos: " . $e->getMessage());
+}
+
+// 📄 Cargar plantilla
 include('../../templates/cabecera.php');
 include('../../templates/topbar.php');
 include('../../templates/sidebar.php');
@@ -66,8 +97,6 @@ include('../../templates/sidebar.php');
                         <option value="">-- Selecciona estatus --</option>
                         <option value="Pagado">Pagado</option>
                         <option value="Pendiente">Pendiente</option>
-                        <option value="Vencido">Vencido</option>
-                        <option value="Cancelado">Cancelado</option>
                     </select>
                 </div>
 

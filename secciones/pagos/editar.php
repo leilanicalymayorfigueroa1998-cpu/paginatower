@@ -1,7 +1,21 @@
 <?php
 include('../../includes/auth.php');
 include('../../includes/helpers.php');
+include('../../includes/permisos.php');
 include('../../bd.php');
+
+require_once(__DIR__ . '/../../services/PagosService.php');
+
+// 🔐 Verificar sesión
+$idRol = $_SESSION['id_rol'] ?? null;
+
+if (!$idRol) {
+    header("Location: ../../login.php");
+    exit();
+}
+
+// 🔐 Permiso para editar pagos
+verificarPermiso($conexionBD, $idRol, 'pagos', 'editar');
 
 $id_pago = 0;
 
@@ -9,7 +23,10 @@ if (isset($_GET['txtID']) && is_numeric($_GET['txtID'])) {
 
     $id_pago = intval($_GET['txtID']);
 
-    $consulta = $conexionBD->prepare("SELECT * FROM pagos WHERE id_pago = :id");
+    $consulta = $conexionBD->prepare("
+        SELECT * FROM pagos 
+        WHERE id_pago = :id
+    ");
     $consulta->bindParam(':id', $id_pago);
     $consulta->execute();
 
@@ -24,20 +41,30 @@ if (isset($_GET['txtID']) && is_numeric($_GET['txtID'])) {
     $monto       = $pago['monto'];
     $metodo_pago = $pago['metodo_pago'];
     $estatus     = $pago['estatus'];
+} else {
+    header("Location: index.php");
+    exit();
 }
 
-$consultaContrato = $conexionBD->prepare("SELECT r.id_contrato, l.codigo, c.nombre
+
+// 🔎 Obtener contratos activos
+$consultaContrato = $conexionBD->prepare("
+    SELECT r.id_contrato, l.codigo, a.nombre
     FROM contratos r
     INNER JOIN locales l ON r.id_local = l.id_local
-    INNER JOIN arrendatarios c ON r.id_arrendatario = c.id_arrendatario");
+    INNER JOIN arrendatarios a ON r.id_arrendatario = a.id_arrendatario
+    WHERE r.estatus = 'Activa'
+    ORDER BY l.codigo ASC
+");
+
 $consultaContrato->execute();
 $listaContratos = $consultaContrato->fetchAll(PDO::FETCH_ASSOC);
 
 
+// 📄 Plantillas
 include('../../templates/cabecera.php');
 include('../../templates/topbar.php');
 include('../../templates/sidebar.php');
-
 ?>
 
 <div class="content">
@@ -98,8 +125,6 @@ include('../../templates/sidebar.php');
                     <select name="estatus" class="form-control" required>
                         <option value="Pagado" <?= ($estatus == 'Pagado') ? 'selected' : ''; ?>>Pagado</option>
                         <option value="Pendiente" <?= ($estatus == 'Pendiente') ? 'selected' : ''; ?>>Pendiente</option>
-                        <option value="Vencido" <?= ($estatus == 'Vencido') ? 'selected' : ''; ?>>Vencido</option>
-                        <option value="Cancelado" <?= ($estatus == 'Cancelado') ? 'selected' : ''; ?>>Cancelado</option>
                     </select>
                 </div>
 

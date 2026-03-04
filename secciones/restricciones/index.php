@@ -25,7 +25,10 @@ include('../../templates/sidebar.php');
 
     <div class="card">
 
-        <div class="card-header">
+        <div class="card-header d-flex justify-content-between align-items-center">
+
+            <h5 class="mb-0">Restricciones</h5>
+
             <?php if ($puedeCrear): ?>
                 <a class="btn btn-success" href="crear.php">+ Nueva Restriccion</a>
             <?php endif; ?>

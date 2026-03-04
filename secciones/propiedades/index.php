@@ -41,7 +41,9 @@ include('../../templates/sidebar.php');
 
         <?php endif; ?>
 
-        <div class="card-header">
+        <div class="card-header d-flex justify-content-between align-items-center">
+
+            <h5 class="mb-0">Propiedades</h5>
             <?php if ($puedeCrear): ?>
                 <a class="btn btn-success" href="crear.php"> + Nueva Propiedad </a>
             <?php endif; ?>
@@ -70,11 +72,7 @@ include('../../templates/sidebar.php');
 
                                 <td><?= htmlspecialchars($value['dueno']) ?></td>
 
-                                <td>
-                                    <span class="badge bg-info">
-                                        <?= htmlspecialchars($value['tipo']) ?>
-                                    </span>
-                                </td>
+                                <td><?= htmlspecialchars($value['tipo']) ?></td>
 
                                 <td><?= htmlspecialchars($value['direccion']) ?></td>
 
