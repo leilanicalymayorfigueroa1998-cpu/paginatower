@@ -57,7 +57,7 @@ include('../../templates/sidebar.php');
 
                 <div class="mb-3">
                     <label class="form-label">Medidas</label>
-                    <input type="text" class="form-control" name="medidas"
+                    <input type="text" class="form-control" name="medidas" id="medidas"
                         value="<?= htmlspecialchars($local['medidas']); ?>">
                 </div>
 
@@ -96,5 +96,7 @@ include('../../templates/sidebar.php');
     </div>
 
 </div>
+
+<script src="../../assets/js/medidas.js"></script>
 
 <?php include('../../templates/pie.php'); ?>

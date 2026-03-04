@@ -32,8 +32,9 @@ include('../../templates/sidebar.php');
 <div class="content">
 
     <div class="card">
-        <div class="card-header">
+        <div class="card-header d-flex justify-content-between align-items-center">
 
+            <h5 class="mb-0">Inmuebles</h5>
 
             <?php if ($puedeCrear): ?>
                 <a class="btn btn-success" href="crear.php">+ Agregar Inmueble </a>
@@ -62,7 +63,28 @@ include('../../templates/sidebar.php');
                     <?php foreach ($listaLocales as $value) { ?>
                         <tr>
                             <td><?= $value['codigo']; ?></td>
-                            <td><?= $value['medidas']; ?></td>
+                            <td>
+
+                                <?php
+                                $medida = strtolower($value['medidas']);
+                                $medida = str_replace(" ", "", $medida);
+
+                                if (strpos($medida, 'x') !== false) {
+                                    $partes = explode('x', $medida);
+
+                                    if (count($partes) == 2) {
+                                        $area = floatval($partes[0]) * floatval($partes[1]);
+                                        $medida = $area . " m²";
+                                    }
+                                }
+
+                                $medida = str_replace(['m3', 'm^3'], ' m²', $medida);
+                                $medida = str_replace(['m2', 'm^2'], ' m²', $medida);
+
+                                echo htmlspecialchars($medida);
+                                ?>
+
+                            </td>
                             <td><?= $value['descripcion']; ?></td>
                             <td><?= $value['estacionamiento']; ?></td>
                             <td>
@@ -97,6 +119,8 @@ include('../../templates/sidebar.php');
 
     </div>
 </div>
-</div>
+
+
+<script src="../../assets/js/medidas.js"></script>
 
 <?php include('../../templates/pie.php'); ?>

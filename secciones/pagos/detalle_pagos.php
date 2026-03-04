@@ -6,7 +6,6 @@ include('../../bd.php');
 
 require_once(__DIR__ . '/../../services/PagosService.php');
 
-// 🔐 Verificar sesión
 $idRol = $_SESSION['id_rol'] ?? null;
 
 if (!$idRol) {
@@ -14,33 +13,40 @@ if (!$idRol) {
     exit();
 }
 
-$puedeCrear    = tienePermiso($conexionBD, $idRol, 'pagos', 'crear');
-$puedeEditar   = tienePermiso($conexionBD, $idRol, 'pagos', 'editar');
-$puedeEliminar = tienePermiso($conexionBD, $idRol, 'pagos', 'eliminar');
+$contrato = $_GET['contrato'] ?? '';
 
+// Generar pagos mensuales automáticamente
+$pagoService = new PagoService($conexionBD);
+$pagoService->generarPagosMensuales();
+
+// Marcar pagos vencidos automáticamente
+$conexionBD->exec("
+UPDATE pagos
+SET estatus = 'Vencido'
+WHERE estatus = 'Pendiente'
+AND fecha_pago < CURDATE()
+");
 
 $consulta = $conexionBD->prepare("
 SELECT 
+    p.id_pago,
     l.codigo AS contrato,
-    IFNULL(MAX(p.fecha_pago),'0000-00-00') AS fecha_pago,
-    SUM(p.monto) AS monto,
-    'Resumen' AS metodo_pago,
-    
-    CASE 
-        WHEN SUM(CASE WHEN p.estatus = 'Pendiente' THEN 1 ELSE 0 END) > 0 THEN 'Pendiente'
-        WHEN SUM(CASE WHEN p.estatus = 'Vencido' THEN 1 ELSE 0 END) > 0 THEN 'Vencido'
-        ELSE 'Pagado'
-    END AS estatus
-
+    p.fecha_pago,
+    p.monto,
+    p.metodo_pago,
+    p.estatus
 FROM pagos p
 INNER JOIN contratos r ON p.id_contrato = r.id_contrato
 INNER JOIN locales l ON r.id_local = l.id_local
-GROUP BY l.id_local, l.codigo
-ORDER BY l.codigo
+WHERE l.codigo = :contrato
+ORDER BY p.periodo DESC
 ");
 
-$consulta->execute();
-$listaPagos = $consulta->fetchAll(PDO::FETCH_ASSOC);
+$consulta->execute([
+    ':contrato' => $contrato
+]);
+
+$pagos = $consulta->fetchAll(PDO::FETCH_ASSOC);
 
 include('../../templates/cabecera.php');
 include('../../templates/topbar.php');
@@ -53,13 +59,11 @@ include('../../templates/sidebar.php');
 
         <div class="card-header d-flex justify-content-between align-items-center">
 
-            <h5 class="mb-0">Pagos</h5>
+            <h5 class="mb-0">Pagos del contrato: <?= htmlspecialchars($contrato) ?></h5>
 
-            <?php if ($puedeCrear): ?>
-                <a class="btn btn-success" href="crear.php">
-                    + Nuevo Pago
-                </a>
-            <?php endif; ?>
+            <a class="btn btn-secondary" href="index.php">
+                Volver
+            </a>
 
         </div>
 
@@ -72,41 +76,26 @@ include('../../templates/sidebar.php');
                     <thead class="table-dark">
 
                         <tr>
-                            <th>Contrato</th>
                             <th>Fecha pago</th>
                             <th>Monto</th>
                             <th>Método Pago</th>
                             <th>Estatus</th>
-
+                            <th>Acciones</th>
                         </tr>
 
                     </thead>
 
                     <tbody>
 
-                        <?php foreach ($listaPagos as $value): ?>
+                        <?php foreach ($pagos as $value): ?>
 
                             <tr>
 
-                                <td>
-                                    <a href="detalle_pagos.php?contrato=<?= urlencode($value['contrato']) ?>">
-                                        <?= htmlspecialchars($value['contrato']) ?>
-                                    </a>
-                                </td>
-
-                                <td>
-                                    <?php
-                                    if ($value['fecha_pago'] != '0000-00-00') {
-                                        echo date('d/m/Y', strtotime($value['fecha_pago']));
-                                    } else {
-                                        echo "Sin pagos";
-                                    }
-                                    ?>
-                                </td>
+                                <td><?= date('d/m/Y', strtotime($value['fecha_pago'])) ?></td>
 
                                 <td>$<?= number_format($value['monto'], 2) ?></td>
 
-                                <td><?= htmlspecialchars($value['metodo_pago']) ?></td>
+                                <td><?= $value['metodo_pago'] ? htmlspecialchars($value['metodo_pago']) : 'Sin registrar' ?></td>
 
                                 <td>
 
@@ -127,6 +116,31 @@ include('../../templates/sidebar.php');
                                         <span class="badge bg-secondary">Cancelado</span>
 
                                     <?php endif; ?>
+
+                                </td>
+
+                                <td>
+
+                                    <a class="btn btn-primary btn-sm"
+                                        href="editar.php?txtID=<?= $value['id_pago'] ?>">
+                                        Editar
+                                    </a>
+
+                                    <form action="eliminar.php" method="post" style="display:inline;">
+
+                                        <input type="hidden" name="csrf_token" value="<?= generarTokenCSRF(); ?>">
+
+                                        <input type="hidden" name="txtID" value="<?= $value['id_pago']; ?>">
+
+                                        <button type="submit"
+                                            class="btn btn-danger btn-sm"
+                                            onclick="return confirm('¿Seguro que deseas eliminar este pago?');">
+
+                                            Borrar
+
+                                        </button>
+
+                                    </form>
 
                                 </td>
 

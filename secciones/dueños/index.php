@@ -36,14 +36,13 @@ include('../../templates/sidebar.php');
 <div class="content">
 
     <div class="card">
-        <div class="card-header">
+        <div class="card-header d-flex justify-content-between align-items-center">
+
+            <h5 class="mb-0">Dueños</h5>
 
             <?php if ($puedeCrear): ?>
-                <a class="btn btn-success" href="crear.php">
-                    + Nuevo Dueño
-                </a>
+                <a class="btn btn-success" href="crear.php"> + Nuevo Dueño </a>
             <?php endif; ?>
-
         </div>
 
         <div class="card-body">

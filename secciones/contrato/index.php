@@ -45,12 +45,13 @@ include('../../templates/sidebar.php');
 <div class="content">
 
     <div class="card">
-        <div class="card-header">
+
+        <div class="card-header d-flex justify-content-between align-items-center">
+
+            <h5 class="mb-0">Contrato</h5>
 
             <?php if (tienePermiso($conexionBD, $idRol, 'contratos', 'crear')): ?>
-                <a class="btn btn-success" href="crear.php">
-                    + Nuevo contrato
-                </a>
+                <a class="btn btn-success" href="crear.php">+ Nuevo contrato</a>
             <?php endif; ?>
 
         </div>

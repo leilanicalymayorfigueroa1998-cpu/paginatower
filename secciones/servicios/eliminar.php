@@ -27,3 +27,5 @@ $service->eliminar($id);
 
 header("Location:index.php?mensaje=eliminado");
 exit();
+
+?>

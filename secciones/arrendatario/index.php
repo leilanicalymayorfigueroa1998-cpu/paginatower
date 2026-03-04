@@ -44,14 +44,14 @@ include('../../templates/sidebar.php');
 <div class="content">
 
     <div class="card">
-        <div class="card-header">
+
+        <div class="card-header d-flex justify-content-between align-items-center">
+
+            <h5 class="mb-0">Arrendatario</h5>
 
             <?php if ($puedeCrear): ?>
-                <a class="btn btn-success" href="crear.php">
-                    + Nuevo Arrendatario
-                </a>
+                <a class="btn btn-success" href="crear.php"> + Nuevo Arrendatario</a>
             <?php endif; ?>
-
         </div>
 
         <div class="card-body">
@@ -122,6 +122,6 @@ include('../../templates/sidebar.php');
             </div>
         </div>
     </div>
-</div>
 
-<?php include('../../templates/pie.php'); ?>
+
+    <?php include('../../templates/pie.php'); ?>

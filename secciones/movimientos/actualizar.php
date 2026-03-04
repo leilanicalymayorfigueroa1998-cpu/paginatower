@@ -4,9 +4,9 @@ include('../../includes/helpers.php');
 include('../../includes/permisos.php');
 include('../../bd.php');
 
-require_once('../../app/services/MovimientoService.php');
+require_once __DIR__ . '/../../services/MovimientoService.php';
 
-verificarPermiso($conexionBD, $_SESSION['id_rol'], 'movimientos', 'editar');
+verificarPermiso($conexionBD, $_SESSION['id_rol'], 'movimientos_financieros', 'editar');
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
@@ -23,24 +23,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit();
     }
 
+    $fecha = $_POST['fecha'] ?? '';
+    $id_propiedad = $_POST['id_propiedad'] ?? '';
+    $id_tipo_operacion = $_POST['id_tipo_operacion'] ?? '';
+    $nota = trim($_POST['nota'] ?? '');
+    $abono = floatval($_POST['abono'] ?? 0);
+    $cargo = floatval($_POST['cargo'] ?? 0);
+    $origen = $_POST['origen'] ?? '';
+
     $service = new MovimientoService($conexionBD);
 
     try {
 
         $service->actualizar($id, [
-            'fecha' => $_POST['fecha'] ?? '',
-            'id_propiedad' => $_POST['id_propiedad'] ?? '',
-            'id_tipo_operacion' => $_POST['id_tipo_operacion'] ?? '',
-            'nota' => trim($_POST['nota'] ?? ''),
-            'abono' => floatval($_POST['abono'] ?? 0),
-            'cargo' => floatval($_POST['cargo'] ?? 0),
-            'origen' => $_POST['origen'] ?? ''
+            'fecha' => $fecha,
+            'id_propiedad' => $id_propiedad,
+            'id_tipo_operacion' => $id_tipo_operacion,
+            'nota' => $nota,
+            'abono' => $abono,
+            'cargo' => $cargo,
+            'origen' => $origen
         ]);
 
-        header("Location:index.php");
+        header("Location:index.php?msg=actualizado");
         exit();
 
     } catch (Exception $e) {
-        die($e->getMessage());
+        die("Error al actualizar movimiento: " . $e->getMessage());
     }
 }
+
+?>

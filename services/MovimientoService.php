@@ -10,25 +10,40 @@ class MovimientoService
     }
 
     // Crear movimiento
-    public function crear($data)
-    {
-        if ($data['abono'] > 0 && $data['cargo'] > 0) {
-            throw new Exception("No puede registrar abono y cargo al mismo tiempo.");
-        }
-
-        if ($data['abono'] <= 0 && $data['cargo'] <= 0) {
-            throw new Exception("Debe registrar un abono o un cargo.");
-        }
-
-        $sql = "INSERT INTO movimientos_financieros
-                (fecha, id_propiedad, id_tipo_operacion, nota, abono, cargo, origen)
-                VALUES
-                (:fecha, :id_propiedad, :id_tipo_operacion, :nota, :abono, :cargo, :origen)";
-
-        $stmt = $this->conexion->prepare($sql);
-
-        return $stmt->execute($data);
+   public function crear($data)
+{
+    if ($data['abono'] > 0 && $data['cargo'] > 0) {
+        throw new Exception("No puede registrar abono y cargo al mismo tiempo.");
     }
+
+    if ($data['abono'] <= 0 && $data['cargo'] <= 0) {
+        throw new Exception("Debe registrar un abono o un cargo.");
+    }
+
+    $sql = "INSERT INTO movimientos_financieros
+            (fecha, id_propiedad, id_tipo_operacion, nota, abono, cargo, origen)
+            VALUES
+            (:fecha, :id_propiedad, :id_tipo_operacion, :nota, :abono, :cargo, :origen)";
+
+    $stmt = $this->conexion->prepare($sql);
+    $stmt->execute($data);
+
+    // ACTUALIZAR DEUDA
+    if ($data['abono'] > 0) {
+
+        $sqlContrato = "UPDATE contratos
+                        SET deuda = GREATEST(deuda - :abono, 0)
+                        WHERE id_propiedad = :id_propiedad";
+
+        $stmtContrato = $this->conexion->prepare($sqlContrato);
+        $stmtContrato->execute([
+            ':abono' => $data['abono'],
+            ':id_propiedad' => $data['id_propiedad']
+        ]);
+    }
+
+    return true;
+}
 
     // Obtener todos
     public function obtenerTodos()

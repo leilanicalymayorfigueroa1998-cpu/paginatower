@@ -41,3 +41,5 @@ try {
     header("Location: crear.php?mensaje=error&detalle=" . urlencode($e->getMessage()));
     exit();
 }
+
+?>
