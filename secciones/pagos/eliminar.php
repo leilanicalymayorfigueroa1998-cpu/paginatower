@@ -6,7 +6,9 @@ include('../../bd.php');
 
 require_once __DIR__ . '/../../services/PagosService.php';
 
-// 🔐 Verificar sesión
+/* =========================
+   Verificar sesión
+========================= */
 $idRol = $_SESSION['id_rol'] ?? null;
 
 if (!$idRol) {
@@ -14,36 +16,58 @@ if (!$idRol) {
     exit();
 }
 
-// 🔐 Permiso para eliminar pagos
+/* =========================
+   Verificar permiso
+========================= */
 verificarPermiso($conexionBD, $idRol, 'pagos', 'eliminar');
 
+/* =========================
+   Solo método POST
+========================= */
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header("Location: index.php");
     exit();
 }
 
-// 🔐 Validar CSRF
-if (!validarTokenCSRF($_POST['csrf_token'] ?? '')) {
-    die("Acceso inválido (CSRF)");
+/* =========================
+   Validar CSRF
+========================= */
+$csrf = $_POST['csrf_token'] ?? '';
+
+if (!validarTokenCSRF($csrf)) {
+    echo "<div class='alert alert-danger'>Acceso inválido (CSRF).</div>";
+    exit();
 }
 
-$id_pago = intval($_POST['txtID']);
+/* =========================
+   Obtener ID
+========================= */
+$id_pago = intval($_POST['txtID'] ?? 0);
 
 if ($id_pago <= 0) {
-    die("ID inválido.");
+
+    echo "<div class='alert alert-danger'>ID de pago inválido.</div>";
+    exit();
 }
 
+/* =========================
+   Eliminar pago
+========================= */
 $service = new PagoService($conexionBD);
 
 try {
 
     $service->eliminarPago($id_pago);
 
-    header("Location: index.php");
+    header("Location: index.php?msg=eliminado");
     exit();
 
 } catch (Exception $e) {
 
-    die("Error: " . $e->getMessage());
+    echo "<div class='alert alert-danger'>
+    Error al eliminar el pago: " . htmlspecialchars($e->getMessage()) . "
+    </div>";
+
 }
+
 ?>
