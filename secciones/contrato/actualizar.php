@@ -48,25 +48,20 @@ try {
         'deposito' => isset($_POST['deposito']) ? (float) $_POST['deposito'] : 0,
         'adicional' => isset($_POST['adicional']) ? (float) $_POST['adicional'] : 0,
         'fecha_inicio' => $fecha_inicio,
-        'estatus' => $_POST['estatus'],
-        'duracion' => $duracion
+        'estatus'      => $_POST['estatus'],
+        'duracion'     => $duracion,
+        'dia_pago'     => isset($_POST['dia_pago']) ? max(1, min(28, (int)$_POST['dia_pago'])) : 1,
     ];
 
-    // 🔹 Calcular fecha_fin automáticamente
-    if ($duracion === 'indefinido') {
-
+    // 🔹 Manejo correcto de fecha_fin según duracion
+    if ($duracion === 'Indefinido') {
         $data['fecha_fin'] = null;
-
-    } elseif ($duracion === '6') {
-
-        $data['fecha_fin'] = date('Y-m-d', strtotime('+6 months', strtotime($fecha_inicio)));
-
-    } elseif ($duracion === '12') {
-
-        $data['fecha_fin'] = date('Y-m-d', strtotime('+12 months', strtotime($fecha_inicio)));
-
     } else {
-        throw new Exception("Duración inválida.");
+        // Fijo: requiere fecha_fin enviada desde el formulario
+        if (empty($_POST['fecha_fin'])) {
+            throw new Exception("Debe seleccionar fecha fin para contratos fijos.");
+        }
+        $data['fecha_fin'] = $_POST['fecha_fin'];
     }
 
     $service->actualizarContrato($id_contrato, $data);

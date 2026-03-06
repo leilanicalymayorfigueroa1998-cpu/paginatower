@@ -9,48 +9,56 @@ require_once(__DIR__ . '/../../services/PagosService.php');
 $idRol = $_SESSION['id_rol'] ?? null;
 if (!$idRol) { header("Location: ../../login.php"); exit(); }
 
-$puedeCrear    = tienePermiso($conexionBD, $idRol, 'pagos', 'crear');
-$puedeEditar   = tienePermiso($conexionBD, $idRol, 'pagos', 'editar');
-$puedeEliminar = tienePermiso($conexionBD, $idRol, 'pagos', 'eliminar');
+$puedeCrear = tienePermiso($conexionBD, $idRol, 'pagos', 'crear');
 
-// Un registro por inmueble con info del mes actual
+/* =====================================================
+   Marcar pagos vencidos automáticamente
+===================================================== */
+$conexionBD->prepare("
+    UPDATE pagos SET estatus = 'Vencido'
+    WHERE estatus = 'Pendiente' AND fecha_pago < CURDATE()
+")->execute();
+
+$periodo = date('Y-m-01');
+
+/* =====================================================
+   Un renglón por contrato activo con info del mes
+===================================================== */
 $consulta = $conexionBD->prepare("
     SELECT
-        r.id_contrato,
-        l.codigo                        AS contrato,
-        r.renta,
-        r.deuda,
-
-        -- Último pago realizado
-        MAX(p.fecha_pago)               AS ultimo_pago,
-
-        -- Estatus del mes actual
-        (
-            SELECT estatus FROM pagos
-            WHERE id_contrato = r.id_contrato
-              AND periodo = DATE_FORMAT(CURDATE(), '%Y-%m-01')
-            LIMIT 1
-        )                               AS estatus_mes,
-
-        -- Estatus global del contrato
-        CASE
-            WHEN SUM(CASE WHEN p.estatus = 'Vencido'  THEN 1 ELSE 0 END) > 0 THEN 'Vencido'
-            WHEN SUM(CASE WHEN p.estatus = 'Pendiente' THEN 1 ELSE 0 END) > 0 THEN 'Pendiente'
-            WHEN COUNT(p.id_pago) = 0 THEN 'Sin pagos'
-            ELSE 'Al corriente'
-        END                             AS estatus_global
-
-    FROM contratos r
-    INNER JOIN locales l   ON r.id_local    = l.id_local
-    LEFT  JOIN pagos   p   ON p.id_contrato = r.id_contrato
-
-    WHERE r.estatus = 'Activa'
-
-    GROUP BY r.id_contrato, l.codigo, r.renta, r.deuda
-    ORDER BY l.codigo
+        c.id_contrato,
+        c.duracion,
+        c.dia_pago,
+        c.renta,
+        l.codigo       AS local,
+        a.nombre       AS arrendatario,
+        pm.id_pago     AS pago_mes_id,
+        pm.fecha_pago  AS fecha_pago_mes,
+        pm.monto       AS monto_mes,
+        pm.metodo_pago AS metodo_mes,
+        pm.estatus     AS estatus_mes,
+        COUNT(ph.id_pago)                                          AS total_pagos,
+        SUM(CASE WHEN ph.estatus='Pagado'    THEN 1 ELSE 0 END)   AS pagados,
+        SUM(CASE WHEN ph.estatus='Pendiente' THEN 1 ELSE 0 END)   AS pendientes,
+        SUM(CASE WHEN ph.estatus='Vencido'   THEN 1 ELSE 0 END)   AS vencidos
+    FROM contratos c
+    INNER JOIN locales l       ON c.id_local        = l.id_local
+    INNER JOIN arrendatarios a ON c.id_arrendatario = a.id_arrendatario
+    LEFT  JOIN pagos pm        ON pm.id_contrato = c.id_contrato AND pm.periodo = :periodo
+    LEFT  JOIN pagos ph        ON ph.id_contrato = c.id_contrato
+    WHERE c.estatus = 'Activa'
+    GROUP BY c.id_contrato, pm.id_pago
+    ORDER BY FIELD(pm.estatus,'Vencido','Pendiente','Pagado',NULL), l.codigo
 ");
-$consulta->execute();
-$listaPagos = $consulta->fetchAll(PDO::FETCH_ASSOC);
+$consulta->execute([':periodo' => $periodo]);
+$contratos = $consulta->fetchAll(PDO::FETCH_ASSOC);
+
+$totalVencidos = $totalPendientes = $totalPagados = 0;
+foreach ($contratos as $c) {
+    if ($c['estatus_mes'] === 'Vencido')        $totalVencidos++;
+    elseif ($c['estatus_mes'] === 'Pagado')     $totalPagados++;
+    else                                         $totalPendientes++;
+}
 
 include('../../templates/cabecera.php');
 include('../../templates/topbar.php');
@@ -58,92 +66,114 @@ include('../../templates/sidebar.php');
 ?>
 
 <div class="content">
+
+    <!-- Resumen -->
+    <div class="row mb-4 g-3">
+        <div class="col-md-3">
+            <div class="card text-white bg-danger">
+                <div class="card-body py-3 d-flex justify-content-between align-items-center">
+                    <div><div class="small text-white-50">Vencidos</div><div class="fs-3 fw-bold"><?= $totalVencidos ?></div></div>
+                    <div class="fs-1 opacity-50">⚠</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-dark bg-warning">
+                <div class="card-body py-3 d-flex justify-content-between align-items-center">
+                    <div><div class="small">Pendientes</div><div class="fs-3 fw-bold"><?= $totalPendientes ?></div></div>
+                    <div class="fs-1 opacity-50">⏳</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-success">
+                <div class="card-body py-3 d-flex justify-content-between align-items-center">
+                    <div><div class="small text-white-50">Pagados este mes</div><div class="fs-3 fw-bold"><?= $totalPagados ?></div></div>
+                    <div class="fs-1 opacity-50">✓</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-dark">
+                <div class="card-body py-3 d-flex justify-content-between align-items-center">
+                    <div><div class="small text-white-50">Contratos activos</div><div class="fs-3 fw-bold"><?= count($contratos) ?></div></div>
+                    <div class="fs-1 opacity-50">🏢</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabla -->
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">Pagos</h5>
+            <h5 class="mb-0">Pagos — <span class="text-muted fs-6"><?= date('F Y') ?></span></h5>
             <?php if ($puedeCrear): ?>
-                <a class="btn btn-success" href="crear.php">+ Nuevo Pago</a>
+                <a class="btn btn-success btn-sm" href="crear.php">+ Registrar pago</a>
             <?php endif; ?>
         </div>
-
-        <div class="card-body">
-
-            <?php if (isset($_GET['msg']) && $_GET['msg'] === 'creado'): ?>
-                <div class="alert alert-success">Pago registrado correctamente.</div>
-            <?php endif; ?>
-
+        <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table table-striped table-hover align-middle">
+                <table class="table table-hover mb-0">
                     <thead class="table-dark">
                         <tr>
-                            <th>Inmueble</th>
-                            <th class="text-end">Renta</th>
-                            <th class="text-end">Deuda</th>
-                            <th>Último pago</th>
-                            <th>Mes actual</th>
-                            <th>Estatus general</th>
-                            <th>Detalle</th>
+                            <th>Local</th>
+                            <th>Arrendatario</th>
+                            <th>Día pago</th>
+                            <th>Fecha programada</th>
+                            <th>Monto</th>
+                            <th>Método</th>
+                            <th>Estatus mes</th>
+                            <th>Historial</th>
+                            <th>Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <?php if (empty($listaPagos)): ?>
-                            <tr><td colspan="7" class="text-center">No hay registros</td></tr>
-                        <?php else: ?>
-                            <?php foreach ($listaPagos as $v): ?>
-                            <tr>
-                                <td class="fw-semibold"><?= htmlspecialchars($v['contrato']) ?></td>
+                    <?php foreach ($contratos as $c):
+                        // Calcular fecha programada del mes actual con dia_pago
+                        $anio = (int)date('Y'); $mes = (int)date('m');
+                        $dia  = max(1, min(28, (int)($c['dia_pago'] ?? 1)));
+                        $max  = (int)date('t', mktime(0,0,0,$mes,1,$anio));
+                        $fechaProg = date('d/m/Y', mktime(0,0,0,$mes,min($dia,$max),$anio));
 
-                                <td class="text-end">$<?= number_format($v['renta'], 2) ?></td>
-
-                                <td class="text-end <?= $v['deuda'] > 0 ? 'text-danger fw-bold' : 'text-success' ?>">
-                                    $<?= number_format($v['deuda'], 2) ?>
-                                </td>
-
-                                <td>
-                                    <?= $v['ultimo_pago'] ? date('d/m/Y', strtotime($v['ultimo_pago'])) : '<span class="text-muted">Sin pagos</span>' ?>
-                                </td>
-
-                                <td>
-                                    <?php
-                                    $em = $v['estatus_mes'];
-                                    if ($em === 'Pagado'):
-                                    ?><span class="badge bg-success">Pagado</span>
-                                    <?php elseif ($em === 'Pendiente'): ?>
-                                        <span class="badge bg-warning text-dark">Pendiente</span>
-                                    <?php elseif ($em === 'Vencido'): ?>
-                                        <span class="badge bg-danger">Vencido</span>
-                                    <?php else: ?>
-                                        <span class="badge bg-secondary">Sin registro</span>
-                                    <?php endif; ?>
-                                </td>
-
-                                <td>
-                                    <?php
-                                    $eg = $v['estatus_global'];
-                                    if ($eg === 'Al corriente'):
-                                    ?><span class="badge bg-success">Al corriente</span>
-                                    <?php elseif ($eg === 'Pendiente'): ?>
-                                        <span class="badge bg-warning text-dark">Pendiente</span>
-                                    <?php elseif ($eg === 'Vencido'): ?>
-                                        <span class="badge bg-danger">Vencido</span>
-                                    <?php else: ?>
-                                        <span class="badge bg-secondary">Sin pagos</span>
-                                    <?php endif; ?>
-                                </td>
-
-                                <td>
-                                    <a href="detalle_pagos.php?contrato=<?= urlencode($v['contrato']) ?>"
-                                       class="btn btn-sm btn-outline-primary">
-                                        Ver pagos
-                                    </a>
-                                </td>
-                            </tr>
-                            <?php endforeach; ?>
-                        <?php endif; ?>
+                        $estMes = $c['estatus_mes'] ?? null;
+                        if ($estMes === 'Pagado')        { $badge = 'bg-success';         $label = 'Pagado'; }
+                        elseif ($estMes === 'Vencido')   { $badge = 'bg-danger';          $label = 'Vencido'; }
+                        elseif ($estMes === 'Pendiente') { $badge = 'bg-warning text-dark'; $label = 'Pendiente'; }
+                        else                             { $badge = 'bg-secondary';        $label = 'Sin generar'; }
+                    ?>
+                        <tr>
+                            <td class="fw-semibold"><?= htmlspecialchars($c['local']) ?></td>
+                            <td><?= htmlspecialchars($c['arrendatario']) ?></td>
+                            <td>
+                                <span class="badge bg-dark">Día <?= $c['dia_pago'] ?></span><br>
+                                <small class="text-muted"><?= $c['duracion'] === 'Indefinido' ? '∞ Indef.' : 'Fijo' ?></small>
+                            </td>
+                            <td><strong><?= $fechaProg ?></strong></td>
+                            <td>$<?= number_format($c['renta'], 2) ?></td>
+                            <td>
+                                <?= !empty($c['metodo_mes'])
+                                    ? '<span class="badge bg-light text-dark border">'.htmlspecialchars($c['metodo_mes']).'</span>'
+                                    : '<span class="text-muted small">—</span>' ?>
+                            </td>
+                            <td><span class="badge <?= $badge ?>"><?= $label ?></span></td>
+                            <td>
+                                <span class="badge bg-success me-1" title="Pagados"><?= $c['pagados'] ?>✓</span>
+                                <span class="badge bg-danger me-1"  title="Vencidos"><?= $c['vencidos'] ?>⚠</span>
+                                <span class="badge bg-warning text-dark" title="Pendientes"><?= $c['pendientes'] ?>⏳</span>
+                            </td>
+                            <td>
+                                <a class="btn btn-outline-primary btn-sm"
+                                   href="detalle_pagos.php?id=<?= $c['id_contrato'] ?>">Ver detalle</a>
+                                <?php if ($puedeCrear && $estMes !== 'Pagado'): ?>
+                                    <a class="btn btn-success btn-sm ms-1"
+                                       href="crear.php?id_contrato=<?= $c['id_contrato'] ?>">Registrar</a>
+                                <?php endif; ?>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
                     </tbody>
                 </table>
             </div>
-
         </div>
     </div>
 </div>
