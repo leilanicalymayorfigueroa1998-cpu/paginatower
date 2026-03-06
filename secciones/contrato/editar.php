@@ -140,22 +140,28 @@ include('../../templates/sidebar.php');
                     <label class="form-label">Duración</label>
                     <select name="duracion" id="duracion" class="form-control" required>
 
-                        <option value="6"
-                            <?= ($contrato['duracion'] == '6') ? 'selected' : '' ?>>
-                            6 meses
+                        <option value="Fijo"
+                            <?= ($contrato['duracion'] == 'Fijo') ? 'selected' : '' ?>>
+                            Fijo (con fecha fin)
                         </option>
 
-                        <option value="12"
-                            <?= ($contrato['duracion'] == '12') ? 'selected' : '' ?>>
-                            12 meses
-                        </option>
-
-                        <option value="indefinido"
-                            <?= ($contrato['duracion'] == 'indefinido') ? 'selected' : '' ?>>
-                            Indefinido
+                        <option value="Indefinido"
+                            <?= ($contrato['duracion'] == 'Indefinido') ? 'selected' : '' ?>>
+                            Indefinido (mes a mes)
                         </option>
 
                     </select>
+                </div>
+
+                <!-- DÍA DE PAGO -->
+                <div class="mb-3">
+                    <label class="form-label">Día de pago mensual
+                        <small class="text-muted">(1–28, ej: 5 = cada día 5 del mes)</small>
+                    </label>
+                    <input type="number" class="form-control" name="dia_pago"
+                           min="1" max="28"
+                           value="<?= htmlspecialchars($contrato['dia_pago'] ?? 1) ?>"
+                           required>
                 </div>
 
                 <button type="submit" class="btn btn-success">Modificar</button>

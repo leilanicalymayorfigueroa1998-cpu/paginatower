@@ -53,6 +53,7 @@ $data = [
     'deposito' => isset($_POST['deposito']) ? (float) $_POST['deposito'] : 0,
     'adicional' => isset($_POST['adicional']) ? (float) $_POST['adicional'] : 0,
     'fecha_inicio' => $_POST['fecha_inicio'],
+    'dia_pago'     => isset($_POST['dia_pago']) ? max(1, min(28, (int)$_POST['dia_pago'])) : 1,
     'estatus' => $_POST['estatus']
 ];
 

@@ -13,57 +13,55 @@ class ContratoService
        CREAR CONTRATO
     ===================================================== */
     public function crearContrato($data)
-{
-    $this->conexion->beginTransaction();
+    {
+        $this->conexion->beginTransaction();
 
-    try {
+        try {
 
-        // 1️⃣ Insertar contrato
-        $stmtContrato = $this->conexion->prepare("
-            INSERT INTO contratos 
-            (id_arrendatario, id_propiedad, fecha_inicio, duracion_meses, monto_renta)
-            VALUES (:id_arrendatario, :id_propiedad, :fecha_inicio, :duracion_meses, :monto_renta)
-        ");
-
-        $stmtContrato->execute([
-            ':id_arrendatario' => $data['id_arrendatario'],
-            ':id_propiedad'    => $data['id_propiedad'],
-            ':fecha_inicio'    => $data['fecha_inicio'],
-            ':duracion_meses'  => $data['duracion_meses'], // 6 o 12
-            ':monto_renta'     => $data['monto_renta']
-        ]);
-
-        $idContrato = $this->conexion->lastInsertId();
-
-        // 2️⃣ Generar pagos automáticamente
-        $fechaInicio = new DateTime($data['fecha_inicio']);
-
-        for ($i = 0; $i < $data['duracion_meses']; $i++) {
-
-            $fechaPago = clone $fechaInicio;
-            $fechaPago->modify("+$i month");
-
-            $stmtPago = $this->conexion->prepare("
-                INSERT INTO pagos 
-                (id_contrato, fecha_programada, monto, estatus)
-                VALUES (:id_contrato, :fecha_programada, :monto, 'Pendiente')
+            // 1️⃣ Insertar contrato (incluye dia_pago personalizado)
+            $stmtContrato = $this->conexion->prepare("
+                INSERT INTO contratos
+                (id_local, id_arrendatario, renta, deposito, adicional,
+                 fecha_inicio, fecha_fin, estatus, duracion, dia_pago)
+                VALUES
+                (:id_local, :id_arrendatario, :renta, :deposito, :adicional,
+                 :fecha_inicio, :fecha_fin, :estatus, :duracion, :dia_pago)
             ");
 
-            $stmtPago->execute([
-                ':id_contrato'    => $idContrato,
-                ':fecha_programada' => $fechaPago->format('Y-m-d'),
-                ':monto'          => $data['monto_renta']
+            $stmtContrato->execute([
+                ':id_local'        => $data['id_local'],
+                ':id_arrendatario' => $data['id_arrendatario'],
+                ':renta'           => $data['renta'],
+                ':deposito'        => $data['deposito'] ?? 0,
+                ':adicional'       => $data['adicional'] ?? 0,
+                ':fecha_inicio'    => $data['fecha_inicio'],
+                ':fecha_fin'       => $data['fecha_fin'] ?? null,
+                ':estatus'         => $data['estatus'],
+                ':duracion'        => $data['duracion'],
+                ':dia_pago'        => $data['dia_pago'] ?? 1,
             ]);
+
+            $idContrato = $this->conexion->lastInsertId();
+
+            // 2️⃣ Marcar local como ocupado si aplica
+            if ($data['estatus'] === 'Activa') {
+                $this->ocuparLocal($data['id_local']);
+            }
+
+            // 3️⃣ Generar pagos solo para contratos de plazo fijo
+            if ($data['duracion'] !== 'Indefinido' && !empty($data['fecha_fin'])) {
+                $this->generarPagos($idContrato, $data);
+            }
+            // Los contratos indefinidos generan pagos mes a mes vía cron
+
+            $this->conexion->commit();
+            return true;
+
+        } catch (Exception $e) {
+            $this->conexion->rollBack();
+            throw $e;
         }
-
-        $this->conexion->commit();
-        return true;
-
-    } catch (Exception $e) {
-        $this->conexion->rollBack();
-        throw $e;
     }
-}
 
     /* =====================================================
        ACTUALIZAR CONTRATO
@@ -103,21 +101,23 @@ class ContratoService
                 fecha_inicio = :fecha_inicio,
                 fecha_fin = :fecha_fin,
                 estatus = :estatus,
-                duracion = :duracion
+                duracion = :duracion,
+                dia_pago = :dia_pago
             WHERE id_contrato = :id_contrato
         ");
 
             $consulta->execute([
-                ':id_local' => $data['id_local'],
+                ':id_local'        => $data['id_local'],
                 ':id_arrendatario' => $data['id_arrendatario'],
-                ':renta' => $data['renta'],
-                ':deposito' => $data['deposito'],
-                ':adicional' => $data['adicional'],
-                ':fecha_inicio' => $data['fecha_inicio'],
-                ':fecha_fin' => $data['fecha_fin'],
-                ':estatus' => $data['estatus'],
-                ':duracion' => $data['duracion'],
-                ':id_contrato' => $id_contrato
+                ':renta'           => $data['renta'],
+                ':deposito'        => $data['deposito'],
+                ':adicional'       => $data['adicional'],
+                ':fecha_inicio'    => $data['fecha_inicio'],
+                ':fecha_fin'       => $data['fecha_fin'],
+                ':estatus'         => $data['estatus'],
+                ':duracion'        => $data['duracion'],
+                ':dia_pago'        => $data['dia_pago'] ?? 1,
+                ':id_contrato'     => $id_contrato
             ]);
 
             /* ==============================
@@ -222,79 +222,105 @@ class ContratoService
 
     /* =====================================================
        GENERAR PAGOS (SOLO PARA PLAZO FIJO)
+       Usa dia_pago para calcular la fecha exacta cada mes
     ===================================================== */
     private function generarPagos($id_contrato, $data)
     {
         if (empty($data['fecha_fin'])) {
-            return; // 👈 NO generar pagos para indefinido
+            return;
         }
 
+        $diaPago     = max(1, min(28, (int)($data['dia_pago'] ?? 1)));
         $fechaActual = strtotime($data['fecha_inicio']);
         $fechaFinal  = strtotime($data['fecha_fin']);
 
         while ($fechaActual <= $fechaFinal) {
 
-            $periodo = date('Y-m-01', $fechaActual);
+            $anio   = (int) date('Y', $fechaActual);
+            $mes    = (int) date('m', $fechaActual);
+
+            // Ajustar día al máximo disponible del mes (ej. feb=28)
+            $maxDia       = (int) date('t', mktime(0, 0, 0, $mes, 1, $anio));
+            $diaReal      = min($diaPago, $maxDia);
+            $fechaPago    = date('Y-m-d', mktime(0, 0, 0, $mes, $diaReal, $anio));
+            $periodo      = date('Y-m-01', $fechaActual);
 
             $this->conexion->prepare("
-                INSERT INTO pagos
+                INSERT IGNORE INTO pagos
                 (id_contrato, periodo, fecha_pago, monto, estatus)
                 VALUES
-                (:id_contrato, :periodo, NULL, :monto, 'Pendiente')
+                (:id_contrato, :periodo, :fecha_pago, :monto, 'Pendiente')
             ")->execute([
                 ':id_contrato' => $id_contrato,
-                ':periodo' => $periodo,
-                ':monto' => $data['renta']
+                ':periodo'     => $periodo,
+                ':fecha_pago'  => $fechaPago,
+                ':monto'       => $data['renta']
             ]);
 
             $fechaActual = strtotime("+1 month", $fechaActual);
         }
     }
 
+    /* =====================================================
+       GENERAR PAGOS INDEFINIDOS (ejecutado por cron)
+       Crea el pago del mes actual con el dia_pago exacto
+    ===================================================== */
     public function generarPagosIndefinidos()
     {
-        $hoy = date('Y-m-01');
+        $hoy    = date('Y-m-01');
+        $anio   = (int) date('Y');
+        $mes    = (int) date('m');
 
-        // Buscar contratos activos e indefinidos
+        // Traer contratos indefinidos activos con su dia_pago
         $consulta = $this->conexion->prepare("
-        SELECT id_contrato, renta
-        FROM contratos
-        WHERE estatus = 'Activa'
-        AND duracion = 'indefinido'
-    ");
-
+            SELECT id_contrato, renta, dia_pago
+            FROM contratos
+            WHERE estatus = 'Activa'
+            AND duracion = 'Indefinido'
+        ");
         $consulta->execute();
         $contratos = $consulta->fetchAll(PDO::FETCH_ASSOC);
 
+        $generados = 0;
+
         foreach ($contratos as $contrato) {
 
-            // Verificar si ya existe pago este mes
+            // Verificar si ya existe pago para este periodo
             $verificar = $this->conexion->prepare("
-            SELECT COUNT(*) FROM pagos
-            WHERE id_contrato = :id
-            AND periodo = :periodo
-        ");
-
+                SELECT COUNT(*) FROM pagos
+                WHERE id_contrato = :id
+                AND periodo = :periodo
+            ");
             $verificar->execute([
-                ':id' => $contrato['id_contrato'],
+                ':id'      => $contrato['id_contrato'],
                 ':periodo' => $hoy
             ]);
 
             if ($verificar->fetchColumn() == 0) {
 
-                // Crear pago del mes
+                // Calcular fecha exacta de pago usando dia_pago del contrato
+                $diaPago  = max(1, min(28, (int)($contrato['dia_pago'] ?? 1)));
+                $maxDia   = (int) date('t', mktime(0, 0, 0, $mes, 1, $anio));
+                $diaReal  = min($diaPago, $maxDia);
+                $fechaPago = date('Y-m-d', mktime(0, 0, 0, $mes, $diaReal, $anio));
+
                 $this->conexion->prepare("
-                INSERT INTO pagos
-                (id_contrato, periodo, fecha_pago, monto, estatus)
-                VALUES
-                (:id_contrato, :periodo, NULL, :monto, 'Pendiente')
-            ")->execute([
+                    INSERT INTO pagos
+                    (id_contrato, periodo, fecha_pago, monto, estatus)
+                    VALUES
+                    (:id_contrato, :periodo, :fecha_pago, :monto, 'Pendiente')
+                ")->execute([
                     ':id_contrato' => $contrato['id_contrato'],
-                    ':periodo' => $hoy,
-                    ':monto' => $contrato['renta']
+                    ':periodo'     => $hoy,
+                    ':fecha_pago'  => $fechaPago,
+                    ':monto'       => $contrato['renta']
                 ]);
+
+                $generados++;
             }
         }
+
+        return $generados;
     }
 
     public function eliminarContrato($id)
@@ -326,3 +352,5 @@ class ContratoService
         }
     }
 }
+
+?>

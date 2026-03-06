@@ -9,7 +9,7 @@ if (php_sapi_name() !== 'cli') {
 require_once __DIR__ . '/../../bd.php';
 require_once __DIR__ . '/../../services/ContratoService.php';
 
-$service = new ContratoService($conexionBD);
-$service->generarPagosIndefinidos();
+$service  = new ContratoService($conexionBD);
+$generados = $service->generarPagosIndefinidos();
 
-echo "[" . date('Y-m-d H:i:s') . "] Pagos generados correctamente.\n";
+echo "[" . date('Y-m-d H:i:s') . "] Pagos generados: {$generados} contrato(s) procesados.\n";
