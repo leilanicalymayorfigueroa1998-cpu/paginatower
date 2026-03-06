@@ -10,40 +10,167 @@ class MovimientoService
     }
 
     // Crear movimiento
-   public function crear($data)
-{
-    if ($data['abono'] > 0 && $data['cargo'] > 0) {
-        throw new Exception("No puede registrar abono y cargo al mismo tiempo.");
-    }
+    public function crear($data)
+    {
+        if ($data['abono'] > 0 && $data['cargo'] > 0) {
+            throw new Exception("No puede registrar abono y cargo al mismo tiempo.");
+        }
 
-    if ($data['abono'] <= 0 && $data['cargo'] <= 0) {
-        throw new Exception("Debe registrar un abono o un cargo.");
-    }
+        if ($data['abono'] <= 0 && $data['cargo'] <= 0) {
+            throw new Exception("Debe registrar un abono o un cargo.");
+        }
 
-    $sql = "INSERT INTO movimientos_financieros
-            (fecha, id_propiedad, id_tipo_operacion, nota, abono, cargo, origen)
-            VALUES
-            (:fecha, :id_propiedad, :id_tipo_operacion, :nota, :abono, :cargo, :origen)";
+        $this->conexion->beginTransaction();
 
-    $stmt = $this->conexion->prepare($sql);
-    $stmt->execute($data);
+        try {
+            // 1. Insertar movimiento
+            $sql = "INSERT INTO movimientos_financieros
+                    (fecha, id_propiedad, id_tipo_operacion, nota, abono, cargo, origen, id_pago)
+                    VALUES
+                    (:fecha, :id_propiedad, :id_tipo_operacion, :nota, :abono, :cargo, :origen, :id_pago)";
 
-    // ACTUALIZAR DEUDA
-    if ($data['abono'] > 0) {
+            $stmt = $this->conexion->prepare($sql);
+            $stmt->execute([
+                ':fecha'             => $data['fecha'],
+                ':id_propiedad'      => $data['id_propiedad'],
+                ':id_tipo_operacion' => $data['id_tipo_operacion'],
+                ':nota'              => $data['nota'],
+                ':abono'             => $data['abono'],
+                ':cargo'             => $data['cargo'],
+                ':origen'            => $data['origen'],
+                ':id_pago'           => $data['id_pago'] ?? null,
+            ]);
 
-        $sqlContrato = "UPDATE contratos
+            $id_movimiento = $this->conexion->lastInsertId();
+
+            // 2. Si es código IR (Ingreso por Rentas) y hay abono → afecta pagos y contratos
+            if ($data['abono'] > 0) {
+                $codigoIR = $this->esCodigoIR($data['id_tipo_operacion']);
+
+                if ($codigoIR) {
+                    // Buscar el contrato activo del local/propiedad
+                    $stmtContrato = $this->conexion->prepare("
+                        SELECT id_contrato, renta
+                        FROM contratos
+                        WHERE id_local = :id_propiedad
+                        AND estatus = 'Activa'
+                        ORDER BY id_contrato DESC
+                        LIMIT 1
+                    ");
+                    $stmtContrato->execute([':id_propiedad' => $data['id_propiedad']]);
+                    $contrato = $stmtContrato->fetch(PDO::FETCH_ASSOC);
+
+                    if ($contrato) {
+                        $id_contrato = $contrato['id_contrato'];
+                        $periodo = date('Y-m-01', strtotime($data['fecha']));
+
+                        // Verificar si ya existe pago para este periodo
+                        $checkPago = $this->conexion->prepare("
+                            SELECT id_pago FROM pagos
+                            WHERE id_contrato = :id_contrato
+                            AND periodo = :periodo
+                        ");
+                        $checkPago->execute([
+                            ':id_contrato' => $id_contrato,
+                            ':periodo'     => $periodo,
+                        ]);
+                        $pagoExistente = $checkPago->fetch();
+
+                        if ($pagoExistente) {
+                            // Actualizar pago existente a Pagado
+                            $this->conexion->prepare("
+                                UPDATE pagos
+                                SET estatus     = 'Pagado',
+                                    fecha_pago  = :fecha,
+                                    monto       = :monto,
+                                    metodo_pago = :metodo
+                                WHERE id_pago = :id_pago
+                            ")->execute([
+                                ':fecha'    => $data['fecha'],
+                                ':monto'    => $data['abono'],
+                                ':metodo'   => strtolower($data['origen'] ?? 'Efectivo'),
+                                ':id_pago'  => $pagoExistente['id_pago'],
+                            ]);
+
+                            // Enlazar movimiento con el pago
+                            $this->conexion->prepare("
+                                UPDATE movimientos_financieros
+                                SET id_pago = :id_pago
+                                WHERE id_movimiento = :id_mov
+                            ")->execute([
+                                ':id_pago' => $pagoExistente['id_pago'],
+                                ':id_mov'  => $id_movimiento,
+                            ]);
+                        } else {
+                            // Crear nuevo pago
+                            $this->conexion->prepare("
+                                INSERT INTO pagos
+                                (id_contrato, periodo, fecha_pago, monto, metodo_pago, estatus)
+                                VALUES (:id_contrato, :periodo, :fecha, :monto, :metodo, 'Pagado')
+                            ")->execute([
+                                ':id_contrato' => $id_contrato,
+                                ':periodo'     => $periodo,
+                                ':fecha'       => $data['fecha'],
+                                ':monto'       => $data['abono'],
+                                ':metodo'      => strtolower($data['origen'] ?? 'Efectivo'),
+                            ]);
+
+                            $id_pago_nuevo = $this->conexion->lastInsertId();
+
+                            // Enlazar movimiento con el pago nuevo
+                            $this->conexion->prepare("
+                                UPDATE movimientos_financieros
+                                SET id_pago = :id_pago
+                                WHERE id_movimiento = :id_mov
+                            ")->execute([
+                                ':id_pago' => $id_pago_nuevo,
+                                ':id_mov'  => $id_movimiento,
+                            ]);
+                        }
+
+                        // Descontar deuda del contrato
+                        $this->conexion->prepare("
+                            UPDATE contratos
+                            SET deuda = GREATEST(deuda - :abono, 0)
+                            WHERE id_contrato = :id_contrato
+                        ")->execute([
+                            ':abono'       => $data['abono'],
+                            ':id_contrato' => $id_contrato,
+                        ]);
+                    }
+                } else {
+                    // No es IR pero igual descuenta deuda si hay abono
+                    $this->conexion->prepare("
+                        UPDATE contratos
                         SET deuda = GREATEST(deuda - :abono, 0)
-                        WHERE id_propiedad = :id_propiedad";
+                        WHERE id_local = :id_propiedad
+                        AND estatus = 'Activa'
+                    ")->execute([
+                        ':abono'       => $data['abono'],
+                        ':id_propiedad' => $data['id_propiedad'],
+                    ]);
+                }
+            }
 
-        $stmtContrato = $this->conexion->prepare($sqlContrato);
-        $stmtContrato->execute([
-            ':abono' => $data['abono'],
-            ':id_propiedad' => $data['id_propiedad']
-        ]);
+            $this->conexion->commit();
+            return true;
+        } catch (Exception $e) {
+            $this->conexion->rollBack();
+            throw $e;
+        }
     }
 
-    return true;
-}
+    // Verificar si el tipo de operación es un código IR (Ingreso por Rentas)
+    private function esCodigoIR($id_tipo_operacion)
+    {
+        $stmt = $this->conexion->prepare("
+            SELECT codigo FROM tipo_operacion WHERE id = :id
+        ");
+        $stmt->execute([':id' => $id_tipo_operacion]);
+        $tipo = $stmt->fetch(PDO::FETCH_ASSOC);
+        // C_IR = Ingreso por rentas cobradas (cuenta), E_IR = Ingreso por rentas cobradas (efectivo)
+        return $tipo && in_array($tipo['codigo'], ['C_IR', 'E_IR']);
+    }
 
     // Obtener todos
     public function obtenerTodos()
@@ -53,6 +180,36 @@ class MovimientoService
                 INNER JOIN propiedades p ON p.id_propiedad = m.id_propiedad
                 INNER JOIN tipo_operacion t ON t.id = m.id_tipo_operacion
                 ORDER BY m.fecha DESC";
+
+        return $this->conexion->query($sql)->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    // Balance ingresos y egresos separado por cuenta/efectivo
+    public function obtenerBalance()
+    {
+        $sql = "SELECT
+                    origen,
+                    SUM(abono) AS total_abonos,
+                    SUM(cargo) AS total_cargos,
+                    SUM(abono) - SUM(cargo) AS balance
+                FROM movimientos_financieros
+                GROUP BY origen";
+
+        return $this->conexion->query($sql)->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    // Balance del mes actual
+    public function obtenerBalanceMes()
+    {
+        $sql = "SELECT
+                    origen,
+                    SUM(abono) AS total_abonos,
+                    SUM(cargo) AS total_cargos,
+                    SUM(abono) - SUM(cargo) AS balance
+                FROM movimientos_financieros
+                WHERE YEAR(fecha) = YEAR(CURDATE())
+                  AND MONTH(fecha) = MONTH(CURDATE())
+                GROUP BY origen";
 
         return $this->conexion->query($sql)->fetchAll(PDO::FETCH_ASSOC);
     }

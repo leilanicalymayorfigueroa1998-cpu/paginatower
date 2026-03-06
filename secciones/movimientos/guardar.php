@@ -4,81 +4,49 @@ include('../../includes/helpers.php');
 include('../../includes/permisos.php');
 include('../../bd.php');
 
+require_once __DIR__ . '/../../services/MovimientoService.php';
+
 verificarPermiso($conexionBD, $_SESSION['id_rol'], 'movimientos_financieros', 'crear');
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    header("Location: index.php");
+    exit();
+}
 
-    // Validar token CSRF
-    if (!validarTokenCSRF($_POST['csrf_token'] ?? '')) {
-        die("Acceso inválido (CSRF)");
-    }
+if (!validarTokenCSRF($_POST['csrf_token'] ?? '')) {
+    die("Acceso inválido (CSRF)");
+}
+unset($_SESSION['csrf_token']);
 
-    unset($_SESSION['csrf_token']);
+$fecha             = trim($_POST['fecha'] ?? '');
+$id_propiedad      = intval($_POST['id_propiedad'] ?? 0);
+$id_tipo_operacion = intval($_POST['id_tipo_operacion'] ?? 0);
+$nota              = trim($_POST['nota'] ?? '');
+$abono             = floatval($_POST['abono'] ?? 0);
+$cargo             = floatval($_POST['cargo'] ?? 0);
+$origen            = trim($_POST['origen'] ?? '');
 
-    // Obtener datos del formulario
-    $fecha = $_POST['fecha'] ?? '';
-    $id_propiedad = $_POST['id_propiedad'] ?? '';
-    $id_tipo_operacion = $_POST['id_tipo_operacion'] ?? '';
-    $nota = trim($_POST['nota'] ?? '');
-    $abono = floatval($_POST['abono'] ?? 0);
-    $cargo = floatval($_POST['cargo'] ?? 0);
-    $origen = $_POST['origen'] ?? '';
+if (!$fecha || !$id_propiedad || !$id_tipo_operacion || !$origen) {
+    die("Faltan datos obligatorios.");
+}
 
-    // Validar campos obligatorios
-    if (!$fecha || !$id_propiedad || !$id_tipo_operacion || !$origen) {
-        die("Faltan datos obligatorios.");
-    }
+$service = new MovimientoService($conexionBD);
 
-    // Validaciones financieras
-    if ($abono > 0 && $cargo > 0) {
-        die("No puede registrar abono y cargo al mismo tiempo.");
-    }
+try {
+    $service->crear([
+        'fecha'             => $fecha,
+        'id_propiedad'      => $id_propiedad,
+        'id_tipo_operacion' => $id_tipo_operacion,
+        'nota'              => $nota,
+        'abono'             => $abono,
+        'cargo'             => $cargo,
+        'origen'            => $origen,
+        'id_pago'           => null,
+    ]);
 
-    if ($abono <= 0 && $cargo <= 0) {
-        die("Debe registrar un abono o un cargo.");
-    }
+    header("Location: index.php?msg=guardado");
+    exit();
 
-    try {
-
-        // Insertar movimiento financiero
-        $consulta = $conexionBD->prepare("
-            INSERT INTO movimientos_financieros
-            (fecha, id_propiedad, id_tipo_operacion, nota, abono, cargo, origen)
-            VALUES
-            (:fecha, :id_propiedad, :id_tipo_operacion, :nota, :abono, :cargo, :origen)
-        ");
-
-        $consulta->execute([
-            ':fecha' => $fecha,
-            ':id_propiedad' => $id_propiedad,
-            ':id_tipo_operacion' => $id_tipo_operacion,
-            ':nota' => $nota,
-            ':abono' => $abono,
-            ':cargo' => $cargo,
-            ':origen' => $origen
-        ]);
-
-        // Descontar deuda del contrato si es abono
-        if ($abono > 0) {
-
-            $actualizar = $conexionBD->prepare("
-        UPDATE contratos
-        SET deuda = GREATEST(deuda - :abono,0)
-        WHERE id_local = :id_propiedad
-        AND estatus = 'Activa'
-    ");
-
-            $actualizar->execute([
-                ':abono' => $abono,
-                ':id_propiedad' => $id_propiedad
-            ]);
-        }
-
-        // Redirigir
-        header("Location: index.php?msg=guardado");
-        exit();
-    } catch (Exception $e) {
-
-        die("Error al guardar el movimiento financiero.");
-    }
+} catch (Exception $e) {
+    die("Error al guardar el movimiento: " . htmlspecialchars($e->getMessage()));
 }
