@@ -1,0 +1,163 @@
+/* ════════════════════════════════════════════
+   dashboard.css — KPI cards, gráficas, grids
+   Sistema Tower
+════════════════════════════════════════════ */
+
+/* ════════════════════════════════════════════
+   STAT CARDS
+════════════════════════════════════════════ */
+.tw-stats {
+  display: grid;
+  gap: 14px;
+  margin-bottom: 22px;
+}
+.tw-stats-4 { grid-template-columns: repeat(4, 1fr); }
+.tw-stats-3 { grid-template-columns: repeat(3, 1fr); }
+
+.tw-stat {
+  background: var(--s1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color .2s, transform .2s;
+}
+.tw-stat:hover { border-color: var(--border2); transform: translateY(-2px); }
+
+/* Barra de color superior (2px) */
+.tw-stat .bar {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+}
+
+/* Círculo de glow en la esquina */
+.tw-stat .glow {
+  position: absolute;
+  top: 0; right: 0;
+  width: 80px; height: 80px;
+  border-radius: 50%;
+  transform: translate(20px, -20px);
+  opacity: 0.07;
+}
+
+.tw-stat-label {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.9px;
+  text-transform: uppercase;
+  color: var(--text2);
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.tw-stat-value {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 28px;
+  line-height: 1;
+  margin-bottom: 5px;
+}
+
+.tw-stat-meta {
+  font-size: 11.5px;
+  color: var(--text2);
+}
+
+/* ════════════════════════════════════════════
+   PROGRESS BARS
+════════════════════════════════════════════ */
+.tw-prog {
+  height: 5px;
+  background: var(--s3);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-top: 4px;
+}
+.tw-prog-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width .5s ease;
+}
+
+/* Bootstrap progress override */
+.progress { background: var(--s3) !important; border-radius: 4px !important; }
+.progress-bar { border-radius: 4px !important; }
+.progress-bar.bg-primary { background: var(--blue) !important; }
+.progress-bar.bg-success { background: var(--green) !important; }
+
+/* ════════════════════════════════════════════
+   ALERT CARDS
+════════════════════════════════════════════ */
+.tw-alert {
+  padding: 11px 14px;
+  border-radius: 9px;
+  border: 1px solid;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 12.5px;
+}
+.tw-alert-icon { font-size: 16px; flex-shrink: 0; }
+.tw-alert-title { font-weight: 600; }
+.tw-alert-desc  { font-size: 11px; opacity: .8; margin-top: 1px; }
+
+.tw-alert.red   { background: var(--red-g);   border-color: rgba(244,63,94,0.2);  color: var(--red); }
+.tw-alert.amber { background: var(--amber-g); border-color: rgba(245,158,11,0.2); color: var(--amber); }
+.tw-alert.blue  { background: var(--blue-g);  border-color: rgba(59,130,246,0.2); color: var(--blue); }
+.tw-alert.green { background: var(--green-g); border-color: rgba(16,185,129,0.2); color: var(--green); }
+
+/* ════════════════════════════════════════════
+   KPI LIST ROWS
+════════════════════════════════════════════ */
+.tw-kpi-item {
+  padding: 11px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border);
+  transition: background .1s;
+}
+.tw-kpi-item:last-child { border-bottom: none; }
+.tw-kpi-item:hover { background: rgba(255,255,255,0.02); }
+.tw-kpi-label { font-size: 12.5px; color: var(--text2); }
+.tw-kpi-val   { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 13.5px; color: var(--text); }
+
+/* ════════════════════════════════════════════
+   CHARTS (Chart.js)
+════════════════════════════════════════════ */
+canvas { background: transparent !important; }
+
+/* ════════════════════════════════════════════
+   BOOTSTRAP OVERRIDES (solo los que rompen
+   el tema oscuro en el dashboard)
+════════════════════════════════════════════ */
+.bg-white, .bg-light { background: transparent !important; }
+.text-muted   { color: var(--text2) !important; }
+.text-success { color: var(--green) !important; }
+.text-danger  { color: var(--red)   !important; }
+.text-primary { color: var(--blue)  !important; }
+.text-warning { color: var(--amber) !important; }
+.fw-bold, .fw-semibold { color: var(--text) !important; }
+
+.bg-success.bg-opacity-10 { background-color: var(--green-g) !important; }
+.bg-primary.bg-opacity-10 { background-color: var(--blue-g)  !important; }
+.bg-danger.bg-opacity-10  { background-color: var(--red-g)   !important; }
+.bg-warning.bg-opacity-10 { background-color: var(--amber-g) !important; }
+
+/* ════════════════════════════════════════════
+   RESPONSIVE GRIDS DEL DASHBOARD
+════════════════════════════════════════════ */
+@media (max-width: 1280px) {
+  .tw-stats-4 { grid-template-columns: repeat(2, 1fr) !important; }
+}
+@media (max-width: 900px) {
+  .tw-stats-3 { grid-template-columns: repeat(2, 1fr) !important; }
+}
+@media (max-width: 768px) {
+  .tw-stats-4,
+  .tw-stats-3 { grid-template-columns: 1fr !important; }
+}
