@@ -2,7 +2,7 @@
 if (session_status() === PHP_SESSION_NONE) session_start();
 $usuario = $_SESSION['usuario'] ?? '';
 $rol     = $_SESSION['rol']     ?? '';
-$color   = isset($rol) ? obtenerColorRol($rol) : '#4f8ef7';
+$color   = isset($rol) ? obtenerColorRol($rol) : '#3b82f6';
 $uri     = $_SERVER['REQUEST_URI'] ?? '';
 function isActive($path, $uri) { return (strpos($uri, $path) !== false) ? ' active' : ''; }
 ?>
@@ -10,11 +10,11 @@ function isActive($path, $uri) { return (strpos($uri, $path) !== false) ? ' acti
 <div class="sidebar">
 
   <!-- Brand -->
-  <div style="display:flex;align-items:center;gap:10px;padding:18px 16px 16px;border-bottom:1px solid var(--border);">
-    <div style="width:32px;height:32px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;font-size:15px;flex-shrink:0;">T</div>
+  <div style="padding:20px 18px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:11px;">
+    <div style="width:36px;height:36px;background:linear-gradient(135deg,#3b82f6,#06b6d4);border-radius:9px;display:grid;place-items:center;font-size:17px;flex-shrink:0;box-shadow:0 0 18px rgba(59,130,246,0.35);">🏢</div>
     <div>
-      <div style="font-size:14px;font-weight:700;color:var(--text);line-height:1.2;">Sistema Tower</div>
-      <div style="font-size:10.5px;color:var(--muted);">Gestión Inmobiliaria</div>
+      <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:15px;color:var(--text);line-height:1.1;">Sistema Tower</div>
+      <div style="font-size:10.5px;color:var(--text2);margin-top:1px;">Sistema Inmobiliario</div>
     </div>
   </div>
 
@@ -28,33 +28,35 @@ function isActive($path, $uri) { return (strpos($uri, $path) !== false) ? ' acti
   </div>
 
   <!-- Nav -->
-  <div style="padding:8px 0;">
+  <div>
 
-    <span style="font-size:10px;font-weight:700;color:var(--dim);letter-spacing:1.2px;text-transform:uppercase;padding:12px 20px 4px;display:block;">Principal</span>
+    <span style="padding:12px 18px 4px;display:block;font-size:9.5px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);">Principal</span>
 
-    <a href="<?= $url_base ?>/secciones/dashboard/"  class="<?= isActive('dashboard',$uri) ?>">📊 Dashboard</a>
-    <a href="<?= $url_base ?>/secciones/movimientos/" class="<?= isActive('movimientos',$uri) ?>">🧾 Administración</a>
+    <a href="<?= $url_base ?>/secciones/dashboard/"   class="<?= isActive('dashboard',$uri) ?>">📊 Dashboard</a>
+    <a href="<?= $url_base ?>/secciones/movimientos/" class="<?= isActive('movimientos',$uri) ?>">⚙️ Administración</a>
+
+    <span style="padding:12px 18px 4px;display:block;font-size:9.5px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);">Inmuebles</span>
 
     <a href="javascript:void(0)" onclick="togglePropiedades()" class="menu-toggle<?= isActive('propiedades',$uri) ?: isActive('locales',$uri) ?: isActive('servicios',$uri) ?: isActive('restricciones',$uri) ?>">
-      🏠 Propiedades <span class="arrow" id="arrowProp">▼</span>
+      🏘️ Propiedades <span class="arrow" id="arrowProp">▾</span>
     </a>
     <div class="submenu" id="submenuPropiedades">
-      <a href="<?= $url_base ?>/secciones/propiedades/" class="<?= isActive('/propiedades/',$uri) ?>">🏠 Propiedades</a>
-      <a href="<?= $url_base ?>/secciones/locales/"     class="<?= isActive('/locales/',$uri) ?>">🏢 Locales</a>
-      <a href="<?= $url_base ?>/secciones/servicios/"   class="<?= isActive('/servicios/',$uri) ?>">💧 Servicios</a>
-      <a href="<?= $url_base ?>/secciones/restricciones/" class="<?= isActive('/restricciones/',$uri) ?>">⚠ Restricciones</a>
+      <a href="<?= $url_base ?>/secciones/propiedades/"  class="<?= isActive('/propiedades/',$uri) ?>">🏠 Propiedades</a>
+      <a href="<?= $url_base ?>/secciones/locales/"      class="<?= isActive('/locales/',$uri) ?>">🏢 Locales</a>
+      <a href="<?= $url_base ?>/secciones/servicios/"    class="<?= isActive('/servicios/',$uri) ?>">💧 Servicios</a>
+      <a href="<?= $url_base ?>/secciones/restricciones/" class="<?= isActive('/restricciones/',$uri) ?>">⚠️ Restricciones</a>
     </div>
 
-    <span style="font-size:10px;font-weight:700;color:var(--dim);letter-spacing:1.2px;text-transform:uppercase;padding:12px 20px 4px;display:block;">Finanzas</span>
+    <span style="padding:12px 18px 4px;display:block;font-size:9.5px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);">Finanzas</span>
 
-    <a href="<?= $url_base ?>/secciones/contrato/"    class="<?= isActive('contrato',$uri) ?>">📄 Contratos</a>
-    <a href="<?= $url_base ?>/secciones/pagos/"       class="<?= isActive('pagos',$uri) ?>">💳 Pagos</a>
+    <a href="<?= $url_base ?>/secciones/contrato/" class="<?= isActive('contrato',$uri) ?>">📋 Contratos</a>
+    <a href="<?= $url_base ?>/secciones/pagos/"    class="<?= isActive('pagos',$uri) ?>">💳 Pagos</a>
 
-    <span style="font-size:10px;font-weight:700;color:var(--dim);letter-spacing:1.2px;text-transform:uppercase;padding:12px 20px 4px;display:block;">CRM</span>
+    <span style="padding:12px 18px 4px;display:block;font-size:9.5px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);">CRM</span>
 
-    <a href="<?= $url_base ?>/secciones/dueños/"      class="<?= isActive('dueños',$uri) ?: isActive('due%C3%B1os',$uri) ?>">👤 Dueños</a>
-    <a href="<?= $url_base ?>/secciones/arrendatario/" class="<?= isActive('arrendatario',$uri) ?>">🏘️ Arrendatario</a>
-    <a href="<?= $url_base ?>/secciones/usuarios/"    class="<?= isActive('usuarios',$uri) ?>">⚙ Usuarios</a>
+    <a href="<?= $url_base ?>/secciones/dueños/"       class="<?= isActive('dueños',$uri) ?: isActive('due%C3%B1os',$uri) ?>">👤 Dueños</a>
+    <a href="<?= $url_base ?>/secciones/arrendatario/" class="<?= isActive('arrendatario',$uri) ?>">🏠 Arrendatario</a>
+    <a href="<?= $url_base ?>/secciones/usuarios/"     class="<?= isActive('usuarios',$uri) ?>">◎ Usuarios</a>
 
   </div>
 </div>
