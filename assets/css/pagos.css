@@ -1,0 +1,51 @@
+/* ════════════════════════════════════════════
+   PAGOS — pagos.css
+════════════════════════════════════════════ */
+
+.tw-page-header  { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:22px; gap:16px; flex-wrap:wrap; }
+.tw-page-title   { font-size:22px; font-weight:800; color:var(--text); letter-spacing:-0.5px; }
+.tw-page-subtitle { font-size:12.5px; color:var(--text2); margin-top:2px; }
+
+/* ── Stats ── */
+.pag-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 22px;
+}
+@media (max-width: 900px) { .pag-stats { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 520px) { .pag-stats { grid-template-columns: 1fr; } }
+
+.pag-stat {
+  background: var(--s1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  transition: border-color .2s, transform .2s;
+}
+.pag-stat:hover { border-color: var(--border2); transform: translateY(-2px); }
+.pag-stat-icon { font-size: 26px; line-height: 1; }
+.pag-stat-val  { font-family:'DM Mono',monospace; font-size:26px; font-weight:800; color:var(--text); line-height:1; }
+.pag-stat-lbl  { font-size:11px; color:var(--text2); margin-top:2px; }
+
+.pag-stat.red   .pag-stat-val { color: var(--red);   }
+.pag-stat.amber .pag-stat-val { color: var(--amber); }
+.pag-stat.green .pag-stat-val { color: var(--green); }
+.pag-stat.blue  .pag-stat-val { color: var(--blue);  }
+
+/* ── Celdas especiales ── */
+.pag-dia   { font-family:'DM Mono',monospace; font-size:12px; font-weight:600; color:var(--text); }
+.pag-monto { font-weight:700; color:var(--text); }
+
+/* ── Historial mini-badges ── */
+.pag-historial { display:flex; gap:4px; }
+.pag-his-badge {
+  font-size:10.5px; font-weight:700;
+  padding:2px 7px; border-radius:20px;
+}
+.pag-his-badge.green { background:var(--green-g); color:var(--green); border:1px solid rgba(16,185,129,.2); }
+.pag-his-badge.red   { background:var(--red-g);   color:var(--red);   border:1px solid rgba(242,75,106,.2); }
+.pag-his-badge.amber { background:var(--amber-g); color:var(--amber); border:1px solid rgba(251,191,36,.2); }

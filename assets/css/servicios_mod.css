@@ -1,0 +1,82 @@
+/* ════════════════════════════════════════════
+   SERVICIOS — servicios_mod.css
+════════════════════════════════════════════ */
+
+/* ── Page Header ─────────────────────────── */
+.tw-page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 22px;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.tw-page-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: -0.5px;
+}
+
+.tw-page-subtitle {
+  font-size: 12.5px;
+  color: var(--text2);
+  margin-top: 2px;
+}
+
+/* ── Stats ───────────────────────────────── */
+.svc-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 22px;
+}
+
+@media (max-width: 800px) { .svc-stats { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 480px) { .svc-stats { grid-template-columns: 1fr; } }
+
+.svc-stat {
+  background: var(--s1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  transition: border-color .2s, transform .2s;
+}
+
+.svc-stat:hover {
+  border-color: var(--border2);
+  transform: translateY(-2px);
+}
+
+.svc-stat-icon {
+  font-size: 26px;
+  line-height: 1;
+}
+
+.svc-stat-val {
+  font-family: 'DM Mono', monospace;
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--text);
+  line-height: 1.1;
+}
+
+.svc-stat-lbl {
+  font-size: 11px;
+  color: var(--text2);
+  margin-top: 2px;
+}
+
+.svc-stat.blue  .svc-stat-val { color: var(--blue); }
+.svc-stat.cyan  .svc-stat-val { color: var(--cyan); }
+.svc-stat.red   .svc-stat-val { color: var(--red); }
+.svc-stat.green .svc-stat-val { color: var(--green); }
+
+/* ── Número de contrato ───────────────────── */
+.svc-num {
+  font-size: 11.5px;
+}

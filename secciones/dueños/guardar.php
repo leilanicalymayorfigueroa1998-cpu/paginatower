@@ -29,18 +29,28 @@ unset($_SESSION['csrf_token']);
 
 $service = new DuenoService($conexionBD);
 
-try {
+// Soporta nombre completo en un campo ('nombre')
+// o dividido en nombre_p + nombre_a (modal mejorado)
+if (!empty($_POST['nombre'])) {
+    $nombre = trim($_POST['nombre']);
+} else {
+    $partes = array_filter([
+        trim($_POST['nombre_p'] ?? ''),
+        trim($_POST['nombre_a'] ?? '')
+    ]);
+    $nombre = implode(' ', $partes);
+}
 
+try {
     $service->crear([
-        'nombre'   => trim($_POST['nombre'] ?? ''),
+        'nombre'   => $nombre,
         'telefono' => trim($_POST['telefono'] ?? ''),
         'correo'   => trim($_POST['correo'] ?? '')
     ]);
 
-    header("Location:index.php");
+    header("Location:index.php?mensaje=creado");
     exit();
 } catch (Exception $e) {
     die($e->getMessage());
 }
-
 ?>

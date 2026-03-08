@@ -1,0 +1,126 @@
+/* ════════════════════════════════════════════
+   DASHBOARD — dashboard_mod.css
+   Estilos de layout y componentes propios.
+   Los estilos de tarjetas KPI (tw-stat, etc.)
+   ya están en temas.css / dashboard.css.
+════════════════════════════════════════════ */
+
+/* ── Page Header ─────────────────────────── */
+.tw-page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 22px;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.tw-page-title    { font-size: 22px; font-weight: 800; color: var(--text); letter-spacing: -0.5px; }
+.tw-page-subtitle { font-size: 12.5px; color: var(--text2); margin-top: 2px; }
+.tw-page-actions  { display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* ── Fila 2: gráfica + distribución ─────── */
+.dash-row-2 {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+@media (max-width: 960px) { .dash-row-2 { grid-template-columns: 1fr; } }
+
+/* ── Fila 3: alertas + pagos + por vencer ── */
+.dash-row-3 {
+  display: grid;
+  grid-template-columns: 220px 1fr 320px;
+  gap: 16px;
+}
+@media (max-width: 1100px) { .dash-row-3 { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 700px)  { .dash-row-3 { grid-template-columns: 1fr; } }
+
+/* ── Progress bar ────────────────────────── */
+.dash-progress-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+.dash-progress-bg {
+  flex: 1;
+  height: 4px;
+  background: var(--s3);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.dash-progress-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width .5s ease;
+}
+.dash-progress-fill.green { background: var(--green); }
+
+/* ── Donut wrapper ───────────────────────── */
+.dash-donut-wrap {
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+}
+.dash-legend         { display: flex; flex-direction: column; gap: 8px; }
+.dash-legend-item    { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text2); }
+.dash-legend-dot     { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+.dash-legend-dot.green { background: var(--green); }
+.dash-legend-dot.red   { background: var(--red); }
+.dash-legend-dot.blue  { background: var(--blue); }
+.dash-legend-val     { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 13px; color: var(--text); margin-left: auto; }
+
+/* ── KPI rows dentro del card distribución ── */
+.dash-kpi-row {
+  padding: 11px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.dash-kpi-row:last-child { border-bottom: none; flex-direction: row; align-items: center; }
+.dash-kpi-header  { display: flex; justify-content: space-between; }
+.dash-kpi-label   { font-size: 12px; color: var(--text2); }
+.dash-kpi-value   { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 13px; color: var(--text); }
+
+/* ── Alertas ─────────────────────────────── */
+.dash-alertas {
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.dash-alerta {
+  padding: 11px 14px;
+  border-radius: 9px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+.dash-alerta.red   { border: 1px solid rgba(244,63,94,.2);  background: var(--red-g); }
+.dash-alerta.amber { border: 1px solid rgba(245,158,11,.2); background: var(--amber-g); }
+.dash-alerta.blue  { border: 1px solid rgba(59,130,246,.2); background: var(--blue-g); }
+
+.dash-alerta-icon  { font-size: 16px; flex-shrink: 0; }
+.dash-alerta-title { font-size: 12px; font-weight: 600; }
+.dash-alerta-sub   { font-size: 11px; opacity: .8; margin-top: 2px; }
+
+.dash-alerta.red   .dash-alerta-title,
+.dash-alerta.red   .dash-alerta-sub   { color: var(--red); }
+.dash-alerta.amber .dash-alerta-title,
+.dash-alerta.amber .dash-alerta-sub   { color: var(--amber); }
+.dash-alerta.blue  .dash-alerta-title,
+.dash-alerta.blue  .dash-alerta-sub   { color: var(--blue); }
+
+.dash-alerta-ok { padding: 24px 14px; text-align: center; color: var(--green); font-size: 12px; }
+
+/* ── Tablas mini del dashboard ───────────── */
+.dash-table-empty {
+  text-align: center;
+  padding: 32px;
+  color: var(--green);
+  font-size: 13px;
+}

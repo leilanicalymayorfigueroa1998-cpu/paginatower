@@ -1,0 +1,90 @@
+/* ════════════════════════════════════════════
+   PROPIEDADES — propiedades_mod.css
+════════════════════════════════════════════ */
+
+/* ── Page Header ─────────────────────────── */
+.tw-page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 22px;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.tw-page-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: -0.5px;
+}
+
+.tw-page-subtitle {
+  font-size: 12.5px;
+  color: var(--text2);
+  margin-top: 2px;
+}
+
+/* ── Stats ───────────────────────────────── */
+.prop-stats {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 22px;
+  flex-wrap: wrap;
+}
+
+.prop-stat {
+  background: var(--s1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 110px;
+  transition: border-color .2s, transform .2s;
+}
+
+.prop-stat:hover {
+  border-color: var(--border2);
+  transform: translateY(-2px);
+}
+
+.prop-stat-icon {
+  font-size: 22px;
+  line-height: 1;
+}
+
+.prop-stat-val {
+  font-family: 'DM Mono', monospace;
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--text);
+  line-height: 1.1;
+}
+
+.prop-stat-lbl {
+  font-size: 11px;
+  color: var(--text2);
+  margin-top: 2px;
+}
+
+.prop-stat.green  .prop-stat-val { color: var(--green); }
+.prop-stat.blue   .prop-stat-val { color: var(--blue); }
+.prop-stat.amber  .prop-stat-val { color: var(--amber); }
+.prop-stat.violet .prop-stat-val { color: var(--violet); }
+.prop-stat.cyan   .prop-stat-val { color: var(--cyan); }
+
+/* ── Celda dirección ─────────────────────── */
+.prop-dir {
+  max-width: 280px;
+  white-space: normal;
+  font-size: 12.5px;
+}
+
+/* ── Coordenadas ─────────────────────────── */
+.prop-coords {
+  font-family: 'DM Mono', monospace;
+  font-size: 10.5px;
+}

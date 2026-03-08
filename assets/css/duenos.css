@@ -1,0 +1,270 @@
+/* ════════════════════════════════════════════
+   DUEÑOS — Estilos del módulo
+════════════════════════════════════════════ */
+
+/* ── STATS ─────────────────────────────────────────────── */
+.dno-stats { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:22px; }
+@media(max-width:900px){ .dno-stats{ grid-template-columns:repeat(2,1fr); } }
+
+.dno-stat {
+  background: var(--s1); border:1px solid var(--border);
+  border-radius: var(--radius); padding:16px 18px;
+  position:relative; overflow:hidden; transition: border-color .2s, transform .2s;
+}
+.dno-stat:hover { border-color: var(--border2); transform: translateY(-2px); }
+.dno-stat::before {
+  content:''; position:absolute; top:0; left:0; right:0; height:2px;
+}
+.dno-stat.blue::before   { background: var(--blue); }
+.dno-stat.green::before  { background: var(--green); }
+.dno-stat.amber::before  { background: var(--amber); }
+.dno-stat.violet::before { background: var(--violet); }
+.dno-stat-lbl { font-size:10px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--text3); margin-bottom:8px; }
+.dno-stat-val { font-family:'Syne',sans-serif; font-size:26px; font-weight:800; color:var(--text); line-height:1; }
+.dno-stat-sub { font-size:11px; color:var(--text2); margin-top:4px; }
+
+/* ── CONTROLES ─────────────────────────────────────────── */
+.dno-controls {
+  display:flex; justify-content:space-between; align-items:center;
+  padding:10px 16px; border-bottom:1px solid var(--border);
+  gap:10px; flex-wrap:wrap; background:rgba(0,0,0,0.1);
+}
+.dno-controls-left  { display:flex; align-items:center; gap:8px; }
+.dno-controls-right { display:flex; align-items:center; gap:8px; }
+
+.dno-search { position:relative; }
+.dno-search input {
+  background:var(--s2); border:1px solid var(--border);
+  color:var(--text); padding:7px 10px 7px 30px;
+  border-radius:8px; font-size:13px;
+  font-family:'Epilogue',sans-serif; width:210px; outline:none;
+  transition: border-color .2s, width .2s;
+}
+.dno-search input::placeholder { color:var(--text3); }
+.dno-search input:focus { border-color:var(--blue); width:260px; }
+.dno-search-icon {
+  position:absolute; left:9px; top:50%; transform:translateY(-50%);
+  color:var(--text3); font-size:12px; pointer-events:none;
+}
+
+.dno-view-toggle { display:flex; background:var(--s2); border:1px solid var(--border); border-radius:8px; overflow:hidden; }
+.dno-view-btn { padding:6px 11px; font-size:13px; cursor:pointer; color:var(--text3); background:none; border:none; transition:all .15s; }
+.dno-view-btn.active { background:rgba(59,130,246,0.15); color:var(--blue); }
+
+/* ── TABLA ─────────────────────────────────────────────── */
+.dno-table { width:100%; border-collapse:collapse; }
+.dno-table thead { background:rgba(0,0,0,0.15); border-bottom:1px solid var(--border); }
+.dno-table th {
+  padding:10px 14px; text-align:left; font-size:10px; font-weight:700;
+  text-transform:uppercase; letter-spacing:.9px; color:var(--text3);
+}
+.dno-table tbody tr { border-bottom:1px solid var(--border); transition:background .13s; cursor:pointer; }
+.dno-table tbody tr:last-child { border-bottom:none; }
+.dno-table tbody tr:hover { background:rgba(255,255,255,0.025); }
+.dno-table tbody tr.dno-expanded { background:rgba(59,130,246,0.04); }
+.dno-table td { padding:13px 14px; font-size:13px; }
+
+.dno-owner-cell { display:flex; align-items:center; gap:10px; }
+.dno-avatar {
+  width:36px; height:36px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-family:'Syne',sans-serif; font-weight:800; font-size:13px; color:#fff; flex-shrink:0;
+}
+.dno-owner-name { font-weight:600; font-size:13px; }
+.dno-owner-id   { font-size:10.5px; color:var(--text3); }
+
+.dno-chevron { margin-left:6px; font-size:10px; color:var(--text3); transition:transform .2s; display:inline-block; }
+.dno-chevron.open { transform:rotate(90deg); color:var(--blue); }
+
+.dno-phone { font-family:'DM Mono',monospace; font-size:12px; color:var(--text2); }
+.dno-email { color:var(--blue); font-size:12.5px; text-decoration:none; opacity:.85; }
+.dno-email:hover { opacity:1; text-decoration:underline; }
+
+.dno-badge {
+  display:inline-flex; align-items:center; gap:4px;
+  background:var(--blue-g); color:var(--blue);
+  padding:3px 8px; border-radius:20px; font-size:11px; font-weight:600;
+  border:1px solid rgba(59,130,246,0.18);
+}
+
+/* ── PANEL PROPIEDADES ─────────────────────────────────── */
+.dno-panel {
+  background:#060a11; border-top:1px solid var(--border);
+  padding:18px 18px 18px 70px;
+  animation: dnoSlide .22s ease;
+}
+@keyframes dnoSlide {
+  from { opacity:0; transform:translateY(-6px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+.dno-panel-hdr {
+  display:flex; align-items:center; justify-content:space-between;
+  margin-bottom:14px;
+}
+.dno-panel-title { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.9px; color:var(--text2); }
+
+.dno-props-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(210px,1fr)); gap:11px; }
+
+.dno-prop-card {
+  background:var(--s1); border:1px solid var(--border);
+  border-radius:10px; padding:13px; position:relative; overflow:hidden;
+  transition: border-color .2s, transform .2s;
+}
+.dno-prop-card:hover { border-color:var(--border2); transform:translateY(-2px); box-shadow:0 6px 20px rgba(0,0,0,0.4); }
+.dno-prop-bar { position:absolute; top:0; left:0; right:0; height:2px; }
+
+.dno-prop-hdr { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:7px; }
+.dno-prop-icon { font-size:20px; line-height:1; }
+.dno-prop-status {
+  font-size:9.5px; font-weight:700; padding:2px 6px;
+  border-radius:12px; text-transform:uppercase; letter-spacing:.5px;
+}
+.dno-prop-status.activo { background:var(--green-g); color:var(--green); border:1px solid rgba(16,185,129,.2); }
+.dno-prop-status.libre  { background:var(--blue-g);  color:var(--blue);  border:1px solid rgba(59,130,246,.2); }
+.dno-prop-status.otro   { background:var(--amber-g); color:var(--amber); border:1px solid rgba(245,158,11,.2); }
+
+.dno-prop-code        { font-family:'Syne',sans-serif; font-size:13px; font-weight:700; margin-bottom:2px; }
+.dno-prop-addr        { font-size:11px; color:var(--text3); margin-bottom:7px; line-height:1.4; }
+.dno-prop-tipo        { font-size:10px; color:var(--text3); margin-bottom:6px; }
+.dno-prop-renta-lbl   { font-size:9.5px; color:var(--text3); }
+.dno-prop-renta       { font-family:'DM Mono',monospace; font-size:14px; font-weight:700; color:var(--green); }
+.dno-prop-renta-anual { font-size:10.5px; color:var(--text2); margin-top:3px; }
+
+/* ── PROYECCIÓN ANUAL ──────────────────────────────────── */
+.dno-annual {
+  margin-top:16px;
+  background:linear-gradient(135deg,rgba(16,185,129,0.06),rgba(59,130,246,0.06));
+  border:1px solid rgba(16,185,129,0.18); border-radius:10px; padding:16px 18px;
+}
+.dno-annual-title {
+  font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.9px;
+  color:var(--text2); margin-bottom:14px; display:flex; align-items:center; gap:6px;
+}
+.dno-annual-row { display:flex; align-items:flex-start; gap:20px; flex-wrap:wrap; margin-bottom:14px; }
+.dno-annual-item { min-width:130px; }
+.dno-annual-item-lbl { font-size:10px; color:var(--text3); margin-bottom:3px; }
+.dno-annual-item-val {
+  font-family:'DM Mono',monospace; font-size:19px; font-weight:700;
+  color:var(--green); line-height:1;
+}
+.dno-annual-item-val.blue  { color:var(--blue); }
+.dno-annual-item-val.amber { color:var(--amber); }
+.dno-annual-item-sub { font-size:10px; color:var(--text3); margin-top:2px; }
+
+.dno-bar-wrap { flex:1; min-width:160px; }
+.dno-bar-lbl { display:flex; justify-content:space-between; font-size:10px; color:var(--text3); margin-bottom:5px; }
+.dno-bar-lbl span:last-child { color:var(--green); font-weight:700; }
+.dno-bar-bg   { height:5px; background:rgba(255,255,255,0.05); border-radius:3px; overflow:hidden; }
+.dno-bar-fill { height:100%; border-radius:3px; background:linear-gradient(90deg,var(--green),var(--blue)); transition:width .6s ease; }
+
+.dno-months { display:flex; gap:4px; flex-wrap:wrap; }
+.dno-month {
+  width:24px; height:24px; border-radius:5px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:8.5px; font-weight:700; cursor:default; transition:transform .15s;
+}
+.dno-month:hover { transform:scale(1.2); }
+.dno-month.past    { background:rgba(16,185,129,.22); color:var(--green); border:1px solid rgba(16,185,129,.35); }
+.dno-month.current { background:var(--green); color:#fff; border:1px solid var(--green); box-shadow:0 0 8px rgba(16,185,129,.45); }
+.dno-month.future  { background:rgba(255,255,255,.04); color:var(--text3); border:1px solid var(--border); }
+
+/* ── VISTA TARJETAS ────────────────────────────────────── */
+.dno-cards { display:grid; grid-template-columns:repeat(auto-fill,minmax(295px,1fr)); gap:14px; padding:16px; }
+.dno-card {
+  background:var(--s1); border:1px solid var(--border);
+  border-radius:var(--radius); overflow:hidden; transition: border-color .2s, transform .2s;
+}
+.dno-card:hover { border-color:var(--border2); transform:translateY(-3px); box-shadow:var(--shadow); }
+
+.dno-card-hdr { padding:16px; display:flex; align-items:center; gap:11px; border-bottom:1px solid var(--border); }
+.dno-card-avatar {
+  width:44px; height:44px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-family:'Syne',sans-serif; font-weight:800; font-size:15px; color:#fff; flex-shrink:0;
+}
+.dno-card-name  { font-family:'Syne',sans-serif; font-weight:700; font-size:13.5px; margin-bottom:2px; }
+.dno-card-email { font-size:11.5px; color:var(--text3); }
+.dno-card-phone { font-family:'DM Mono',monospace; font-size:11.5px; color:var(--text2); margin-top:1px; }
+
+.dno-card-props       { padding:12px 16px; }
+.dno-card-props-title { font-size:9.5px; font-weight:700; text-transform:uppercase; letter-spacing:.9px; color:var(--text3); margin-bottom:9px; }
+
+.dno-mini-prop {
+  display:flex; align-items:center; gap:8px;
+  padding:7px 9px; background:var(--s2); border-radius:7px;
+  margin-bottom:5px; transition:background .13s; cursor:pointer;
+}
+.dno-mini-prop:last-child { margin-bottom:0; }
+.dno-mini-prop:hover { background:var(--s3); }
+.dno-mini-icon  { font-size:15px; flex-shrink:0; }
+.dno-mini-name  { flex:1; font-size:12px; font-weight:500; color:var(--text); }
+.dno-mini-addr  { font-size:10px; color:var(--text3); }
+.dno-mini-renta { font-family:'DM Mono',monospace; font-size:11px; color:var(--green); font-weight:700; }
+.dno-mini-status { font-size:9px; font-weight:700; padding:1px 5px; border-radius:8px; }
+
+.dno-card-annual {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:9px 16px;
+  background:rgba(16,185,129,.06);
+  border-top:1px solid rgba(16,185,129,.14);
+}
+.dno-card-annual-lbl { font-size:10px; color:var(--text3); }
+.dno-card-annual-val { font-family:'DM Mono',monospace; font-size:14px; font-weight:700; color:var(--green); }
+
+.dno-card-actions { padding:10px 16px; border-top:1px solid var(--border); display:flex; gap:7px; }
+
+/* ── MODAL NUEVO DUEÑO ─────────────────────────────────── */
+.dno-modal-overlay {
+  position:fixed; inset:0; background:rgba(0,0,0,0.72);
+  display:none; align-items:center; justify-content:center; z-index:9999;
+}
+.dno-modal-overlay.open { display:flex; }
+.dno-modal {
+  background:var(--s2); border:1px solid var(--border2);
+  border-radius:14px; padding:26px; width:440px; max-width:95vw;
+  animation: dnoModalIn .18s ease;
+}
+@keyframes dnoModalIn {
+  from { opacity:0; transform:scale(.96); }
+  to   { opacity:1; transform:scale(1); }
+}
+.dno-modal-title {
+  font-family:'Syne',sans-serif; font-size:17px; font-weight:800;
+  color:var(--text); margin-bottom:18px;
+  display:flex; justify-content:space-between; align-items:center;
+}
+.dno-modal-close { background:none; border:none; color:var(--text3); font-size:17px; cursor:pointer; transition:color .15s; }
+.dno-modal-close:hover { color:var(--text); }
+.dno-modal-row    { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.dno-modal-group  { margin-bottom:14px; }
+.dno-modal-label  {
+  font-size:10px; font-weight:700; text-transform:uppercase;
+  letter-spacing:.7px; color:var(--text2); margin-bottom:5px; display:block;
+}
+.dno-modal-input  {
+  width:100%; background:var(--s3); border:1px solid var(--border);
+  color:var(--text); padding:9px 11px; border-radius:8px;
+  font-size:13px; font-family:'Epilogue',sans-serif; outline:none;
+  transition:border-color .2s;
+}
+.dno-modal-input:focus { border-color:var(--blue); box-shadow:0 0 0 3px rgba(59,130,246,.1); }
+.dno-modal-input::placeholder { color:var(--text3); }
+.dno-modal-footer {
+  display:flex; gap:9px; justify-content:flex-end;
+  margin-top:20px; padding-top:16px; border-top:1px solid var(--border);
+}
+
+/* ── PAGINACIÓN ────────────────────────────────────────── */
+.dno-footer      { display:flex; justify-content:space-between; align-items:center; padding:10px 16px; border-top:1px solid var(--border); }
+.dno-footer-info { font-size:11.5px; color:var(--text3); }
+.dno-pag-btns    { display:flex; gap:5px; }
+.dno-pag-btn {
+  width:28px; height:28px; display:flex; align-items:center; justify-content:center;
+  background:var(--s2); border:1px solid var(--border); border-radius:6px;
+  font-size:12px; color:var(--text2); cursor:pointer; transition:all .15s;
+}
+.dno-pag-btn:hover  { border-color:var(--blue); color:var(--blue); }
+.dno-pag-btn.active { background:var(--blue); border-color:var(--blue); color:#fff; }
+
+/* ── UTILIDADES ────────────────────────────────────────── */
+.hidden { display:none !important; }

@@ -1,0 +1,42 @@
+/* ════════════════════════════════════════════
+   USUARIOS — usuarios_mod.css
+════════════════════════════════════════════ */
+
+.tw-page-header  { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:22px; gap:16px; flex-wrap:wrap; }
+.tw-page-title   { font-size:22px; font-weight:800; color:var(--text); letter-spacing:-0.5px; }
+.tw-page-subtitle { font-size:12.5px; color:var(--text2); margin-top:2px; }
+
+/* ── Stats ── */
+.usr-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 22px;
+}
+@media (max-width: 900px) { .usr-stats { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 520px) { .usr-stats { grid-template-columns: 1fr; } }
+
+.usr-stat {
+  background: var(--s1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color .2s, transform .2s;
+}
+.usr-stat:hover { border-color:var(--border2); transform:translateY(-2px); }
+.usr-stat::before {
+  content: ''; position:absolute; top:0; left:0; right:0; height:2px;
+  border-radius: var(--radius) var(--radius) 0 0;
+}
+.usr-stat.blue::before   { background: linear-gradient(90deg, var(--blue),   transparent); }
+.usr-stat.violet::before { background: linear-gradient(90deg, var(--violet), transparent); }
+.usr-stat.green::before  { background: linear-gradient(90deg, var(--green),  transparent); }
+
+.usr-stat-lbl { font-size:10px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--text3); margin-bottom:8px; }
+.usr-stat-val { font-family:'DM Mono',monospace; font-size:26px; font-weight:800; color:var(--text); line-height:1; }
+.usr-stat.blue   .usr-stat-val { color: var(--blue);   }
+.usr-stat.violet .usr-stat-val { color: var(--violet); }
+.usr-stat.green  .usr-stat-val { color: var(--green);  }
+.usr-stat-sub { font-size:11px; color:var(--text3); margin-top:4px; }
