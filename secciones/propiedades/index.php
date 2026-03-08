@@ -1,4 +1,11 @@
 <?php
+/* ════════════════════════════════════════════
+   PROPIEDADES — index.php
+   Solo lógica PHP / controlador
+   CSS → assets/css/propiedades.css
+   JS  → assets/js/propiedades_mod.js
+════════════════════════════════════════════ */
+
 include('../../includes/auth.php');
 include('../../includes/helpers.php');
 include('../../includes/permisos.php');
@@ -8,106 +15,39 @@ require_once(__DIR__ . '/../../services/PropiedadService.php');
 
 verificarPermiso($conexionBD, $_SESSION['id_rol'], 'propiedades', 'ver');
 
-$service = new PropiedadService($conexionBD);
+$service          = new PropiedadService($conexionBD);
 $listaPropiedades = $service->obtenerTodos();
 
-// Permisos para botones
 $puedeCrear    = tienePermiso($conexionBD, $_SESSION['id_rol'], 'propiedades', 'crear');
 $puedeEditar   = tienePermiso($conexionBD, $_SESSION['id_rol'], 'propiedades', 'editar');
 $puedeEliminar = tienePermiso($conexionBD, $_SESSION['id_rol'], 'propiedades', 'eliminar');
 
+/* ─── Estadísticas ─── */
+$total = count($listaPropiedades);
+$tipos = array_count_values(array_column($listaPropiedades, 'tipo'));
+arsort($tipos);
+
+/* ─── Íconos y colores por tipo ─── */
+$iconosTipo = [
+  'Casa'          => '🏠',
+  'Departamento'  => '🏢',
+  'Local'         => '🏪',
+  'Oficina'       => '🖥️',
+  'Terreno'       => '🌳',
+];
+$coloresTipo = [
+  'Casa'          => 'green',
+  'Departamento'  => 'blue',
+  'Local'         => 'amber',
+  'Oficina'       => 'violet',
+  'Terreno'       => 'cyan',
+];
+
+/* ─── CSS extra de esta sección ─── */
+$pagina_css = ['assets/css/propiedades_mod.css'];
+
 include('../../templates/cabecera.php');
 include('../../templates/topbar.php');
 include('../../templates/sidebar.php');
-?>
-
-<div class="content">
-
-    <div class="card">
-
-        <?php if (isset($_GET['mensaje'])): ?>
-
-            <?php if ($_GET['mensaje'] == "creado"): ?>
-                <div class="alert alert-success">Propiedad creada correctamente ✅</div>
-            <?php endif; ?>
-
-            <?php if ($_GET['mensaje'] == "editado"): ?>
-                <div class="alert alert-primary">Propiedad actualizada ✏️</div>
-            <?php endif; ?>
-
-            <?php if ($_GET['mensaje'] == "eliminado"): ?>
-                <div class="alert alert-danger">Propiedad eliminada 🗑</div>
-            <?php endif; ?>
-
-        <?php endif; ?>
-
-        <div class="card-header d-flex justify-content-between align-items-center">
-
-            <h5 class="mb-0">Propiedades</h5>
-            <?php if ($puedeCrear): ?>
-                <a class="btn btn-success" href="crear.php"> + Nueva Propiedad </a>
-            <?php endif; ?>
-        </div>
-
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-striped table-hover">
-                    <thead class="table-dark">
-                        <tr>
-                            <th>Código</th>
-                            <th>Dueño</th>
-                            <th>Tipo</th>
-                            <th>Dirección</th>
-                            <th>Latitud</th>
-                            <th>Longitud</th>
-                            <th class="text-center">Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-
-                        <?php foreach ($listaPropiedades as $value): ?>
-                            <tr>
-
-                                <td><?= htmlspecialchars($value['codigo']) ?></td>
-
-                                <td><?= htmlspecialchars($value['dueno']) ?></td>
-
-                                <td><?= htmlspecialchars($value['tipo']) ?></td>
-
-                                <td><?= htmlspecialchars($value['direccion']) ?></td>
-
-                                <td><?= htmlspecialchars($value['latitud']) ?></td>
-
-                                <td><?= htmlspecialchars($value['longitud']) ?></td>
-
-                                <td class="text-center">
-
-                                    <?php if ($puedeEditar): ?>
-                                        <a class="btn btn-primary btn-sm"
-                                            href="editar.php?txtID=<?= $value['id_propiedad']; ?>">
-                                            Editar
-                                        </a>
-                                    <?php endif; ?>
-
-                                    <?php if ($puedeEliminar): ?>
-                                        <a class="btn btn-danger btn-sm"
-                                            href="eliminar.php?txtID=<?= $value['id_propiedad']; ?>"
-                                            onclick="return confirm('¿Seguro que deseas eliminar esta propiedad?');">
-                                            Borrar
-                                        </a>
-                                    <?php endif; ?>
-
-                                </td>
-
-                            </tr>
-                        <?php endforeach; ?>
-
-                    </tbody>
-                </table>
-            </div>
-
-        </div>
-
-    </div>
-
-    <?php include('../../templates/pie.php'); ?>
+include('view.php');
+include('../../templates/pie.php');

@@ -1,0 +1,96 @@
+/* ════════════════════════════════════════════
+   MOVIMIENTOS FINANCIEROS — movimientos.css
+════════════════════════════════════════════ */
+
+/* ── Page Header ─────────────────────────── */
+.tw-page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 22px;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.tw-page-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: -0.5px;
+}
+
+.tw-page-subtitle {
+  font-size: 12.5px;
+  color: var(--text2);
+  margin-top: 2px;
+}
+
+/* ── Stats grid ──────────────────────────── */
+.mov-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 22px;
+}
+
+@media (max-width: 900px) { .mov-stats { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 520px) { .mov-stats { grid-template-columns: 1fr; } }
+
+.mov-stat {
+  background: var(--s1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color .2s, transform .2s;
+}
+
+.mov-stat:hover {
+  border-color: var(--border2);
+  transform: translateY(-2px);
+}
+
+.mov-stat::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  border-radius: var(--radius) var(--radius) 0 0;
+}
+
+.mov-stat.green::before  { background: linear-gradient(90deg, var(--green),  transparent); }
+.mov-stat.red::before    { background: linear-gradient(90deg, var(--red),    transparent); }
+.mov-stat.blue::before   { background: linear-gradient(90deg, var(--blue),   transparent); }
+.mov-stat.amber::before  { background: linear-gradient(90deg, var(--amber),  transparent); }
+.mov-stat.violet::before { background: linear-gradient(90deg, var(--violet), transparent); }
+
+.mov-stat-lbl {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text3);
+  margin-bottom: 8px;
+}
+
+.mov-stat-val {
+  font-family: 'DM Mono', monospace;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -1px;
+  color: var(--text);
+  line-height: 1.1;
+}
+
+.mov-stat.green  .mov-stat-val { color: var(--green); }
+.mov-stat.red    .mov-stat-val { color: var(--red); }
+.mov-stat.blue   .mov-stat-val { color: var(--blue); }
+.mov-stat.amber  .mov-stat-val { color: var(--amber); }
+.mov-stat.violet .mov-stat-val { color: var(--violet); }
+
+.mov-stat-sub {
+  font-size: 11px;
+  color: var(--text3);
+  margin-top: 4px;
+}

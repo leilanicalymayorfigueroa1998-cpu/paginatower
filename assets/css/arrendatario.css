@@ -1,0 +1,72 @@
+/* ════════════════════════════════════════════
+   ARRENDATARIO — arrendatario.css
+════════════════════════════════════════════ */
+
+/* ── Page Header ─────────────────────────── */
+.tw-page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 22px;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.tw-page-title   { font-size: 22px; font-weight: 800; color: var(--text); letter-spacing: -0.5px; }
+.tw-page-subtitle { font-size: 12.5px; color: var(--text2); margin-top: 2px; }
+
+/* ── Stats ───────────────────────────────── */
+.arr-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 22px;
+}
+@media (max-width: 900px) { .arr-stats { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 520px) { .arr-stats { grid-template-columns: 1fr; } }
+
+.arr-stat {
+  background: var(--s1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color .2s, transform .2s;
+}
+.arr-stat:hover { border-color: var(--border2); transform: translateY(-2px); }
+.arr-stat::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 2px;
+  border-radius: var(--radius) var(--radius) 0 0;
+}
+.arr-stat.blue::before   { background: linear-gradient(90deg, var(--blue),   transparent); }
+.arr-stat.green::before  { background: linear-gradient(90deg, var(--green),  transparent); }
+.arr-stat.amber::before  { background: linear-gradient(90deg, var(--amber),  transparent); }
+.arr-stat.violet::before { background: linear-gradient(90deg, var(--violet), transparent); }
+
+.arr-stat-lbl {
+  font-size: 10px; font-weight: 700; letter-spacing: 1px;
+  text-transform: uppercase; color: var(--text3); margin-bottom: 8px;
+}
+.arr-stat-val {
+  font-family: 'DM Mono', monospace;
+  font-size: 26px; font-weight: 800; color: var(--text); line-height: 1;
+}
+.arr-stat.blue   .arr-stat-val { color: var(--blue); }
+.arr-stat.green  .arr-stat-val { color: var(--green); }
+.arr-stat.amber  .arr-stat-val { color: var(--amber); }
+.arr-stat.violet .arr-stat-val { color: var(--violet); }
+.arr-stat-sub { font-size: 11px; color: var(--text3); margin-top: 4px; }
+
+/* ── Celdas especiales ───────────────────── */
+.arr-phone {
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  color: var(--text2);
+}
+.arr-dir {
+  max-width: 220px;
+  white-space: normal;
+  font-size: 12px;
+}
